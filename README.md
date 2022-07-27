@@ -1,6 +1,6 @@
 # HIVLASHEA: High order methods for Vlasov-Poisson model for sheath
 
-## Installation of dependencies ##
+## Installation of dependencies! ##
 
 Install c compiler (compile the code):
 
