@@ -21,7 +21,7 @@
 #include "poisson_direct.h"     // type      poisson_solver_direct
                                 // functions new_poisson_solver_direct, compute_E_from_rho_1d
 #include "remap.h"              // type      parallel_stuff
-                                // functions exchange_parallelizations, local_to_global_2d
+                                // functions init_par_variables, exchange_parallelizations, local_to_global_2d
 #include "rho.h"                // function  update_spatial_density
 #include "split.h"              // type      sll_t_splitting_coeff
 #include "string_helpers.h"     // macro     ERROR_MESSAGE
@@ -118,6 +118,22 @@ void source_term(parallel_stuff* electrons, parallel_stuff* ions,
 
 /*
  * Given the density functions fi(x, v) and fe(x, v) of ions and electrons,
+ * compute the charge density rho = rhoi - rhoe = int_v (fi(x,v) - fe(x,v)) dv.
+ * NB.: rho(e/i) could be allocated and destroyed by the function, they
+ *      are temporary, but we give them to avoid frequent malloc / free of arrays.
+ */
+void update_rho(mesh_1d* meshx, mesh_1d* meshve, mesh_1d* meshvi,
+        parallel_stuff* electrons, parallel_stuff* ions,
+        double* rhoe, double* rhoi, double* rho) {
+	update_spatial_density(electrons, meshx->array, meshx->size, meshve->array, meshve->size, rhoe);
+	update_spatial_density(ions,      meshx->array, meshx->size, meshvi->array, meshvi->size, rhoi);
+	for (size_t i = 0; i < meshx->size; i++) {
+        rho[i] = rhoi[i] - rhoe[i];
+	}
+}
+
+/*
+ * Given the density functions fi(x, v) and fe(x, v) of ions and electrons,
  * compute:
  *     >>> the charge density rho = rhoi - rhoe = int_v (fi(x,v) - fe(x,v)) dv.
  *     >>> the current current = currenti - currente = int_v (fi(x,v) - fe(x,v)) v dv.
@@ -128,11 +144,7 @@ void update_rho_and_current(mesh_1d* meshx, mesh_1d* meshve, mesh_1d* meshvi,
         parallel_stuff* electrons, parallel_stuff* ions,
         double* rhoe, double* rhoi, double* rho,
         double* currente, double* currenti, double* current) {
-	update_spatial_density(electrons, meshx->array, meshx->size, meshve->array, meshve->size, rhoe);
-	update_spatial_density(ions,      meshx->array, meshx->size, meshvi->array, meshvi->size, rhoi);
-	for (size_t i = 0; i < meshx->size; i++) {
-        rho[i] = rhoi[i] - rhoe[i];
-	}
+    update_rho(meshx, meshve, meshvi, electrons, ions, rhoe, rhoi, rho);
 	update_current(electrons, meshx->array, meshx->size, meshve->array, meshve->size, currente);
 	update_current(ions,      meshx->array, meshx->size, meshvi->array, meshvi->size, currenti);
 	for (size_t i = 0; i < meshx->size; i++) {
@@ -276,6 +288,7 @@ int main(int argc, char *argv[]) {
     	advection_x(&pari, adv_xi, 0.5*delta_t, meshvi.array);
         // Half time step: source term for ions
         //     f_i^{n+1} = f_i^n + nu * delta_t/2 * f_e
+		update_rho(&meshx, &meshve, &meshvi, &pare, &pari, rhoe, rhoi, rho);
         source_term(&pare, &pari, &meshve, &meshvi, nu, 0.5*delta_t, rho);
 		// Solve Poisson
 		update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari, rhoe, rhoi, rho, currente, currenti, current);
@@ -286,6 +299,7 @@ int main(int argc, char *argv[]) {
     	advection_v(&pare, adv_ve, delta_t, E);
     	advection_v(&pari, adv_vi, delta_t, E);
         // Half time step: source term for ions
+        // (no need to update rho, because it has not changed with the velocity advection)
         source_term(&pare, &pari, &meshve, &meshvi, nu, 0.5*delta_t, rho);
         // Half time-step: advection in x
     	advection_x(&pare, adv_xe, 0.5*delta_t, meshve.array);

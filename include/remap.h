@@ -393,10 +393,15 @@ void init_par_variables(parallel_stuff* par_variables,
     (*par_variables).mpi_world_size = mpi_world_size;
     (*par_variables).mpi_rank       = mpi_rank;
     
+    // For a periodic case, we may distribute sizex-1 points among the processes,
+    // and construct the last point as equal to the point in 0.
+    // For a non periodic case, we need to have the last index be sizex.
+    int total_nb_points_on_x = sizex; // sizex - 1;
+    int total_nb_points_on_v = sizev - 1;
     (*par_variables).layout_par_x = initialize_layout_with_distributed_2d_array(
-        sizex-1, sizev-1, mpi_world_size, 1);
+        total_nb_points_on_x, total_nb_points_on_v, mpi_world_size, 1);
     (*par_variables).layout_par_v = initialize_layout_with_distributed_2d_array(
-        sizex-1, sizev-1, 1, mpi_world_size);
+        total_nb_points_on_x, total_nb_points_on_v, 1, mpi_world_size);
     
     box_2d box = (*par_variables).layout_par_x.boxes[(*par_variables).mpi_rank];
     (*par_variables).size_x_par_x  = box.i_max - box.i_min + 1;
@@ -416,12 +421,12 @@ void init_par_variables(parallel_stuff* par_variables,
     (*par_variables).remap_v_to_x = new_remap_plan_2d(mpi_world_size, mpi_rank,
         (*par_variables).layout_par_v, (*par_variables).layout_par_x);
     
-    int size_f_1d = sizex-1 > sizev-1 ? sizex-1 : sizev-1;
+    int size_f_1d = imax(total_nb_points_on_x, total_nb_points_on_v);
     (*par_variables).f_1d_in = malloc(size_f_1d * sizeof(double));
     (*par_variables).f_1d_out = malloc(size_f_1d * sizeof(double));
     
     (*par_variables).send_buf = allocate_1d_array((*par_variables).size_x_par_x);
-    (*par_variables).recv_buf = allocate_1d_array(sizex-1);
+    (*par_variables).recv_buf = allocate_1d_array(total_nb_points_on_x);
     (*par_variables).recv_counts = malloc(mpi_world_size * sizeof(int));
     for (i = 0; i < mpi_world_size; i++)
         (*par_variables).recv_counts[i] =

@@ -62,7 +62,7 @@ void adv1d_periodic_lag_compute_i0_and_alpha(double coeff, double dt, double xmi
     *alpha = -coeff*dt/(xmax-xmin);
     *alpha = *alpha-floor(*alpha);
     *alpha *= (double)N;
-    *i0 = floor(*alpha);
+    *i0 = (int)floor(*alpha);
     if (*i0 == N) {
         *alpha = 0.;
         *i0 = 0;

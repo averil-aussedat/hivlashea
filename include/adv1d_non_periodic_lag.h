@@ -12,10 +12,9 @@ typedef struct adv1d_non_periodic_lag_t {
     double max;
     int N;
     double v;
-    // At the borders, we make an interpolation of degree 1 [with 2 points].
-    // TODO: make an interpolation of degree 2 [with 3 points] --- this time we need a
-    // specific code, because this file always uses odd degree 2d+1.
-//    struct adv1d_non_periodic_lag_t border_advection;
+    double* lag; // Lagrange coefficients
+    double* buf; // Stores f + d points on the left + d points on the right
+                 // for butterfly method (extrapolation)
 } adv1d_non_periodic_lag_t;
 
 void adv1d_non_periodic_lag_init(adv1d_non_periodic_lag_t* *adv, PC_tree_t conf, double* x, int sizex, int mpi_rank) {
@@ -36,11 +35,14 @@ void adv1d_non_periodic_lag_init(adv1d_non_periodic_lag_t* *adv, PC_tree_t conf,
         ERROR_MESSAGE("#Error in advection %s: missing v.\n", conf->key);
     }
     *adv = malloc(sizeof(adv1d_non_periodic_lag_t));
-    (*adv)->d = (int)tmp;
+    int d = (int)tmp;
+    (*adv)->d = d;
     (*adv)->min = x[0];
     (*adv)->max = x[sizex-1];
     (*adv)->N = sizex-1;
     (*adv)->v = val;
+    (*adv)->lag = malloc((2*d+2)*sizeof(double));
+    (*adv)->buf = malloc((sizex+2*d)*sizeof(double));
     if (mpi_rank == 0) {
         printf("#adv1d_lag:d=%d min=%1.20lg max=%1.20lg N=%d\n",(*adv)->d,
             (*adv)->min,(*adv)->max,(*adv)->N);
@@ -62,16 +64,10 @@ void adv1d_non_periodic_lag_init(adv1d_non_periodic_lag_t* *adv, PC_tree_t conf,
  */
 void adv1d_non_periodic_lag_compute_i0_and_alpha(double coeff, double dt, double xmin,
         double xmax, int N, int* i0, double* alpha) {
-    
-    *alpha = -coeff*dt/(xmax-xmin);
-    *alpha = *alpha-floor(*alpha);
-    *alpha *= (double)N;
-    *i0 = floor(*alpha);
-    if (*i0 == N) {
-        *alpha = 0.;
-        *i0 = 0;
-    }
-    *alpha = *alpha-((double)*i0);
+    double dx = (xmax - xmin) / ((double)N);
+    double displacement = -coeff*dt/dx;
+    *i0 = (int)floor(displacement);
+    *alpha = displacement - (double)(*i0);
 }
 
 /*
@@ -82,7 +78,6 @@ void adv1d_non_periodic_lag_compute_i0_and_alpha(double coeff, double dt, double
  * @param[out] lag coefficients of the interpolator
  */
 void adv1d_non_periodic_lag_compute_lag(double x, int d, double* lag) {
-    
     int i;
     double a;
     
@@ -116,29 +111,44 @@ void adv1d_non_periodic_lag_compute_lag(double x, int d, double* lag) {
     }
 }
 
-void adv1d_non_periodic_lag_semi_lag_advect_classical(double* buf, int N, int i0, double* lag, int d, double* f) {
-    int i, j;
+void adv1d_non_periodic_lag_semi_lag_advect_classical(
+        int N, int i0, double* lag, int d, double* buf, double* f_in_and_out) {
+    int i, j, index;
     
     for (i = 0; i < N+1; i++)
-        buf[i] = f[i];
+        buf[i + d] = f_in_and_out[i];
+    // Fill buffer on the left
+    // TODO: butterfly
+    for (i = 0; i < d; i++) {
+        buf[i] = f_in_and_out[0];
+    }
+    // Fill buffer on the right
+    // TODO: butterfly
+    for (i = 0; i < d; i++) {
+        buf[i + N+1+d] = f_in_and_out[N];
+    }
     
     for (i = 0; i < N+1; i++) {
-        f[i] = 0.;
+        f_in_and_out[i] = 0.;
         for (j = -d; j <= d+1; j++) {
-            // Here is the non-periodic workaround (the only difference with the periodic case)
-            f[i] += lag[j+d] * buf[(i+j+i0+N)%N];
+            index = i+j+i0 + d;
+            if (index < 0)
+                index = 0;
+            if (index > N+2*d)
+                index = N+2*d;
+            f_in_and_out[i] += lag[j+d] * buf[index];
         }
     }
 }
 
 
-void adv1d_non_periodic_lag_compute(adv1d_non_periodic_lag_t* adv, double* fin, double* fout, double dt){
+void adv1d_non_periodic_lag_compute(adv1d_non_periodic_lag_t* adv,
+        double* useless_parameter, double* f_in_and_out, double dt){
     int d;
     double min;
     double max;
     int N;
     double v;
-    double* lag;
     int i0;
     double alpha;
     
@@ -148,12 +158,10 @@ void adv1d_non_periodic_lag_compute(adv1d_non_periodic_lag_t* adv, double* fin, 
     max = adv->max;
     v = adv->v;
     //printf("Lag d=%d  N=%d v=%1.20lg\n",adv->d,adv->N,adv->v);
-    lag = malloc((2*d+2)*sizeof(double));
-
+    
     adv1d_non_periodic_lag_compute_i0_and_alpha(v, dt, min, max, N, &i0, &alpha);
-    adv1d_non_periodic_lag_compute_lag(alpha, d, lag);
-    adv1d_non_periodic_lag_semi_lag_advect_classical(fin, N, i0, lag, d, fout);
-    free(lag);
+    adv1d_non_periodic_lag_compute_lag(alpha, d, adv->lag);
+    adv1d_non_periodic_lag_semi_lag_advect_classical(N, i0, adv->lag, d, adv->buf, f_in_and_out);
 }
 
 

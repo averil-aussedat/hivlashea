@@ -46,12 +46,15 @@ void update_spatial_density(parallel_stuff* par_variables, double *x, int sizex,
     
     // Rebuild rho from the concatenation of the linearised rho_locals
     pos = 0;
-    for (int process = 0; process < par_variables->mpi_world_size; process++)
+    for (int process = 0; process < par_variables->mpi_world_size; process++) {
         for (size_t i = par_variables->layout_par_x.boxes[process].i_min; i <= par_variables->layout_par_x.boxes[process].i_max; i++)
             rho[i] = par_variables->recv_buf[pos++];
+//        printf("Last i value is: %d.\n", par_variables->layout_par_x.boxes[process].i_max);
+//        printf("sizex - 1 value is: %d.\n", sizex - 1);
+    }
     
-    // Periodicity [TODO: non-periodic case?]
-    rho[sizex - 1] = rho[0];
+    // For periodic case only
+    // rho[sizex - 1] = rho[0];
 }
 
 /*
@@ -63,9 +66,11 @@ void update_spatial_density(parallel_stuff* par_variables, double *x, int sizex,
 double compute_mass(double *x, int sizex, double* rho) {
     double delta_x = (x[sizex - 1] - x[0]) / (double)(sizex - 1);
     double mass = 0;
-    for (size_t i_x = 0; i_x < sizex; i_x++) {
+    mass += rho[0] / 2.;
+    for (size_t i_x = 1; i_x < sizex - 1; i_x++) {
         mass += rho[i_x];
     }
+    mass += rho[sizex - 1] / 2.;
     mass *= delta_x;
     return mass;
 }
@@ -109,8 +114,8 @@ void update_current(parallel_stuff* par_variables, double *x, int sizex,
         for (size_t i = par_variables->layout_par_x.boxes[process].i_min; i <= par_variables->layout_par_x.boxes[process].i_max; i++)
             current[i] = par_variables->recv_buf[pos++];
     
-    // Periodicity [TODO: non-periodic case?]
-    current[sizex - 1] = current[0];
+    // For periodic case only
+    // current[sizex - 1] = current[0];
 }
 
 void compute_diag_f(parallel_stuff* par_variables, double *x, int sizex,
