@@ -52,6 +52,27 @@ void read_simulation_parameters(PC_tree_t conf, int mpi_rank, double* lambda, do
 }
 
 /*
+ * Given a value target inside (x[0], x[N-1]), computes alpha and index such that
+ * x[index] + alpha = target and 0 <= alpha < delta_x.
+ *
+ * @param[in] target : target value to reach.
+ * @param[in] mesh   : the mesh.
+ * @param[out] index : integer part.
+ * @param[out] alpha : fractional part.
+ */
+void no_boundary_lag_compute_index_and_alpha(double target, mesh_1d* mesh, int* index, double* alpha) {
+    double x_min = mesh->min;
+    double x_max = mesh->max;
+    int N = mesh->size;
+    
+    double tmp = ((double)N) * (target - x_min) / (x_max - x_min);
+    int i = (int)floor(tmp);
+    tmp = tmp - (double)i;
+    *index = i;
+    *alpha = tmp;
+}
+
+/*
  * Solve the equation:
  *     f_i^{n+1} = f_i^n + nu * delta_t/2 * f_e
  * It uses Lagrange interpolation with d=1 (4 points, degree 3).
@@ -59,7 +80,14 @@ void read_simulation_parameters(PC_tree_t conf, int mpi_rank, double* lambda, do
 void source_term(parallel_stuff* electrons, parallel_stuff* ions,
         mesh_1d* meshve, mesh_1d* meshvi,
         double nu, double dt, double* rho) {
-    // The electron/ion velocity meshes are the same.
+    // Lagrange interpolation to interpolate values of the electron mesh
+    // on the ion mesh. The electron velocity mesh is on [-500; 500] whereas the
+    // ion velocity mesh is on [-10; 10] and have the same number of points, thus
+    // we need to interpolate values of fe on the ion velocity mesh.
+    int d = 1;
+    double* lag = malloc((2*d+2)*sizeof(double));
+    int index;
+    double alpha;
     
     if (!electrons->is_par_x) {
         exchange_parallelizations(electrons);
@@ -72,9 +100,19 @@ void source_term(parallel_stuff* electrons, parallel_stuff* ions,
     double coeff = nu * dt;
     for (int i_x = 0; i_x < ions->size_x_par_x; i_x++) {
         for (int i_v = 0; i_v < ions->size_v_par_x; i_v++) {
-            ions->f_parallel_in_x[i_x][i_v] += coeff * electrons->f_parallel_in_x[i_x][i_v];
+            double target = meshvi->array[i_v];
+            no_boundary_lag_compute_index_and_alpha(target, meshve, &index, &alpha);
+            adv1d_periodic_lag_compute_lag(alpha, d, lag);
+            for (int j = -d; j <= d+1; j++) {
+                int index_v = index+j;
+                if (index_v < 0 || index_v >= electrons->size_v_par_x) {
+                    ERROR_MESSAGE("#The electron velocity mesh is not big enough.\n");
+                }
+                ions->f_parallel_in_x[i_x][i_v] += lag[j+d] * coeff * electrons->f_parallel_in_x[i_x][index_v];
+            }
         }
     }
+    free(lag);
 }
 
 /*
@@ -157,11 +195,15 @@ int main(int argc, char *argv[]) {
     } else {
         ERROR_MESSAGE("#Missing meshx in %s\n", argv[1]);
     }
-    if (PC_get(conf, ".meshv")) {
-        meshve = mesh_1d_create(PC_get(conf, ".meshv"), mpi_rank);
-        meshvi = mesh_1d_create(PC_get(conf, ".meshv"), mpi_rank);
+    if (PC_get(conf, ".meshve")) {
+        meshve = mesh_1d_create(PC_get(conf, ".meshve"), mpi_rank);
     } else {
-        ERROR_MESSAGE("#Missing meshv in %s\n", argv[1]);
+        ERROR_MESSAGE("#Missing meshve in %s\n", argv[1]);
+    }
+    if (PC_get(conf, ".meshvi")) {
+        meshvi = mesh_1d_create(PC_get(conf, ".meshvi"), mpi_rank);
+    } else {
+        ERROR_MESSAGE("#Missing meshvi in %s\n", argv[1]);
     }
     
     // Read the simulation parameters [WARNING: before creating Poisson solver]
@@ -272,7 +314,7 @@ int main(int argc, char *argv[]) {
 		// Solve Poisson
         update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari,
                 &Mass_e, rhoe, rhoi, rho, currente, currenti, current, is_periodic);
-        update_E_from_rho_and_current_1d(solver, 0.5*delta_t, Mass_e, rho, current, E);
+        update_E_from_rho_and_current_1d(solver, delta_t, Mass_e, rho, current, E);
     	
 		// Full time-step: advection in v
 		//     d_t(f_i) - 1/mu*E*d_v(f_i) = 0
@@ -288,7 +330,7 @@ int main(int argc, char *argv[]) {
 		// Solve Poisson
         update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari,
                 &Mass_e, rhoe, rhoi, rho, currente, currenti, current, is_periodic);
-        update_E_from_rho_and_current_1d(solver, 0.5*delta_t, Mass_e, rho, current, E);
+        update_E_from_rho_and_current_1d(solver, delta_t, Mass_e, rho, current, E);
     }
     	//advection_x(&pare, adv_xe, 0.5*delta_t, meshve.array);
     	//advection_v(&pare, adv_ve, delta_t, E);

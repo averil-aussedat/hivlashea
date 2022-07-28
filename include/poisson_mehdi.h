@@ -24,7 +24,6 @@ struct poisson_solver_mehdi {
     double* sigma;   // permutation
     double* phi;     // 
     double* rhs;     // right-hand side for the A * X = B equation
-    double delta_t;  // simulation parameter
     double lambda;   // simulation parameter
     double nu;       // simulation parameter
 };
@@ -34,7 +33,7 @@ struct poisson_solver_mehdi {
  * @return    a poisson solver that uses the Gauss elimination.
  */
 poisson_solver_mehdi new_poisson_solver_mehdi(double *x, int sizex,
-        double delta_t, double lambda, double nu) {
+        double lambda, double nu) {
     poisson_solver_mehdi p;
     p.x = x;
     p.sizex = sizex;
@@ -43,7 +42,6 @@ poisson_solver_mehdi new_poisson_solver_mehdi(double *x, int sizex,
     p.sigma = malloc(p.Nx * sizeof(double));
     p.phi = malloc(p.Nx * sizeof(double));
     p.rhs = malloc(p.Nx * sizeof(double));
-    p.delta_t = delta_t;
     p.lambda = lambda;
     p.nu = nu;
     int i;
@@ -123,7 +121,8 @@ void Solve(double** A, double* sigma, double* B, int size, double* X) {
     }
 }
 
-void compute_E_from_rho_1d(poisson_solver p, double* rho, double* current, double* E) {
+void update_E_from_rho_and_current_1d(poisson_solver p,
+        double delta_t, double* rho, double* current, double* E) {
     double delta_x = (x[p.sizex - 1] - x[0]) / (p.sizex - 1);
     double mass = compute_mass(p.x, p.sizex, rho);
     double b_Nx = p.nu / 2 * mass - current[p.sizex];

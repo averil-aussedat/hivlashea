@@ -4,50 +4,55 @@ meshx:
     max: 1.
     N: 256
 
-meshve:
+meshv:
   unif:
-    min: -500.
-    max: 500.
-    N: 64
+    min: -100.
+    max: 100.
+    N: 512
+# WARNING: check that you have [-10/mu ; 10/mu]. mu also appears in f0e and adv_ve
 
-meshvi:
-  unif:
-    min: -10.
-    max: 10.
-    N: 64
+#meshvi:
+#  unif:
+#    min: -10.
+#    max: 10.
+#    N: 512
 
 f0e:
   userDefined:
-    definition: (x, v) -> exp(-v^2 / 2.) / sqrt(2. * pi) # Maxwellian
+    definition: (x, v) -> sqrt(mu) * exp(-mu * v^2 / 2.) / sqrt(2. * pi) # Maxwellian
+    parameters:
+      mu: 0.01
+# WARNING: check that you put the same mu value in adv_ve
 
 f0i:
   userDefined:
-    definition: (x, v) -> v^2 * (1. + a * cos(mode * x)) * exp(-v^2 / (2.*sigma^2)) / (sqrt(2. * pi)*sigma^3) # TSI
-    parameters:
-      a: 0.01
-      mode: 0.29919930034188507033 #mode=2*Pi/L, L=21
-      sigma: 0.5
+    definition: (x, v) -> exp(-v^2 / 2.) / sqrt(2. * pi) # Maxwellian
+
+E0:
+  userDefined:
+    definition: (x) -> 0
 
 time_parameters:
-  dt: 0.1
-  num_iteration: 1000
+  dt: 0.005
+  num_iteration: 400
 
 adv_x:
-  adv1d_lag:
+  adv1d_non_periodic_lag:
     d: 5
   v: 1. # d_t(f_{i/e}) + v*d_x(f_{i/e}) = 0 [parameter value is 1]
 
 adv_ve:
-  adv1d_lag:
+  adv1d_periodic_lag:
     d: 5
-  v: -1./3. # d_t(f_i) - 1/mu*E*d_v(f_i) = 0 [parameter value is -1/mu]
+  v: -100 # d_t(f_i) - 1/mu*E*d_v(f_i) = 0 [parameter value is -1/mu]
+# WARNING: check that you put the same mu value in f0e
 
 adv_vi:
-  adv1d_lag:
+  adv1d_periodic_lag:
     d: 5
   v: 1. # d_t(f_i) + E*d_v(f_i) = 0 [parameter value is 1]
 
 simulation_parameters:
-  lambda: 3.
-  nu: 1.
+  lambda: 0.1
+  nu: 1. # TEST1: 0. ; TEST2: 1.
 

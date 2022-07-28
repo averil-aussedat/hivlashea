@@ -321,7 +321,157 @@ void any_fun_from_string(char* definition, char* fun_name,
 }
 
 /*
- * Builds the parallel representation of an initial function provided by the user.
+ * Builds the representation of an initial 1d function provided by the user.
+ */
+void fill_array_1d_user_defined(PC_tree_t conf, double* f, double* array1, int array1_size, char* fun_name) {
+    // Getting the definition.
+    char* definition;
+    if (PC_get(conf, ".definition")) {
+        PC_string(PC_get(conf, ".definition"), &definition);
+    } else {
+        ERROR_MESSAGE("#Error in function %s: missing the 'definition' field.\n", fun_name);
+    }
+    // Getting the variable string.
+    char* variables_string = (char*)0;
+    char* expression       = (char*)0;
+    split_in_two(definition, DEFINITION_DELIM, &variables_string, &expression);
+    int length = strlen(variables_string);
+    if (variables_string[0] != '(' || variables_string[length-1] != ')') {
+        ERROR_MESSAGE("#Error in function %s: the variable names must be enclosed in parentheses.\n", fun_name);
+    }
+    variables_string[length-1] = '\0';
+    variables_string++;
+    // Checking the variable string.
+    if (strlen(variables_string) == 0) {
+        ERROR_MESSAGE("#Error in function %s: too few variables (there should be 2).\n", fun_name);
+    } else if (strstr(variables_string, VARIABLES_DELIM)) {
+        ERROR_MESSAGE("#Error in function %s: too much variables (there should be 1).\n", fun_name);
+    }
+    
+    // Getting the parameters names, values, and expressions.
+    // When the parameter has arity 0, its value is used. Otherwise, its expression is used.
+    int nb_parameters = 0;
+    char** parameter_names;
+    double* parameter_values;
+    int* parameter_arities;
+    tiny_expr* parameter_functions;
+    if (PC_get(conf, ".parameters")) {
+        PC_tree_t parameters_tree = PC_get(conf, ".parameters")->first_child;
+        // Getting the number of parameters.
+        while (parameters_tree) {
+            parameters_tree = parameters_tree->next_sibling;
+            nb_parameters++;
+        }
+        if (nb_parameters == 0) {
+            ERROR_MESSAGE("#Error in function %s: you must provide parameter names and values or remove the 'parameters' field.\n", fun_name);
+        }
+        // Getting the names and values of parameters.
+        parameters_tree = PC_get(conf, ".parameters")->first_child;
+        parameter_names     = malloc(nb_parameters * sizeof(char*));
+        parameter_values    = malloc(nb_parameters * sizeof(double));
+        parameter_arities   = malloc(nb_parameters * sizeof(int));
+        parameter_functions = malloc(nb_parameters * sizeof(tiny_expr));
+        int id_parameter = 0;
+        while (parameters_tree) {
+            check_valid_variable_name(parameters_tree->key, fun_name);
+            if (!strcmp(parameters_tree->key, fun_name)) {
+                ERROR_MESSAGE("#Error in function %s: no parameter can have the name of the function.\n", fun_name);
+            }
+            parameter_names[id_parameter] = parameters_tree->key;
+            any_fun_from_string(parameters_tree->value, fun_name,
+                id_parameter, parameter_names,
+                parameter_values, parameter_arities, parameter_functions,
+                &parameter_functions[id_parameter]);
+            parameter_arities[id_parameter] = parameter_functions[id_parameter].arity;
+            parameters_tree = parameters_tree->next_sibling;
+            id_parameter++;
+        }
+    } else {
+        // It is perfectly valid to have no parameter.
+    }
+    
+    // Building the tinyexpression
+    int function_arity = 1;
+    double x;
+    te_variable* vars = malloc((function_arity + nb_parameters) * sizeof(te_variable));
+    for (int id_parameter = 0; id_parameter < nb_parameters; id_parameter++) {
+        vars[id_parameter].name    = parameter_names[id_parameter];
+        if (parameter_arities[id_parameter] == 0)
+            vars[id_parameter].address = &parameter_values[id_parameter];
+        else if (parameter_arities[id_parameter] == 1)
+            vars[id_parameter].address = cloture1;
+        else if (parameter_arities[id_parameter] == 2)
+            vars[id_parameter].address = cloture2;
+        else if (parameter_arities[id_parameter] == 3)
+            vars[id_parameter].address = cloture3;
+        else if (parameter_arities[id_parameter] == 4)
+            vars[id_parameter].address = cloture4;
+        else if (parameter_arities[id_parameter] == 5)
+            vars[id_parameter].address = cloture5;
+        else if (parameter_arities[id_parameter] == 6)
+            vars[id_parameter].address = cloture6;
+        else if (parameter_arities[id_parameter] == 7)
+            vars[id_parameter].address = cloture7;
+        vars[id_parameter].type    = parameter_arities[id_parameter] == 0
+            ? TE_VARIABLE
+            : TE_CLOSURE0 + parameter_arities[id_parameter];
+        vars[id_parameter].context = parameter_arities[id_parameter] == 0
+            ? (void*)0
+            : &parameter_functions[id_parameter];
+    }
+    vars[nb_parameters    ].name    = variables_string;
+    vars[nb_parameters    ].address = &x;
+    vars[nb_parameters    ].type    = TE_VARIABLE;
+    vars[nb_parameters    ].context = (void*)0;
+    
+    /* This will compile the expression and check for errors. */
+    int err;
+    te_expr* n = te_compile(expression, vars, function_arity + nb_parameters, &err);
+    
+    if (n) {
+        for (int i = 0; i < array1_size; i++) {
+            x = array1[i];
+            // Evaluation of all parameters.
+            for (int id_parameter = 0; id_parameter < nb_parameters; id_parameter++) {
+                double param_value = te_eval(parameter_functions[id_parameter].expr);
+                parameter_values[id_parameter] = param_value;
+            }
+            f[i] = te_eval(n);
+        }
+        
+        te_free(n);
+    } else {
+        /* Show the user where the error is at. */
+        ERROR_MESSAGE("#When evaluating:\n\t%s\n\t%*s^\n#There was an error near here.\n", expression, err-1, "");
+    }
+    
+    // Cleaning
+    if (nb_parameters > 0) {
+        free(parameter_names);
+        free(parameter_values);
+        free(parameter_arities);
+        for (int id_parameter = 0; id_parameter < nb_parameters; id_parameter++) {
+            free(parameter_functions[id_parameter].variable_names);
+            free(parameter_functions[id_parameter].variable_values);
+        }
+        free(parameter_functions);
+    }
+    free(vars);
+}
+
+/*
+ * Builds the array representation of any 1d initial function.
+ */
+void fill_array_1d(PC_tree_t conf, double* array, double* array1, int array1_size) {
+    if (PC_get(conf, ".userDefined")) {
+        fill_array_1d_user_defined(PC_get(conf, ".userDefined"), array, array1, array1_size, conf->key);
+    } else {
+        ERROR_MESSAGE("#Error in function %s: unkwown function type.\n#Possible function types are 'userDefined'.\n", conf->key);
+    }
+}
+
+/*
+ * Builds the parallel representation of an initial 1d1v function provided by the user.
  */
 void fun_1d1v_user_defined(PC_tree_t conf, parallel_stuff* par_variables, 
         double* array1, double *array2, char* fun_name) {
@@ -394,8 +544,9 @@ void fun_1d1v_user_defined(PC_tree_t conf, parallel_stuff* par_variables,
     }
     
     // Building the tinyexpression
+    int function_arity = 2;
     double x, v;
-    te_variable* vars = malloc((2 + nb_parameters) * sizeof(te_variable));
+    te_variable* vars = malloc((function_arity + nb_parameters) * sizeof(te_variable));
     for (int id_parameter = 0; id_parameter < nb_parameters; id_parameter++) {
         vars[id_parameter].name    = parameter_names[id_parameter];
         if (parameter_arities[id_parameter] == 0)
@@ -432,7 +583,7 @@ void fun_1d1v_user_defined(PC_tree_t conf, parallel_stuff* par_variables,
     
     /* This will compile the expression and check for errors. */
     int err;
-    te_expr* n = te_compile(expression, vars, 2 + nb_parameters, &err);
+    te_expr* n = te_compile(expression, vars, function_arity + nb_parameters, &err);
     
     if (n) {
         par_variables->is_par_x = true;

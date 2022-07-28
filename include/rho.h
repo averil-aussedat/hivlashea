@@ -1,11 +1,12 @@
 #ifndef SELA_VP_1D1V_CART_RHO
 #define SELA_VP_1D1V_CART_RHO
 
-#include <mpi.h>    // function  MPI_Allgatherv
-                    // constants MPI_DOUBLE_PRECISION, MPI_COMM_WORLD
-#include <stdlib.h> // type      size_t
-#include "remap.h"  // type      parallel_stuff
-                    // function  exchange_parallelizations
+#include <mpi.h>     // function  MPI_Allgatherv
+                     // constants MPI_DOUBLE_PRECISION, MPI_COMM_WORLD
+#include <stdbool.h> // type      bool
+#include <stdlib.h>  // type      size_t
+#include "remap.h"   // type      parallel_stuff
+                     // function  exchange_parallelizations
 
 /*****************************************************************************
  *                                Update rho                                 *
@@ -21,7 +22,7 @@
  * @param[out]     rho : charge density (integral of f on v)
  */
 void update_spatial_density(parallel_stuff* par_variables, double *x, int sizex,
-        double *v, int sizev, double* rho) {
+        double *v, int sizev, double* rho, bool is_periodic) {
     int pos;
     
     double delta_v = (v[sizev - 1] - v[0]) / (double)(sizev - 1);
@@ -33,6 +34,7 @@ void update_spatial_density(parallel_stuff* par_variables, double *x, int sizex,
     pos = 0;
     for (size_t i_x = 0; i_x < par_variables->size_x_par_x; i_x++) {
         par_variables->send_buf[pos] = 0.;
+        // Integration: left rectangles method
         for (size_t i_v = 0; i_v < par_variables->size_v_par_x-1; i_v++)
             par_variables->send_buf[pos] += par_variables->f_parallel_in_x[i_x][i_v];
         par_variables->send_buf[pos] *= delta_v;
@@ -54,7 +56,9 @@ void update_spatial_density(parallel_stuff* par_variables, double *x, int sizex,
     }
     
     // For periodic case only
-    // rho[sizex - 1] = rho[0];
+    if (is_periodic) {
+        rho[sizex - 1] = rho[0];
+    }
 }
 
 /*
@@ -66,6 +70,7 @@ void update_spatial_density(parallel_stuff* par_variables, double *x, int sizex,
 double compute_mass(double *x, int sizex, double* rho) {
     double delta_x = (x[sizex - 1] - x[0]) / (double)(sizex - 1);
     double mass = 0;
+    // Integration: trapezius method
     mass += rho[0] / 2.;
     for (size_t i_x = 1; i_x < sizex - 1; i_x++) {
         mass += rho[i_x];
@@ -85,7 +90,7 @@ double compute_mass(double *x, int sizex, double* rho) {
  * @param[out]     current : integral of f*v on v
  */
 void update_current(parallel_stuff* par_variables, double *x, int sizex,
-        double *v, int sizev, double* current) {
+        double *v, int sizev, double* current, bool is_periodic) {
     int pos;
     
     double delta_v = (v[sizev - 1] - v[0]) / (double)(sizev - 1);
@@ -97,6 +102,7 @@ void update_current(parallel_stuff* par_variables, double *x, int sizex,
     pos = 0;
     for (size_t i_x = 0; i_x < par_variables->size_x_par_x; i_x++) {
         par_variables->send_buf[pos] = 0.;
+        // Integration: left rectangles method
         for (size_t i_v = 0; i_v < par_variables->size_v_par_x-1; i_v++)
             par_variables->send_buf[pos] += par_variables->f_parallel_in_x[i_x][i_v] * v[i_v];
         par_variables->send_buf[pos] *= delta_v;
@@ -115,7 +121,9 @@ void update_current(parallel_stuff* par_variables, double *x, int sizex,
             current[i] = par_variables->recv_buf[pos++];
     
     // For periodic case only
-    // current[sizex - 1] = current[0];
+    if (is_periodic) {
+        current[sizex - 1] = current[0];
+    }
 }
 
 void compute_diag_f(parallel_stuff* par_variables, double *x, int sizex,

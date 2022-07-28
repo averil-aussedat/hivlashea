@@ -44,8 +44,8 @@ void adv1d_non_periodic_lag_init(adv1d_non_periodic_lag_t* *adv, PC_tree_t conf,
     (*adv)->lag = malloc((2*d+2)*sizeof(double));
     (*adv)->buf = malloc((sizex+2*d)*sizeof(double));
     if (mpi_rank == 0) {
-        printf("#adv1d_non_periodic_lag:d=%d min=%1.20lg max=%1.20lg N=%d\n",(*adv)->d,
-            (*adv)->min,(*adv)->max,(*adv)->N);
+        printf("#adv1d_non_periodic_lag:d=%d min=%1.20lg max=%1.20lg N=%d v=%1.20lg\n",(*adv)->d,
+            (*adv)->min,(*adv)->max,(*adv)->N,(*adv)->v);
     }
 }
 
@@ -112,20 +112,28 @@ void adv1d_non_periodic_lag_compute_lag(double x, int d, double* lag) {
 }
 
 void adv1d_non_periodic_lag_semi_lag_advect_classical(
-        int N, int i0, double* lag, int d, double* buf, double* f_in_and_out) {
+        double coeff, int N, int i0, double* lag, int d, double* buf, double* f_in_and_out) {
     int i, j, index;
     
     for (i = 0; i < N+1; i++)
         buf[i + d] = f_in_and_out[i];
+    
+    // Boundary condition (at last!)
+    if (coeff > 0) {
+        buf[d] = 0.;
+    } else if (coeff < 0) {
+        buf[N + d] = 0.;
+    }
+    
     // Fill buffer on the left
     // TODO: butterfly
     for (i = 0; i < d; i++) {
-        buf[i] = f_in_and_out[0];
+        buf[i] = buf[d];
     }
     // Fill buffer on the right
     // TODO: butterfly
     for (i = 0; i < d; i++) {
-        buf[i + N+1+d] = f_in_and_out[N];
+        buf[i + N+1+d] = buf[N + d];
     }
     
     for (i = 0; i < N+1; i++) {
@@ -161,7 +169,7 @@ void adv1d_non_periodic_lag_compute(adv1d_non_periodic_lag_t* adv,
     
     adv1d_non_periodic_lag_compute_i0_and_alpha(v, dt, min, max, N, &i0, &alpha);
     adv1d_non_periodic_lag_compute_lag(alpha, d, adv->lag);
-    adv1d_non_periodic_lag_semi_lag_advect_classical(N, i0, adv->lag, d, adv->buf, f_in_and_out);
+    adv1d_non_periodic_lag_semi_lag_advect_classical(v, N, i0, adv->lag, d, adv->buf, f_in_and_out);
 }
 
 

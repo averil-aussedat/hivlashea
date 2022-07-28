@@ -12,8 +12,8 @@ typedef struct adv1d_periodic_lag_t {
     double max;
     int N;
     double v;
-    double* buf; // Stores f points 
-
+    double* lag; // Lagrange coefficients
+    double* buf; // Stores f points
 } adv1d_periodic_lag_t;
 
 void adv1d_periodic_lag_init(adv1d_periodic_lag_t* *adv, PC_tree_t conf, double* x, int sizex, int mpi_rank) {
@@ -34,15 +34,17 @@ void adv1d_periodic_lag_init(adv1d_periodic_lag_t* *adv, PC_tree_t conf, double*
         ERROR_MESSAGE("#Error in advection %s: missing v.\n", conf->key);
     }
     *adv = malloc(sizeof(adv1d_periodic_lag_t));
-    (*adv)->d = (int)tmp;
+    int d = (int)tmp;
+    (*adv)->d = d;
     (*adv)->min = x[0];
     (*adv)->max = x[sizex-1];
     (*adv)->N = sizex-1;
     (*adv)->v = val;
+    (*adv)->lag = malloc((2*d+2)*sizeof(double));
     (*adv)->buf = malloc((sizex)*sizeof(double));
     if (mpi_rank == 0) {
-        printf("#adv1d_periodic_lag:d=%d min=%1.20lg max=%1.20lg N=%d\n",(*adv)->d,
-            (*adv)->min,(*adv)->max,(*adv)->N);
+        printf("#adv1d_periodic_lag: d=%d min=%1.20lg max=%1.20lg N=%d v=%1.20lg\n",(*adv)->d,
+            (*adv)->min,(*adv)->max,(*adv)->N,(*adv)->v);
     }
 }
 
@@ -81,7 +83,6 @@ void adv1d_periodic_lag_compute_i0_and_alpha(double coeff, double dt, double xmi
  * @param[out] lag coefficients of the interpolator
  */
 void adv1d_periodic_lag_compute_lag(double x, int d, double* lag) {
-    
     int i;
     double a;
     
@@ -136,7 +137,6 @@ void adv1d_periodic_lag_compute(adv1d_periodic_lag_t* adv, double* f, double dt)
     double max;
     int N;
     double v;
-    double* lag;
     int i0;
     double alpha;
     
@@ -146,12 +146,10 @@ void adv1d_periodic_lag_compute(adv1d_periodic_lag_t* adv, double* f, double dt)
     max = adv->max;
     v = adv->v;
     //printf("Lag d=%d  N=%d v=%1.20lg\n",adv->d,adv->N,adv->v);
-    lag = malloc((2*d+2)*sizeof(double));
     
     adv1d_periodic_lag_compute_i0_and_alpha(v, dt, min, max, N, &i0, &alpha);
-    adv1d_periodic_lag_compute_lag(alpha, d, lag);
-    adv1d_periodic_lag_semi_lag_advect_classical(adv->buf, N, i0, lag, d, f);
-    free(lag);
+    adv1d_periodic_lag_compute_lag(alpha, d, adv->lag);
+    adv1d_periodic_lag_semi_lag_advect_classical(adv->buf, N, i0, adv->lag, d, f);
 }
 
 
