@@ -10,8 +10,8 @@
 #include <stdio.h>              // functions printf, fprintf
 #include <stdlib.h>             // type      size_t
 #include "adv1d_periodic_lag.h" // function  adv1d_periodic_lag_compute_lag
-#include "advect.h"             // type      adv1d_t
-                                // functions adv1d_init, advection_x, advection_v
+#include "advect.h"             // type      adv1d_x_t, adv1d_v_t
+                                // functions adv1d_x_init, adv1d_y_init, advection_x, advection_v
 #include "diag.h"               // functions diag_energy, diag_f
 #include "init_any_expr.h"      // function  fun_1d1v
 #include "mesh_1d.h"            // type      mesh_1d
@@ -165,8 +165,8 @@ int main(int argc, char *argv[]) {
     double delta_t;
     int num_iteration;
     // Advection
-    adv1d_t *adv_xe,*adv_xi;
-    adv1d_t *adv_ve,*adv_vi;
+    adv1d_x_t *adv_xe,*adv_xi;
+    adv1d_v_t *adv_ve,*adv_vi;
     // Other simulation parameters
     double lambda, nu;
     
@@ -236,26 +236,26 @@ int main(int argc, char *argv[]) {
         ERROR_MESSAGE("#Missing time_parameters in %s\n", argv[1]);
     }
     if (PC_get(conf, ".adv_xe")) {
-	    adv1d_init(&adv_xe, PC_get(conf, ".adv_xe"), meshx.array, meshx.size, mpi_rank);
+	    adv1d_x_init(&adv_xe, PC_get(conf, ".adv_xe"), meshx.array, meshx.size, mpi_rank);
     } else if (PC_get(conf, ".adv_x")) {
-	    adv1d_init(&adv_xe, PC_get(conf, ".adv_x"), meshx.array, meshx.size, mpi_rank);
+	    adv1d_x_init(&adv_xe, PC_get(conf, ".adv_x"), meshx.array, meshx.size, mpi_rank);
     } else {
         ERROR_MESSAGE("#Missing adv_x or adv_xe in %s\n", argv[1]);
     }
     if (PC_get(conf, ".adv_xi")) {
-	    adv1d_init(&adv_xi, PC_get(conf, ".adv_xi"), meshx.array, meshx.size, mpi_rank);
+	    adv1d_x_init(&adv_xi, PC_get(conf, ".adv_xi"), meshx.array, meshx.size, mpi_rank);
     } else if (PC_get(conf, ".adv_x")) {
-	    adv1d_init(&adv_xi, PC_get(conf, ".adv_x"), meshx.array, meshx.size, mpi_rank);
+	    adv1d_x_init(&adv_xi, PC_get(conf, ".adv_x"), meshx.array, meshx.size, mpi_rank);
     } else {
         ERROR_MESSAGE("#Missing adv_x or adv_xi in %s\n", argv[1]);
     }
     if (PC_get(conf, ".adv_ve")) {
-	    adv1d_init(&adv_ve, PC_get(conf, ".adv_ve"), meshve.array, meshve.size, mpi_rank);
+	    adv1d_v_init(&adv_ve, PC_get(conf, ".adv_ve"), meshve.array, meshve.size, mpi_rank);
     } else {
         ERROR_MESSAGE("#Missing adv_ve in %s\n", argv[1]);
     }
     if (PC_get(conf, ".adv_vi")) {
-	    adv1d_init(&adv_vi, PC_get(conf, ".adv_vi"), meshvi.array, meshvi.size, mpi_rank);
+	    adv1d_v_init(&adv_vi, PC_get(conf, ".adv_vi"), meshvi.array, meshvi.size, mpi_rank);
     } else {
         ERROR_MESSAGE("#Missing adv_vi in %s\n", argv[1]);
     }
@@ -269,10 +269,11 @@ int main(int argc, char *argv[]) {
     currente = allocate_1d_array(meshx.size);
     currenti = allocate_1d_array(meshx.size);
     E = allocate_1d_array(meshx.size);
+    for(int i=0;i<meshx.size;i++)E[i]=0;
     
     // Compute electric field (at initial time)
-    update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari, rhoe, rhoi, rho, currente, currenti, current);
-    compute_E_from_rho_1d(solver, rho, current, E);
+    //update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari, rhoe, rhoi, rho, currente, currenti, current);
+    //compute_E_from_rho_1d(solver, rho, current, E);
     
     FILE* file_diag_energy = fopen("diag_ee.txt", "w");
     fprintf(file_diag_energy, "Time | Int(Ex^2)\n");
@@ -293,6 +294,7 @@ int main(int argc, char *argv[]) {
 		// Solve Poisson
 		update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari, rhoe, rhoi, rho, currente, currenti, current);
 		compute_E_from_rho_1d(solver, rho, current, E);
+    	
 		// Full time-step: advection in v
 		//     d_t(f_i) - 1/mu*E*d_v(f_i) = 0
 		//     d_t(f_i) + E*d_v(f_i) = 0
@@ -307,7 +309,11 @@ int main(int argc, char *argv[]) {
 		// Solve Poisson
 		update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari, rhoe, rhoi, rho, currente, currenti, current);
 		compute_E_from_rho_1d(solver, rho, current, E);
+		
     }
+    	//advection_x(&pare, adv_xe, 0.5*delta_t, meshve.array);
+    	//advection_v(&pare, adv_ve, delta_t, E);
+    	//advection_x(&pari, adv_xi, 0.5*delta_t, meshvi.array);
     
     // Output the ions / electrons density functions at the end
     diag_f(&pare, 1, meshx, meshve, 0, "fe");

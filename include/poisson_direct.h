@@ -42,10 +42,14 @@ void compute_E_from_rho_1d(poisson_solver_direct p, double* rho, double* current
     double E_at_minus_one = E[0];
     double mass = compute_mass(p.x, p.sizex, rho);
     
+    //printf("E_at_one=%1.20g\n",E_at_one);
+    
+    
+    
     // Formula: lambda^2 * d_t E(t,1) + J(t,1) = nu/2 mass(t)
-    double E_at_one_new = (p.nu / 2. * mass - current[p.sizex]) * p.delta_t / (p.lambda * p.lambda) + E_at_one;
+    double E_at_one_new = (p.nu / 2. * mass - current[p.sizex-1]) * p.delta_t / (p.lambda * p.lambda) + E_at_one;
     // Formula: lambda^2 * d_t E(t,-1) + J(t,1) = -nu/2 mass(t)
-    double E_at_minus_one_new = (-p.nu / 2. * mass - current[p.sizex]) * p.delta_t / (p.lambda * p.lambda) + E_at_minus_one;
+    double E_at_minus_one_new = (-p.nu / 2. * mass - current[p.sizex-1]) * p.delta_t / (p.lambda * p.lambda) + E_at_minus_one;
     double should_be_zero = (E_at_minus_one_new + E_at_one_new) / 2.;
     
     for (int i = 0; i < p.sizex; i++) {

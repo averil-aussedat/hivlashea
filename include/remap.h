@@ -134,8 +134,9 @@ struct parallel_stuff {
     double** f_parallel_in_x;     // Local values of f when parallel in x
     double** f_parallel_in_v;     // Local values of f when parallel in v
     bool is_par_x;                // What is the last updated f stored?
-    double* f_1d_in;              // array[max(ncx, ncv)] for Lagrange interpolations
-    double* f_1d_out;             // array[max(ncx, ncv)] for Lagrange interpolations
+    //double* f_1d_in;              // array[max(ncx, ncv)] for Lagrange interpolations
+    //double* f_1d_out;             // array[max(ncx, ncv)] for Lagrange interpolations
+    double* f_1d;              	  // array[max(ncx, ncv)] for Lagrange interpolations
     double* send_buf;             // array[loc_ncx] for MPI_Allgatherv
     double* recv_buf;             // array[ncx]         for MPI_Allgatherv
     int* recv_counts;             // array[mpi_world_size] for MPI_Allgatherv
@@ -422,8 +423,9 @@ void init_par_variables(parallel_stuff* par_variables,
         (*par_variables).layout_par_v, (*par_variables).layout_par_x);
     
     int size_f_1d = imax(total_nb_points_on_x, total_nb_points_on_v);
-    (*par_variables).f_1d_in = malloc(size_f_1d * sizeof(double));
-    (*par_variables).f_1d_out = malloc(size_f_1d * sizeof(double));
+    //(*par_variables).f_1d_in = malloc(size_f_1d * sizeof(double));
+    //(*par_variables).f_1d_out = malloc(size_f_1d * sizeof(double));
+    (*par_variables).f_1d = malloc(size_f_1d * sizeof(double));
     
     (*par_variables).send_buf = allocate_1d_array((*par_variables).size_x_par_x);
     (*par_variables).recv_buf = allocate_1d_array(total_nb_points_on_x);
