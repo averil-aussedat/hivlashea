@@ -210,6 +210,55 @@ $$
 
 % ===================================================================
 
+\section{Time integration}
+Here a time splitting is presented. We focus on a second order splitting. 
+
+\paragraph{Space transport ${\cal T}_x^{\Delta t/2}$}
+Knowing $f^n_{i,e}, E^n$, we want to compute $f^\star_{i,e}, E^\star$ by computing the solution on $[t^n, t^n+\Delta t/2]$ of 
+\begin{eqnarray*}
+\partial_t f_{i,e} + v\partial_x f_{i,e} &=& 0\nonumber\\
+\lambda^2\partial_x E &=& \rho_i-\rho_e\nonumber\\
+\lambda^2\partial_t E(t, \pm 1) &=& -J(t, \pm 1) \mp \frac{\nu}{2} m_e(t),   
+\end{eqnarray*}
+with $m_e(t)=\int_{-1}^1 \rho_e(t, x)dx$. 
+
+To do so, we first compute $f^\star$ using the semi-Lagrangian method. 
+Thus, we compute $\rho_{i,e}^\star, J^\star(\pm 1), m_e^\star$ 
+so that we can advance the boundary conditions for $E$ through 
+$$
+\lambda^2 (E^\star(\pm 1) -E^n(\pm 1)) =\frac{\Delta t}{2}\Big[ -\frac{1}{2}(J^n(\pm 1)+J^\star(\pm 1)) \mp \frac{\nu}{4}(m_e^n+m_e^\star)\Big],   
+$$
+with a second order accuracy. After this update, one can compute $E^\star$ with the Poisson solver with the right hand side 
+$\rho_i^\star-\rho_e^\star$. 
+
+\paragraph{Velocity transport ${\cal T}_v^{\Delta t/2}$}
+Knowing $f^n_{i,e}, E^n$, we want to compute $f^\star_{i,e}, E^\star$ by computing the solution on $[t^n, t^n+\Delta t/2]$ of 
+\begin{eqnarray*}
+\partial_t f_{i} + E\partial_v f_{i} &=& 0\nonumber\\
+\partial_t f_{e} -\frac{ E}{\mu}\partial_v f_{e} &=& 0. 
+\end{eqnarray*}
+Since $E$ does not change in time along this equations, one only has to update $f_{i,e}$ using the semi-Lagrangian method. 
+
+\paragraph{Source term ${\cal S}^{\Delta t}$}
+Knowing $f^n_{i,e}, E^n$, we want to compute $f^\star_{i,e}, E^\star$ by computing the solution on $[t^n, t^n+\Delta t]$ of 
+\begin{eqnarray*}
+\partial_t f_{i} &=& \nu f_e\nonumber\\
+\partial_t f_{e} &=& 0. 
+\end{eqnarray*}
+Along this step, $E, f_e$ do not change and one can update $f_i$ thanks to 
+$$
+f^{\star}_i = f^n_i + \nu\Delta t f^n_e. 
+$$
+
+\paragraph{Splitting}
+The time splitting enabling to compute $(f_i^{n+1}, f_e^{n+1}, E^{n+1})$ from $(f_i^{n}, f_e^{n}, E^{n})$ 
+can be written as 
+$$
+(f_i^{n+1}, f_e^{n+1}, E^{n+1}) = ({\cal T}_x^{\Delta t/2} \circ {\cal T}_v^{\Delta t/2}\circ {\cal S}^{\Delta t}\circ {\cal T}_v^{\Delta t/2} \circ  {\cal T}_x^{\Delta t/2} ) (f_i^{n}, f_e^{n}, E^{n})
+$$
+
+% ===================================================================
+
 \section{Examples}
 \label{examples}
 \subsection{Test 1d}
