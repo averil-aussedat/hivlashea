@@ -1,0 +1,489 @@
+\documentclass[12pt,english]{article}
+
+\usepackage{cmap}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\geometry{verbose,tmargin=2.5cm,bmargin=2.5cm,lmargin=2.5cm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{authblk}
+\usepackage{physics}
+%\usepackage{esint}
+%\usepackage{epstopdf}
+%\usepackage{esint}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{setspace}
+\usepackage[normalem]{ulem}
+
+\usepackage{placeins} % to force floating element placement (in numerical results)
+
+%\usepackage{authblk} % for authors affiliations
+
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{tikz}
+
+\usepackage{hyperref}
+\usepackage{biblatex}
+%\usepackage[          %
+%    labelalpha=true,  % 
+%    backend=biber,    %
+%    bibencoding=utf8, %
+%    sorting=none,     %
+%    hyperref=true,    %
+%    url=false,        %
+%    backref=true,     %
+%    backrefstyle=three]{biblatex}
+%\addbibresource{biblio.bib}
+\bibliography{biblio}
+
+%\usepackage[usenames,dvipsnames]{color}
+\theoremstyle{plain}\newtheorem{theorem}{Theorem}[section]
+\theoremstyle{plain}\newtheorem{corollary}{Corollary}[section]
+\theoremstyle{plain}\newtheorem{lemma}{Lemma}[section]
+%\theoremstyle{definition}\newtheorem{Defi}[theorem]{Definition}
+\newtheorem{prop}{Proposition}[section]
+%\theoremstyle{remark}[theorem]
+\newtheorem{remark}{Remark}[section]
+%\theoremstyle{plain}\newtheorem{ex}[theorem]{Example}
+%\theoremstyle{plain}\newtheorem{exper}[theorem]{Experiment}
+\newtheorem{property}{Property}[section]
+%\newtheorem{pf}{Proof}
+%\renewcommand{\proof}{\textbf{Proof}}
+%\newenvironment{proof}[1]{\par \textbf{Proof}\quad #1}{\hfill$\qed$ }
+\DeclareSymbolFont{largesymbol}{OMX}{yhex}{m}{n}
+\DeclareMathAccent{\Widehat}{\mathord}{largesymbol}{"62}
+\newcommand{\alertred}[1]{{\color[rgb]{0.95,0,0.05}{#1}}}
+\newcommand{\sumli}{\sum\limits}
+\newcommand{\tl}{\tilde}
+\newcommand{\vp}{\varphi}
+\newcommand{\pa}{\partial}
+
+\newcommand{\aexp}{\mathfrak{exp}}
+\newcommand{\aerr}{\mathfrak{e}}
+
+%\makeatletter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+\usepackage{babel}
+%\usepackage{showlabels}
+%\usepackage{subfigure}
+\usepackage{subfig}
+\makeatother
+\DeclareMathSizes{14}{14}{9.8}{7}
+\graphicspath{{Figure/}}
+\begin{document}
+
+\title{HIVLASHEA: High order methods for Vlasov-Poisson model for sheath}% with boundaries}
+\date{}
+\maketitle
+
+
+% ===================================================================
+%\tableofcontents
+% ===================================================================
+
+
+\section{Introduction}
+% ===================================================================
+
+We consider the following model for $(f_e, f_i)(t, x, v)\in \mathbb{R}^+$ and $\phi(t, x)\in \mathbb{R}$, 
+$t\geq 0, x\in [-L, L], v\in \mathbb{R}$ 
+\begin{equation}
+\label{model}
+  \begin{aligned}
+   \partial_t f_i + v\partial_x f_i -\partial_x \phi \partial_v f_i = \nu f_e, \;\;\; (\mbox{Vlasov for ions})\\ 
+   \partial_t f_e + v\partial_x f_e +\frac{1}{\mu}\partial_x \phi \partial_v f_e = 0, \;\;\; (\mbox{Vlasov for electrons})\\
+   -\lambda^2\partial_x^2 \phi = \rho_i-\rho_e, \;\; \rho_{i,e}= \int_\mathbb{R} f_{i, e} dv,  \;\;\; (\mbox{Poisson})
+  \end{aligned}
+\end{equation}
+with the following boundary and initial conditions 
+\begin{equation}
+\label{bc}
+  \begin{aligned}
+    f_{i, e}(t, x=-L, v>0)= 0, \;\; f_{i, e}(t, x=L, v<0) = 0, \\ 
+   \phi(t, 0)=0 \;\;  (\mbox{reference potential}), \;\; \partial_x \phi(t, 1)=C(t), \\
+ f_{i, e}(0, x, v)=f_{i, e}^0(x, v),  \\ 
+- \lambda^2\partial_x^2\phi(0, x) = \int_\mathbb{R} f_{i}^0(x, v) dv  - \int_\mathbb{R} f_{ e}^0(x, v) dv, 
+  \end{aligned}
+\end{equation}
+where $f_{i, e}^0$ are given and $C(t)$ will be defined in \eqref{ampere_bc_phi}. 
+
+
+We look for solution that are symmetric with respect to $x=0$: 
+%\begin{equation}
+$$
+f_{i, e}(t, x, v) = f_{i, e}(t, -x, -v) \;\;  \forall x\in [-L, L], \;\; \forall v\in\mathbb{R}, \;\;\; \phi(t, x) = \phi(t, -x), \;\;  \forall x\in [-L, L].  
+$$
+%\end{equation}
+This implies 
+$$
+ \begin{aligned}
+\rho_{i, e}(t, x) = \rho_{i, e}(t, -x), \;\; J_{i,e}(t, x) = -J_{i,e}(t, -x), \\
+E(t, x)=-\partial_x\phi(t, x) = \partial_x \phi(t, -x) = -E(t, -x). 
+ \end{aligned}
+$$
+We call $E$ the electric field which derives from the electric potential $\phi$ ($E=-\partial_x \phi$), whereas $\rho_{i,e}$ are the ion and electron densities. 
+Moreover, $J_{i,e} = \int_{\mathbb{R}} vf_{i,e} dv$ denote the ion and electron currents. 
+
+\paragraph{Looking for $C(t)$\\}
+Here we derive the boundary condition for $\phi$. 
+%\paragraph{Amp\`ere equation\\}
+
+First, we derive with respect to time the Poisson equation 
+%Let derive with respect to time the Poisson equation to get 
+$$
+-\partial_t (\lambda^2\partial_x^2 \phi) = \partial_t (n_i- n_e), % = -\partial_x (J_i-J_e) +\nu n_e, 
+$$
+and considering the difference between the $v$-integration of the Vlasov equations gives 
+$$
+\partial_t (n_i- n_e) + \partial_x (J_i-J_e) = \nu n_e, 
+$$
+so that, using $E=-\partial_x \phi$, we get 
+$$
+\partial_x (\lambda^2\partial_t E + J_i-J_e) = \nu n_e, \;\;\; \forall x\in [-L, L]. 
+$$
+Integrating now in space leads to 
+%between $xx=-L$ and $x$ leads to (with the notation $J(t, x)\equiv (J_i-J_e)(t, x)$ for the total current) 
+%\begin{equation}
+%\label{ampere_1}
+%\lambda^2\partial_t E(t, x) + J(t, x) = \textcolor{red}{-}\lambda^2\partial_t E(t, -L) + J(t, -L) +\nu \int_{-L}^x n_e(t, y)dy. 
+%\end{equation}
+%Evaluating \eqref{ampere_1} at $x=L$ leads to 
+$$
+\lambda^2\partial_t E(t, L) + (J_i-J_e)(t, L) = \lambda^2\partial_t E(t, -L) + (J_i-J_e)(t, -L) +\nu \int_{-L}^L n_e(t, x)dx,  
+$$
+and using the symmetries highlighted before ($E(t,x)=-E(t, -x)$ and  $J(t,x)=-J(t, -x)$), it comes 
+\begin{equation}
+\label{ampere_bc}
+\lambda^2\partial_t E(t, L) + (J_i-J_e)(t, L)  = \frac{\nu}{2} \int_{-L}^L n_e(t, x)dx, 
+\end{equation}
+%We thus deduce from \eqref{ampere_1} and \eqref{ampere_bc} the following Amp\`ere equation 
+%\begin{equation}
+%\label{ampere}
+%\textcolor{red}{-}\lambda^2\partial_t E(t, x) + J(t, x) = \frac{\nu}{2} \Big( \int_{-L}^x n_e(t, y)dy -  \int_{x}^L n_e(t, y)dy\Big). 
+%\end{equation}
+or, in terms of $\phi$ 
+\begin{equation}
+\label{ampere_bc_phi}
+\partial_x \phi(t, L) =\partial_x \phi(0, L) +\frac{1}{\lambda^2}\int_0^t (J_i-J_e)(s, L)ds - \frac{\nu}{2\lambda^2}\int_0^t  \int_{-L}^L n_e(s, x)dx ds \equiv C(t). 
+\end{equation}
+
+
+Our goal is to propose high order numerical methods to approximate the solution of \eqref{model}-\eqref{bc}-\eqref{ampere_bc_phi}. 
+As a starting point, we will use several techniques proposed and explained in \cite{badsi}. Below are some areas of works 
+that will be explored and incorporated in the code developed in \cite{badsi}:  
+\begin{itemize}
+\item to reach high order at the boundaries, we will use \cite{boutin, coulombel} (code dedicated to the linear transport to test 
+with the semi-Lagrangian method). 
+\item Hermite-Lagrange 1D interpolation  (see Section \ref{hemite}) (code linear transport and then 
+\begin{itemize}
+\item code for linear transport (semi-Lagrangian method and periodic boundary conditions) 
+\item code for Vlasov-Poisson (one species and periodic boundary conditions)
+\item code for Vlasov-Poisson (two species and periodic boundary conditions: test on exact solution from \cite{morel}) 
+\end{itemize}
+\item write a solver for the Poisson equation with Dirichlet-Neuman boundary conditions. 
+\item investigate high order time splittings for \eqref{model}-\eqref{bc}-\eqref{ampere_bc_phi}.  
+\end{itemize}
+But also
+\begin{itemize}
+\item Poisson reformulation following ideas in \cite{degond} to overcome the stringent condition on the time step. 
+\item construction of the stationary solutions of  \eqref{model}-\eqref{bc}-\eqref{ampere_bc_phi}.  
+\end{itemize}
+
+\subsection{Energy evolution}
+Multiplying by $v^2/2$ the ion equation and by $\mu v^2/2$ the electron equation gives, after integration in $v$ and $x$
+$$
+\frac{d}{dt}{\cal E}_{\mbox{kin}} + \int\int_{-1}^1 \frac{v^3}{2}\partial_x (f_i + \mu f_e)dxdv -\int_{-1}^1  E (J_i-J_e) dx = \frac{\nu}{\mu} { \cal E}^e_{\mbox{kin}}, 
+$$
+with ${\cal E}_{\mbox{kin}} = \int\int_{-1}^1 \frac{v^2}{2}(f_i+\mu f_e) dx dv$, ${ \cal E}^e_{\mbox{kin}}= \int\int_{-1}^1 \frac{v^2}{2} \mu f_e dx dv$ and $J_{i,e} = \int v f_{i,e} dv$. \\
+But the second term is 
+$$
+\int\int_{-1}^1 \frac{v^3}{2}\partial_x (f_i + \mu f_e)dxdv = M_3(t, 1)-M_3(t, -1), 
+$$
+with $M_3(t, x) := \int \frac{v^3}{2}(f_i(t, x, v) +\mu f_e(t, x, v))dv$. 
+%and the third one is (denoting $J(t, x)=(J_i-J_e)(t, x)$) 
+%$$
+%-\int_{-1}^1 EJ dx = \int_{-1}^1   \partial_x \phi  (J_i-J_e) dx = [\phi(t, 1) J(t, 1) - \phi(t, -1) J(t, -1)] - \int_{-1}^1    \phi  \partial_x J dx
+%$$
+Using the Amp\`ere equation 
+$$
+J(t, x) - J(t, -1)= -\lambda^2\partial_t E(t, x) + \lambda^2\partial_t E(t, -1) + \nu \int_{-1}^x \rho_e (t, y)dy, 
+$$
+we get for the third term 
+\begin{eqnarray*}
+\int_{-1}^1 EJ dx &=& \int_{-1}^1 E dx \Big[ J(t, -1)+\lambda^2 \partial_t E(t, -1)\Big] -\lambda^2\int_{-1}^1  E \partial_t E(t, x) dx  
++\nu \int_{-1}^1 E \int_{-1}^x  \rho_e (t, y)dy dx\nonumber\\
+&=&  - \frac{\lambda^2}{2} \frac{d}{dt} \int_{-1}^1  E^2 dx - \nu\int_{-1}^1 (\partial_x \phi) \int_{-1}^x  \rho_e (t, y)dy dx\nonumber\\
+&=& - \frac{\lambda^2}{2} \frac{d}{dt} \int_{-1}^1  E^2 dx - \nu\Big[ \phi(t, 1)\int_{-1}^1  \rho_e (t, y)dy \Big] 
++ \nu\int_{-1}^1 \phi(t, x) \rho_e(t, x) dx, 
+\end{eqnarray*}
+since $\int_{-1}^1 E dx = -(\phi(t, 1)-\phi(t, -1)) = 0$. Hence, we get 
+\begin{eqnarray*}
+\frac{d}{dt}{\cal E}_{\mbox{kin}} \!\!\!\!\!\!\!\!\!&& +  \frac{d}{dt}{\cal E}_{\mbox{pot}} +M_3(t, 1)-M_3(t, -1) + \nu\phi(t, 1) \int_{-1}^1  \rho_e (t, x)dx\nonumber\\
+&& = \nu \int_{-1}^1  \phi(t, x)\rho_e (t, x)dx + \frac{\nu}{\mu} { \cal E}^e_{\mbox{kin}}, 
+\end{eqnarray*}
+with ${\cal E}_{\mbox{pot}} = \frac{\lambda^2}{2}\int_{-1}^1 E^2dx$. 
+
+\section{Examples}
+\subsection{Test 1d}
+We can consider the following 1d test 
+$$
+\partial_t + a \partial_x u = 0, \;\; x\in [0, 1], \;\; a>0, 
+$$
+with the following boundary and initial conditions $u(t=0, x)=u_0(x), u(t, 0)=u_L(t)$. 
+We introduce a mesh in space $x_i=i\Delta x, i=0, \dots, N$, with $\Delta x>0$ and $N\Delta x=1$ 
+and in time $t^n=n\Delta t, \Delta t>0$.  
+To reconstruct using high order interpolation, one needs to give a sense to the numerical solution at the inflow ghost points  $x_{-i}, i=1, 2, \dots$ at the outflow ghost points $x_{N+i}, i=1, 2, \dots$. 
+
+For the inflow boundary, one can investigate two options 
+\begin{itemize}
+\item characteristics based: using the characteristics, we have $u(t^n, x_{-1}) = u(t, x_{-1}+(t-t^n)) = u_L(t)$ with $t$ the time such that 
+$x_{-1} + (t-t^n) = 0$, or $t=t^n-x_{-1}$. Of course, the same strategy can be applied for $x_{-i}, i=2, 3, ...$.  
+\item Inverse Lax-Wendroff (ILW): following the strategy developed in \cite{boutin, coulombel}, we perform a Taylor expansion 
+of inflow ghost points at the boundary $x=0$ 
+$$
+u_{-1}^n \approx \sum_{k=0}^K \frac{(-\Delta x)^k}{k!}(\partial_x^k u^n)_0 = \sum_{k=0}^K \frac{(\Delta x)^k}{a^k k!}(\partial_t^k u^n)_0 
+= \sum_{k=0}^K \frac{(\Delta x)^k}{a^k k!}(\partial_t^k u_L(t^n)). 
+$$ 
+Of course, the same strategy can be applied for $x_{-i}, i=2, 3, ...$.  
+\end{itemize}
+One can observe and check properly that the ILW is an approximation of the characteristics based approach. The two options can be programmed in combination with a high order semi-Lagrangian method. 
+
+For the outflow, one can use the strategy proposed in \cite{boutin, coulombel} where a condition is imposed to reconstruct 
+$u_{N+i}, i=1, 2, \dots$. For a $k_b$ given, they introduce the finite difference operator $(D u)_j = u_j-u_{j-1}$. 
+We impose $(D^2 u)_N=0$ which means $u_{N-1}-2u_N+u_{N+1}=0$ or $u_{N+1}=2u_N-u_{N-1}$. 
+The next point $u_{N+2}$ is then defined with $(D^2 u)_{N+1}=u_{N}-2u_{N+1}+u_{N+2}=0$. 
+Another choice would be $(D^3 u)_N=0$ which imposes $u_{N+1}$ and so on.  
+
+Tests can be performed using the exact solution $u(t, x)=\sin(k(x-at))$ which means 
+that the initial condition is  $u_0(x)=\sin(kx)$ and the boundary condition is $u_L(t)=-\sin(kat)$ 
+for a given $k\in\mathbb{N}^\star$. 
+
+\subsection{Test 2d}
+We suggest to investigate the properties of the above approach in a 2d context using the following model 
+$$
+\partial_t u +v\partial_x u - x\partial_v u = 0, \;\; x\in [-1, 1], \;\; v\in [-1, 1], 
+$$
+with the initial condition $u(t=0, x, v) = u_0(x, v)$ and with the boundary conditions in space 
+$$
+u(t, -1, v)=u_L(t, v), v>0, \;\;\; u(t, 1, v)=u_R(t, v), v<0, 
+$$
+whereas in $v$, vanishing boundary conditions are considered. 
+
+We shall consider the following exact solution 
+$$
+u(t, x, v) = u_0(x\cos t - v\sin t , x\sin t +v\cos t), 
+$$
+so that the boundary conditions are $u_L(t) = u_0(-\cos t -v\sin t, -x\sin t +v\cos t)$ for $v> 0$ 
+and $u_R(t) = u_0(\cos t -v\sin t, \sin t +v\cos t)$ for $v< 0$. The initial condition can be chosen as 
+$u_0(x, v) = \exp( - 100 (x-1)^2 - 100 v^2)$.  
+
+To use a directional splitting method, one has to modify the boundary conditions to be compatible 
+with the one dimensional space advections. 
+\begin{itemize}
+\item solve $\partial_t u +v \partial_x u = 0$ on $\Delta t/2$ 
+with $\tilde{u}_L(t^n) = u_0(x_{-1}\cos t^n - v\sin t^n , x_{-1}\sin t^n +v\cos t^n)$
+\item solve $\partial_t u -x \partial_v u = 0$ on $\Delta t$ with zero boundary conditions at the boundary 
+\item solve $\partial_t u +v \partial_x u = 0$ on $\Delta t/2$ with $\tilde{u}_L(t) = u_0(x_{-1}\cos t - v\sin t , x_{-1}\sin t +v\cos t)$ with 
+$t$ such that $v(t-t^{n+1}) = -\Delta x$. 
+\end{itemize}
+
+\subsection{Poisson solver}
+To solve the Poisson equation 
+$$
+\lambda^2\partial_x E = \rho, \;\; x\in [-1, 1], 
+$$
+with $E(1)$ given, one integrates successively between $x$ and $1$ and then between $-1$ and $x$ to get 
+$$
+E(1) - E(x) = \frac{1}{\lambda^2} \int_x^1 \rho(y) dy, \;\;\; E(x) - E(-1) = \frac{1}{\lambda^2} \int_{-1}^x \rho(y) dy. 
+$$
+We obtain the following expression for $E(x)$ 
+$$
+E(x) = \frac{1}{2}(E(1)+E(-1)) + \frac{1}{2\lambda^2} \Big[\int_{-1}^x \rho(y) dy - \int_x^1 \rho(y) dy \Big]. 
+$$
+We assume that $\rho$ is known on the spatial grid $x_i=i\Delta x$ so that $\rho(x_i) \approx \rho_i$. 
+Hence, an approximation of the electric field at $x_i$ is given by 
+$$
+E_i = \frac{1}{2}(E(1)+E(-1)) + \frac{\Delta x}{4\lambda^2} \Big[\sum_{j=0}^{i-1} (\rho_j+\rho_{j+1})  - \sum_{j=i}^{N-1}(\rho_j+\rho_{j+1}) \Big].
+$$
+This expression ensures the symmetry of $E$ at the discrete level.
+
+
+\section{Hermite interpolation}
+\label{hemite}
+Let us consider the 3rd order interpolation on the interval $[x_i, x_{i+1}]$ such that $x_{i+1}-x_i=h>0$. 
+We look for the polynomial function $P\in \mathbb{R}^2[X]$ such that 
+\begin{equation}
+\label{hermite_conditions}
+P(x_i) = f(x_i), P(x_{i+1}) = f(x_{i+1}), P'(x_i) = f'(x_i), P'(x_{i+1}) = f'(x_{i+1}).  
+\end{equation} 
+On the one side, we define the two 1st order Lagrange polynomial 
+$$
+L_i(x)=\frac{x-x_{i+1}}{x_i-x_{i+1}}  =\frac{x_{i+1}-x}{h}  \mbox{ and } L_{i+1}(x)=\frac{x-x_{i}}{x_{i+1}-x_{i}}=\frac{x-x_{i}}{h}, 
+$$
+and following the Peyr\'e's tweet, the Hermite polynomial satisfying \eqref{hermite_conditions} is 
+\begin{equation}
+\label{p-hermite}
+P(x) = f(x_i)H_i(x) + f(x_{i+1})H_{i+1}(x)  + f'(x_i)K_i(x) + f'(x_{i+1})K_{i+1}(x),  
+\end{equation}
+with 
+\begin{eqnarray}
+\label{K_H}
+K_i(x)&=&L_i(x)^2(x-x_i), \;\; K_{i+1}(x)=L_{i+1}(x)^2(x-x_{i+1}), \\
+H_i(x)&=&L_i(x)^2(1-2L_i'(x_i)(x-x_i)), \;\; H_{i+1}(x)=L_{i+1}(x)^2(1-2L_{i+1}'(x_{i+1})(x-x_{i+1}). 
+\end{eqnarray}
+From the properties of $H_i, K_i$, we can check that \eqref{p-hermite} satisfies \eqref{hermite_conditions}. 
+
+We can generalize to arbitrary (odd) order in the following way. 
+From a Lagrange polynomial of degree $(2d+1)$, we can reconstruct using Peyr\'e's tweet 
+a polynomial of degree $2(2d+1)+1$. % which is ${\cal C}^1$ on the whole interval (instead of only ${\cal C}^0$ for Lagange). 
+In this method, we need to reconstruct $f'(x_i)$ which is not known since we only know $f(x_i)$. 
+To do so, we can use finite difference formula with the correct order (to not destroy the order of the Hermite reconstruction). 
+
+The strategy is the following. First we define the Lagrange polynomial of order  $2d+1$ ($d\in\mathbb{N}$ given) 
+$$
+L_i(x)=\Pi_{j\neq i} \frac{x-x_j}{x_i-x_j}, \;\; \mbox{ for } i=-d, \dots, d+1. 
+$$
+We also define the derivative of the Lagrange polynomial. We only need $L'_i(x_i)$ for which we have 
+$$
+L_i'(i) = \sum_{j=-d, ..., d+1 /  j \neq i} \frac{1}{i-j}. 
+$$ 
+Then, we define $(K_i)_{i=-d, \dots, d+1}$ and $(H_i)_{i=-d, \dots, d+1}$ from \eqref{K_H} and we have the following polynomial 
+$$
+P(x) = \sum_{i=-d}^d f(x_i) H_i(x) + \sum_{i=-d}^d f'(x_i) K_i(x). 
+$$
+An approximation of $f'(x_i)$ is required. Different options can be envisaged according to stability. 
+The first one is the uncentered one as in \cite{caim} 
+$$
+P(x) = \sum_{i=-d}^d f(x_i) H_i(x) + \sum_{i=-d}^0 f'_{i, +} K_i(x)+ \sum_{i=1}^d f'_{i, -} K_i(x). 
+$$
+where the derivatives are approximated with 
+\begin{eqnarray*}
+f'(x_i) &\approx& f'_{i, +} = \sum_{\ell = r^+}^{s^+} b_\ell^+ f_{i+\ell}   \mbox{ for } i=-d, \dots, 0, \\ 
+f'(x_i) &\approx& f'_{1, -} = \sum_{\ell = r^-}^{s^-} b_\ell^- f_{i+\ell}   \mbox{ for } i=1, \dots, d.  
+\end{eqnarray*} 
+The integers $r^{\pm}, s^\pm$ are computed according to a degree $p\in \mathbb{N}^\star$: 
+$r^+=-\left\lfloor\dfrac{p}{2}\right\rfloor, \;\; s^+=\left\lfloor\dfrac{p+1}{2}\right\rfloor, \;\; r^-=-s^+, \;\; s^-=-r^+$. 
+Below are the coefficients for different values of $p$ (general formulas can be found in \cite{caim} 
+\begin{eqnarray*}
+p=1 && b^+ = (-1, 1)\\
+p=2 && b^+ = (-1/2, 0, 1/2)\\
+p=3 && b^+ = (-1/3,-1/2,1,-1/6)\\
+p=4 && b^+ = (1/12,-2/3,0,2/3,-1/12)\\
+p=5 && b^+ = (1/20,-1/2,-1/3,1,-1/4,1/30)\\
+p=6 && b^+ = (-1/60,3/20,-3/4,0,3/4,-3/20,1/60), 
+\end{eqnarray*}
+with $b^-_{-\ell} = -b^+_\ell$ for $\ell=r^+, \dots, s^+, \ell\neq 0$ and $b^-_0 = -b_0^+$. 
+
+More details of the method in the maple code of Michel !  
+\begin{verbatim}
+d:=1:r:=-d:s:=d+1:
+dmax:=2*(s-r+1):
+for k from r to s do
+         \% Lagrange polynomials of odd degree 
+        	L[k]:=product((x-j)/(k-j),j=r..k-1)*product((x-j)/(k-j),j=k+1..s): 
+        	\% derivative of Lagrange 
+        	dL[k]:=diff(L[k],x):
+od:	
+for k from r to s do 
+        \% Compute H and K from the Peyré\'e formulas  
+        	H[k]:=L[k]**2*(1-2*subs(x=k,dL[k])*(x-k)):#f
+        	K[k]:=L[k]**2*(x-k):  #fprime
+od:
+for k from 0 to dmax do
+        \%test on a given function 
+         f:=x**k:df:=diff(f,x):
+        	g:=simplify(x**k-add(H[j]*subs(x=j,f),j=r..s)-add(K[j]*subs(x=j,df),j=r..s)):
+        	print(k,g);
+od:
+\end{verbatim}
+
+\begin{thebibliography}{}
+
+\bibitem{badsi}
+{\sc M. Badsi, M. Mehrenberger, L. Navoret}
+\textit{Numerical stability of plasma sheath}, 
+ESAIM: Proceedings and Surveys, SMAI 2017, Volume 64 (2018), pp 17-36.
+
+
+\bibitem{boutin}
+{\sc B. Boutin, T. H. T. Nguyen, Abraham Sylla, S. Tran-Tien, J.-F. Coulombel}, 
+\textit{High order numerical schemes for transport equations on bounded domains}, 
+(2021), ESAIM: Proceedings and Surveys.
+
+\bibitem{coulombel}
+{\sc J.-F. Coulombel,  F. Lagouti\`ere}. 
+\textit{The neumann numerical boundary condition for transport equations}. 
+Kinet. Relat. Models,   2020, 13(1), pp. 1-32. 
+
+\bibitem{degond}
+{\sc P. Degond, F. Deluzet, L. Navoret, A.-B. Sun, M.-H. Vignal}, 
+\textit{Asymptotic-Preserving Particle-In-Cell method for the Vlasov-Poisson system near quasi-neutrality}, 
+J. Comp. Phys., vol. 229, 16, pp. 5630-5652 (2010)
+
+\bibitem{caim}
+{\sc A. Hamiaz, M. Mehrenberger, H. Sellama, E. Sonnendrucker}, 
+\textit{The semi-Lagrangian method on curvilinear grids}, 
+Communications in Applied and Industrial Mathematics, 2016, Volume 7, Issue 3, pp. 96-134.
+
+
+\bibitem{morel}
+{\sc C. Morel}, 
+\textit{A well-balanced scheme using exact solutions to the two species Vlasov-Poisson system}, 
+Intern notes. 
+
+\bibitem{sonnen}
+{\sc E. Sonnendrucker}
+\textit{Numerical Methods for the Vlasov-Maxwell equations}.  
+
+\end{thebibliography}
+
+\end{document}
+
+\begin{prop}
+The system \eqref{model}-\eqref{bc}-\eqref{ampere_1} is equivalent to \eqref{model}-\eqref{bc}-\eqref{ampere}. 
+\end{prop}
+\begin{proof}
+The previous calculations showed that \eqref{model}-\eqref{bc}-\eqref{ampere_1} implies \eqref{model}-\eqref{bc}-\eqref{ampere}. 
+Let now start with \eqref{model}-\eqref{bc}-\eqref{ampere}. 
+
+We derive \eqref{ampere} with respect to $x$ to get 
+$$
+-\lambda^2\partial_x\partial_t E +\partial_x J = \frac{\nu}{2}\Big( n_e(t, x) + n_e(t, x)) = \nu n_e(t, x).  
+$$
+Thanks to the continuity equation $\partial_t (n_i-n_e) +\partial_x J = \nu n_e$, we obtain 
+$$
+-\lambda^2\partial_x\partial_t E - \partial_t (n_i-n_e) + \nu n_e = \nu n_e, 
+$$
+or again 
+$$
+\partial_t (-\lambda^2\partial_x E -  (n_i-n_e) ) = 0. 
+$$
+Integrating on time $s\in [0, t]$ enables to get 
+$$
+-\lambda^2\partial_x E(t, x) -  (n_i-n_e)(t, x) = -\lambda^2\partial_x E(0, x) -  (n_i-n_e)(0, x) =0, 
+$$
+where the last equality comes from the fact that Poisson is satisfied initially. Then, using $E=-\partial_x \phi$, 
+we obtain the Poisson equation $\lambda^2\partial^2_x \phi(t, x) =  (n_i-n_e)(t, x)$. Regarding the boundary 
+\end{proof}
+
+\begin{remark}
+For stationary solution, thanks to $J(t, L)-J(t, -L) = \nu\int_{-L}^L n_e(t, x)dx$, we recover Eq (71) from Alvaro et al. paper.  
+\end{remark}
+
+Objectif: \'ecriture d'un code VP double esp\`ece avec bord ($f_{i,e}$ et $\phi$) selon les calculs pr\'ec\'edents. 
+Lid\'ee est d'observer la relaxation vers un \'etat stationnaire non homog\`ene comme dans Alvaro et al. 
+
+Quelques sch\'emas possibles 
+\begin{itemize}
+\item bas\'e sur Duhamel, on peut lever la CFL de transport (papier avec Dimarco-Vignal)
+\item semi-Lagrangien 2d pour suivre au mieux les caract\'eristiques (papier avec Degond-Belaouar) 
+\item voir pour rester stable par rapport \`a $\lambda$ 
+\item interpolation Hermite (Peyr\'e/Michel)
+\item voir calculs Morel pour \'etats stationnaires dans le cas p\'eriodique en $x$ 
+\end{itemize}
+
+\end{document}
