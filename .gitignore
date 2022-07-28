@@ -9,6 +9,8 @@ build/*
 **/*.synctex.gz
 **/*.snm
 **/*.toc
+**/*.bcf
+**/*.run.xml
 
 # intermediate files
 **/*.o

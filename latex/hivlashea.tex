@@ -10,17 +10,13 @@
 \usepackage{amsthm}
 \usepackage{authblk}
 \usepackage{physics}
-%\usepackage{esint}
-%\usepackage{epstopdf}
-%\usepackage{esint}
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{setspace}
 \usepackage[normalem]{ulem}
 
-\usepackage{placeins} % to force floating element placement (in numerical results)
+\usepackage{placeins} 
 
-%\usepackage{authblk} % for authors affiliations
 
 \usepackage{color}
 \usepackage{xcolor}
@@ -28,32 +24,14 @@
 
 \usepackage{hyperref}
 \usepackage{biblatex}
-%\usepackage[          %
-%    labelalpha=true,  % 
-%    backend=biber,    %
-%    bibencoding=utf8, %
-%    sorting=none,     %
-%    hyperref=true,    %
-%    url=false,        %
-%    backref=true,     %
-%    backrefstyle=three]{biblatex}
-%\addbibresource{biblio.bib}
 \bibliography{biblio}
 
-%\usepackage[usenames,dvipsnames]{color}
 \theoremstyle{plain}\newtheorem{theorem}{Theorem}[section]
 \theoremstyle{plain}\newtheorem{corollary}{Corollary}[section]
 \theoremstyle{plain}\newtheorem{lemma}{Lemma}[section]
-%\theoremstyle{definition}\newtheorem{Defi}[theorem]{Definition}
 \newtheorem{prop}{Proposition}[section]
-%\theoremstyle{remark}[theorem]
 \newtheorem{remark}{Remark}[section]
-%\theoremstyle{plain}\newtheorem{ex}[theorem]{Example}
-%\theoremstyle{plain}\newtheorem{exper}[theorem]{Experiment}
 \newtheorem{property}{Property}[section]
-%\newtheorem{pf}{Proof}
-%\renewcommand{\proof}{\textbf{Proof}}
-%\newenvironment{proof}[1]{\par \textbf{Proof}\quad #1}{\hfill$\qed$ }
 \DeclareSymbolFont{largesymbol}{OMX}{yhex}{m}{n}
 \DeclareMathAccent{\Widehat}{\mathord}{largesymbol}{"62}
 \newcommand{\alertred}[1]{{\color[rgb]{0.95,0,0.05}{#1}}}
@@ -65,24 +43,18 @@
 \newcommand{\aexp}{\mathfrak{exp}}
 \newcommand{\aerr}{\mathfrak{e}}
 
-%\makeatletter
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
 \usepackage{babel}
-%\usepackage{showlabels}
-%\usepackage{subfigure}
 \usepackage{subfig}
 \makeatother
 \DeclareMathSizes{14}{14}{9.8}{7}
 \graphicspath{{Figure/}}
 \begin{document}
 
-\title{HIVLASHEA: High order methods for Vlasov-Poisson model for sheath}% with boundaries}
+\title{HIVLASHEA: High order methods for Vlasov-Poisson model for sheath}
 \date{}
 \maketitle
 
 
-% ===================================================================
-%\tableofcontents
 % ===================================================================
 
 
@@ -90,7 +62,7 @@
 % ===================================================================
 
 We consider the following model for $(f_e, f_i)(t, x, v)\in \mathbb{R}^+$ and $\phi(t, x)\in \mathbb{R}$, 
-$t\geq 0, x\in [-L, L], v\in \mathbb{R}$ 
+$t\geq 0, x\in [-1, 1], v\in \mathbb{R}$ 
 \begin{equation}
 \label{model}
   \begin{aligned}
@@ -103,21 +75,20 @@ with the following boundary and initial conditions
 \begin{equation}
 \label{bc}
   \begin{aligned}
-    f_{i, e}(t, x=-L, v>0)= 0, \;\; f_{i, e}(t, x=L, v<0) = 0, \\ 
-   \phi(t, 0)=0 \;\;  (\mbox{reference potential}), \;\; \partial_x \phi(t, 1)=C(t), \\
+    f_{i, e}(t, x=-1, v>0)= 0, \;\; f_{i, e}(t, x=1, v<0) = 0, \\ 
+    -\partial_x \phi(t, 1)=E(t, 1)=C_L(t), \;\; -\partial_x \phi(t, -1)=E(t, -1)=C_R(t), \\
+     \phi(t, 0)=0 \;\;  (\mbox{reference potential}), \\ 
  f_{i, e}(0, x, v)=f_{i, e}^0(x, v),  \\ 
 - \lambda^2\partial_x^2\phi(0, x) = \int_\mathbb{R} f_{i}^0(x, v) dv  - \int_\mathbb{R} f_{ e}^0(x, v) dv, 
   \end{aligned}
 \end{equation}
-where $f_{i, e}^0$ are given and $C(t)$ will be defined in \eqref{ampere_bc_phi}. 
+where $f_{i, e}^0$ are given and $C_L(t), C_R(t)$ will be defined in \eqref{ampere_bc_phi} and \eqref{ampere_bc_r}. 
 
 
 We look for solution that are symmetric with respect to $x=0$: 
-%\begin{equation}
 $$
-f_{i, e}(t, x, v) = f_{i, e}(t, -x, -v) \;\;  \forall x\in [-L, L], \;\; \forall v\in\mathbb{R}, \;\;\; \phi(t, x) = \phi(t, -x), \;\;  \forall x\in [-L, L].  
+f_{i, e}(t, x, v) = f_{i, e}(t, -x, -v) \;\;  \forall x\in [-1, 1], \;\; \forall v\in\mathbb{R}, \;\;\; \phi(t, x) = \phi(t, -x), \;\;  \forall x\in [-1, 1].  
 $$
-%\end{equation}
 This implies 
 $$
  \begin{aligned}
@@ -128,49 +99,43 @@ $$
 We call $E$ the electric field which derives from the electric potential $\phi$ ($E=-\partial_x \phi$), whereas $\rho_{i,e}$ are the ion and electron densities. 
 Moreover, $J_{i,e} = \int_{\mathbb{R}} vf_{i,e} dv$ denote the ion and electron currents. 
 
+% ===================================================================
+
 \paragraph{Looking for $C(t)$\\}
 Here we derive the boundary condition for $\phi$. 
-%\paragraph{Amp\`ere equation\\}
 
 First, we derive with respect to time the Poisson equation 
-%Let derive with respect to time the Poisson equation to get 
 $$
--\partial_t (\lambda^2\partial_x^2 \phi) = \partial_t (n_i- n_e), % = -\partial_x (J_i-J_e) +\nu n_e, 
+-\partial_t (\lambda^2\partial_x^2 \phi) = \partial_t (\rho_i- \rho_e), 
 $$
 and considering the difference between the $v$-integration of the Vlasov equations gives 
 $$
-\partial_t (n_i- n_e) + \partial_x (J_i-J_e) = \nu n_e, 
+\partial_t (\rho_i- \rho_e) + \partial_x (J_i-J_e) = \nu \rho_e, 
 $$
 so that, using $E=-\partial_x \phi$, we get 
 $$
-\partial_x (\lambda^2\partial_t E + J_i-J_e) = \nu n_e, \;\;\; \forall x\in [-L, L]. 
+\partial_x (\lambda^2\partial_t E + J_i-J_e) = \nu \rho_e, \;\;\; \forall x\in [-1, 1]. 
 $$
 Integrating now in space leads to 
-%between $xx=-L$ and $x$ leads to (with the notation $J(t, x)\equiv (J_i-J_e)(t, x)$ for the total current) 
-%\begin{equation}
-%\label{ampere_1}
-%\lambda^2\partial_t E(t, x) + J(t, x) = \textcolor{red}{-}\lambda^2\partial_t E(t, -L) + J(t, -L) +\nu \int_{-L}^x n_e(t, y)dy. 
-%\end{equation}
-%Evaluating \eqref{ampere_1} at $x=L$ leads to 
-$$
-\lambda^2\partial_t E(t, L) + (J_i-J_e)(t, L) = \lambda^2\partial_t E(t, -L) + (J_i-J_e)(t, -L) +\nu \int_{-L}^L n_e(t, x)dx,  
-$$
+\begin{equation}
+\label{ampere_integ}
+\lambda^2\partial_t E(t, 1) + (J_i-J_e)(t, 1) = \lambda^2\partial_t E(t, -1) + (J_i-J_e)(t, -1) +\nu \int_{-1}^1 \rho_e(t, x)dx,  
+\end{equation}
 and using the symmetries highlighted before ($E(t,x)=-E(t, -x)$ and  $J(t,x)=-J(t, -x)$), it comes 
 \begin{equation}
 \label{ampere_bc}
-\lambda^2\partial_t E(t, L) + (J_i-J_e)(t, L)  = \frac{\nu}{2} \int_{-L}^L n_e(t, x)dx, 
+\lambda^2\partial_t E(t, 1) + (J_i-J_e)(t, 1)  = \frac{\nu}{2} \int_{-1}^1 \rho_e(t, x)dx, 
 \end{equation}
-%We thus deduce from \eqref{ampere_1} and \eqref{ampere_bc} the following Amp\`ere equation 
-%\begin{equation}
-%\label{ampere}
-%\textcolor{red}{-}\lambda^2\partial_t E(t, x) + J(t, x) = \frac{\nu}{2} \Big( \int_{-L}^x n_e(t, y)dy -  \int_{x}^L n_e(t, y)dy\Big). 
-%\end{equation}
 or, in terms of $\phi$ 
 \begin{equation}
 \label{ampere_bc_phi}
-\partial_x \phi(t, L) =\partial_x \phi(0, L) +\frac{1}{\lambda^2}\int_0^t (J_i-J_e)(s, L)ds - \frac{\nu}{2\lambda^2}\int_0^t  \int_{-L}^L n_e(s, x)dx ds \equiv C(t). 
+\partial_x \phi(t, 1) =\partial_x \phi(0, 1) +\frac{1}{\lambda^2}\int_0^t (J_i-J_e)(s, 1)ds - \frac{\nu}{2\lambda^2}\int_0^t  \int_{-1}^1 \rho_e(s, x)dx ds \equiv C(t). 
 \end{equation}
-
+For the condition $x=-1$, \eqref{ampere_integ} gives 
+\begin{equation}
+\label{ampere_bc_r}
+\lambda^2\partial_t E(t, -1) = J(t, 1) - \frac{\nu}{2}\int_{-1}^1 \rho_e(t, y) dy. 
+\end{equation}
 
 Our goal is to propose high order numerical methods to approximate the solution of \eqref{model}-\eqref{bc}-\eqref{ampere_bc_phi}. 
 As a starting point, we will use several techniques proposed and explained in \cite{badsi}. Below are some areas of works 
@@ -193,7 +158,9 @@ But also
 \item construction of the stationary solutions of  \eqref{model}-\eqref{bc}-\eqref{ampere_bc_phi}.  
 \end{itemize}
 
-\subsection{Energy evolution}
+% ===================================================================
+
+\paragraph{Energy evolution\\}
 Multiplying by $v^2/2$ the ion equation and by $\mu v^2/2$ the electron equation gives, after integration in $v$ and $x$
 $$
 \frac{d}{dt}{\cal E}_{\mbox{kin}} + \int\int_{-1}^1 \frac{v^3}{2}\partial_x (f_i + \mu f_e)dxdv -\int_{-1}^1  E (J_i-J_e) dx = \frac{\nu}{\mu} { \cal E}^e_{\mbox{kin}}, 
@@ -204,10 +171,6 @@ $$
 \int\int_{-1}^1 \frac{v^3}{2}\partial_x (f_i + \mu f_e)dxdv = M_3(t, 1)-M_3(t, -1), 
 $$
 with $M_3(t, x) := \int \frac{v^3}{2}(f_i(t, x, v) +\mu f_e(t, x, v))dv$. 
-%and the third one is (denoting $J(t, x)=(J_i-J_e)(t, x)$) 
-%$$
-%-\int_{-1}^1 EJ dx = \int_{-1}^1   \partial_x \phi  (J_i-J_e) dx = [\phi(t, 1) J(t, 1) - \phi(t, -1) J(t, -1)] - \int_{-1}^1    \phi  \partial_x J dx
-%$$
 Using the Amp\`ere equation 
 $$
 J(t, x) - J(t, -1)= -\lambda^2\partial_t E(t, x) + \lambda^2\partial_t E(t, -1) + \nu \int_{-1}^x \rho_e (t, y)dy, 
@@ -227,7 +190,28 @@ since $\int_{-1}^1 E dx = -(\phi(t, 1)-\phi(t, -1)) = 0$. Hence, we get
 \end{eqnarray*}
 with ${\cal E}_{\mbox{pot}} = \frac{\lambda^2}{2}\int_{-1}^1 E^2dx$. 
 
+% ===================================================================
+
+\paragraph{Mass evolution\\}
+We integrate in $x,v$ the ion and electron equations. Denoting $m_{i,e}(t)=\int \int_{-1}^1 f_{i,e} dxdv$ leads to 
+\begin{eqnarray*}
+m'_i &+& 2J_i(t, 1) = \nu m_e\nonumber\\
+m'_e&+& 2J_e(t, 1) =0.  
+\end{eqnarray*}
+Thus the difference between the 2 above equations gives $\frac{d}{dt}(m_i-m_e) + 2J(t, 1) = \nu m_e$. 
+Using the expression of $J(t, 1)$ from \eqref{ampere_bc}, we finally obtain 
+$$
+\frac{d}{dt}(m_i-m_e) - 2\lambda^2 \partial_t E(t, 1) + \nu m_e = \nu m_e, 
+$$
+or 
+$$
+\frac{d}{dt}(m_i-m_e - 2\lambda^2  E(t, 1)) = 0. 
+$$
+
+% ===================================================================
+
 \section{Examples}
+\label{examples}
 \subsection{Test 1d}
 We can consider the following 1d test 
 $$
@@ -240,8 +224,8 @@ To reconstruct using high order interpolation, one needs to give a sense to the 
 
 For the inflow boundary, one can investigate two options 
 \begin{itemize}
-\item characteristics based: using the characteristics, we have $u(t^n, x_{-1}) = u(t, x_{-1}+(t-t^n)) = u_L(t)$ with $t$ the time such that 
-$x_{-1} + (t-t^n) = 0$, or $t=t^n-x_{-1}$. Of course, the same strategy can be applied for $x_{-i}, i=2, 3, ...$.  
+\item characteristics based: using the characteristics, we have $u(t^n, x_{-1}) = u(t, x_{-1}+a(t-t^n)) = u_L(t)$ with $t$ the time such that 
+$x_{-1} + a(t-t^n) = 0$, or $t=t^n-x_{-1}/a$. Of course, the same strategy can be applied for $x_{-i}, i=2, 3, ...$.  
 \item Inverse Lax-Wendroff (ILW): following the strategy developed in \cite{boutin, coulombel}, we perform a Taylor expansion 
 of inflow ghost points at the boundary $x=0$ 
 $$
@@ -261,6 +245,8 @@ Another choice would be $(D^3 u)_N=0$ which imposes $u_{N+1}$ and so on.
 Tests can be performed using the exact solution $u(t, x)=\sin(k(x-at))$ which means 
 that the initial condition is  $u_0(x)=\sin(kx)$ and the boundary condition is $u_L(t)=-\sin(kat)$ 
 for a given $k\in\mathbb{N}^\star$. 
+
+% ===================================================================
 
 \subsection{Test 2d}
 We suggest to investigate the properties of the above approach in a 2d context using the following model 
@@ -291,7 +277,10 @@ with $\tilde{u}_L(t^n) = u_0(x_{-1}\cos t^n - v\sin t^n , x_{-1}\sin t^n +v\cos 
 $t$ such that $v(t-t^{n+1}) = -\Delta x$. 
 \end{itemize}
 
+% ===================================================================
+
 \subsection{Poisson solver}
+\label{poisson}
 To solve the Poisson equation 
 $$
 \lambda^2\partial_x E = \rho, \;\; x\in [-1, 1], 
@@ -311,6 +300,28 @@ E_i = \frac{1}{2}(E(1)+E(-1)) + \frac{\Delta x}{4\lambda^2} \Big[\sum_{j=0}^{i-1
 $$
 This expression ensures the symmetry of $E$ at the discrete level.
 
+% ===================================================================
+
+\section{Codes} 
+For testing purposes, codes are developed and validated on examples described below. 
+
+\subsection{Two-species Vlasov-Poisson with periodic boundary conditions}  
+A code solving the two-species Vlasov-Poisson with periodic boundary conditions is available in Julia and Python. 
+In particular, exact stationary solutions are tested. Ask to Pierre Navaro. 
+
+\subsection{Two-species Vlasov-Poisson with boundary conditions: version 1}
+The Mehdi's code solves the full model \eqref{model}-\eqref{bc} with an upwind scheme + explicit Euler time integrator + 
+Poisson solver described in \ref{poisson}. It gives a reference numerical solution for the sheath development. 
+The initial condition is 
+$$
+f_i^0(x, v) = \frac{1}{\sqrt{2\pi}} e^{-v^2/2}, \;\;\; f_e^0(x, v) = \frac{\sqrt{\mu}}{\sqrt{2\pi}} e^{-\mu v^2/2}, \;\;\; \phi(0, x)=E(0, x)=0. 
+$$
+
+\subsection{Two-species Vlasov-Poisson with boundary conditions: version 2}
+The goal would be to integrate the numerical methods developed and validated for the problems of Section \ref{examples} 
+in the Michel's code.  
+
+% ===================================================================
 
 \section{Hermite interpolation}
 \label{hemite}
@@ -339,7 +350,7 @@ From the properties of $H_i, K_i$, we can check that \eqref{p-hermite} satisfies
 
 We can generalize to arbitrary (odd) order in the following way. 
 From a Lagrange polynomial of degree $(2d+1)$, we can reconstruct using Peyr\'e's tweet 
-a polynomial of degree $2(2d+1)+1$. % which is ${\cal C}^1$ on the whole interval (instead of only ${\cal C}^0$ for Lagange). 
+a polynomial of degree $2(2d+1)+1$. 
 In this method, we need to reconstruct $f'(x_i)$ which is not known since we only know $f(x_i)$. 
 To do so, we can use finite difference formula with the correct order (to not destroy the order of the Hermite reconstruction). 
 
