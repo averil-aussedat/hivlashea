@@ -145,8 +145,8 @@ Vector compute_rho(Matrix &fi, Matrix &fe, double & Me)
         for(int j = 0 ; j < Nv +1; j++)
         {
             ro[i] += fi[i][j] * dv - fe[i][j] *dv;
+            Me += fe[i][j] * dv * dx;
         }
-        Me += rho[i] * dx;
     }
     return ro;
 }
@@ -354,5 +354,3 @@ Matrix update_fe(Matrix & fe_0, Vector & E)
 
     return new_fe;
 }
-
-

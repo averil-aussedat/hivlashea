@@ -20,7 +20,8 @@ LIBRARY_HDF5=/usr/lib/x86_64-linux-gnu/hdf5/openmpi
 
 compile_gcc() {
   export OMPI_CC=gcc
-  mpicc -I$HIVLASHEA_HOME/include -I$INCLUDE_HDF5 -L$LIBRARY_HDF5 -I$INCLUDE_FFTW -L$LIBRARY_FFTW vp_1d1v_cart_2sp_cemracs2022.c -lfftw3 -lsz -lz -lm -lhdf5 -O3 -march=native -std=gnu11 -Wall -Wfloat-conversion -o build/hivlashea.out
+  # mpicc -I$HIVLASHEA_HOME/include -I$INCLUDE_HDF5 -L$LIBRARY_HDF5 -I$INCLUDE_FFTW -L$LIBRARY_FFTW vp_1d1v_cart_2sp_cemracs2022.c -lfftw3 -lsz -lz -lm -lhdf5 -O3 -march=native -std=gnu11 -Wall -Wfloat-conversion -o build/hivlashea.out
+  mpicc -I$HIVLASHEA_HOME/include -I$INCLUDE_HDF5 -L$LIBRARY_HDF5 -I$INCLUDE_FFTW -L$LIBRARY_FFTW vp_1d1v_cart_2sp_cemracs2022.c -lsz -lz -lm -lhdf5 -O3 -march=native -std=gnu11 -Wall -Wfloat-conversion -o build/hivlashea.out
 }
 
 compile_gcc

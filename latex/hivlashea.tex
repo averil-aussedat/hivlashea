@@ -439,27 +439,29 @@ p=6 && b^+ = (-1/60,3/20,-3/4,0,3/4,-3/20,1/60),
 with $b^-_{-\ell} = -b^+_\ell$ for $\ell=r^+, \dots, s^+, \ell\neq 0$ and $b^-_0 = -b_0^+$. 
 
 More details of the method in the maple code of Michel !  
-\begin{verbatim}
-d:=1:r:=-d:s:=d+1:
-dmax:=2*(s-r+1):
-for k from r to s do
-         \% Lagrange polynomials of odd degree 
-        	L[k]:=product((x-j)/(k-j),j=r..k-1)*product((x-j)/(k-j),j=k+1..s): 
-        	\% derivative of Lagrange 
-        	dL[k]:=diff(L[k],x):
-od:	
-for k from r to s do 
-        \% Compute H and K from the Peyré\'e formulas  
-        	H[k]:=L[k]**2*(1-2*subs(x=k,dL[k])*(x-k)):#f
-        	K[k]:=L[k]**2*(x-k):  #fprime
-od:
-for k from 0 to dmax do
-        \%test on a given function 
-         f:=x**k:df:=diff(f,x):
-        	g:=simplify(x**k-add(H[j]*subs(x=j,f),j=r..s)-add(K[j]*subs(x=j,df),j=r..s)):
-        	print(k,g);
-od:
-\end{verbatim}
+%\texttt{
+%\begin{verbatim}
+%d:=1:r:=-d:s:=d+1:
+%dmax:=2*(s-r+1):
+%for k from r to s do
+%         \% Lagrange polynomials of odd degree 
+%        	L[k]:=product((x-j)/(k-j),j=r..k-1)*product((x-j)/(k-j),j=k+1..s): 
+%        	\% derivative of Lagrange 
+%        	dL[k]:=diff(L[k],x):
+%od:	
+%for k from r to s do 
+%        \% Compute H and K from the Peyr\'e formulas  
+%        	H[k]:=L[k]**2*(1-2*subs(x=k,dL[k])*(x-k)):#f
+%        	K[k]:=L[k]**2*(x-k):  #fprime
+%od:
+%for k from 0 to dmax do
+%        \%test on a given function 
+%         f:=x**k:df:=diff(f,x):
+%        	g:=simplify(x**k-add(H[j]*subs(x=j,f),j=r..s)-add(K[j]*subs(x=j,df),j=r..s)):
+%        	print(k,g);
+%od:
+%\end{verbatim}
+%}
 
 \begin{thebibliography}{}
 
