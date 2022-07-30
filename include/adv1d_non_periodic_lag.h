@@ -147,6 +147,16 @@ void adv1d_non_periodic_lag_semi_lag_advect_classical(
             f_in_and_out[i] += lag[j+d] * buf[index];
         }
     }
+    if(coeff<0){
+    	if(fabs(f_in_and_out[N])>1.e-15){
+    		printf("f_in_and_out[N]=%1.20lg, coeff=%1.20lg\n",f_in_and_out[N],coeff);
+    	}
+    }
+    if(coeff>0){
+    	if(fabs(f_in_and_out[0])>1.e-15){
+    		printf("f_in_and_out[0]=%1.20lg, coeff=%1.20lg\n",f_in_and_out[0],coeff);
+    	}
+    }
 }
 
 

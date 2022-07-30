@@ -57,6 +57,7 @@ void read_simulation_parameters(PC_tree_t conf, int mpi_rank, double* lambda, do
  * It uses Lagrange interpolation with d=1 (4 points, degree 3).
  */
 void source_term(parallel_stuff* electrons, parallel_stuff* ions,
+		mesh_1d* meshx,
         mesh_1d* meshve, mesh_1d* meshvi,
         double nu, double dt, double* rho) {
     // The electron/ion velocity meshes are the same.
@@ -72,7 +73,9 @@ void source_term(parallel_stuff* electrons, parallel_stuff* ions,
     double coeff = nu * dt;
     for (int i_x = 0; i_x < ions->size_x_par_x; i_x++) {
         for (int i_v = 0; i_v < ions->size_v_par_x; i_v++) {
+            //if(fabs(meshvi->array[i_v])>0.1){
             ions->f_parallel_in_x[i_x][i_v] += coeff * electrons->f_parallel_in_x[i_x][i_v];
+            //}
         }
     }
 }
@@ -268,7 +271,7 @@ int main(int argc, char *argv[]) {
         // Half time step: source term for ions
         //     f_i^{n+1} = f_i^n + nu * delta_t/2 * f_e
 		update_rho(&meshx, &meshve, &meshvi, &pare, &pari, rhoe, rhoi, rho, is_periodic);
-        source_term(&pare, &pari, &meshve, &meshvi, nu, 0.5*delta_t, rho);
+        source_term(&pare, &pari,&meshx, &meshve, &meshvi, nu, 0.5*delta_t, rho);
 		// Solve Poisson
         update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari,
                 &Mass_e, rhoe, rhoi, rho, currente, currenti, current, is_periodic);
@@ -281,7 +284,7 @@ int main(int argc, char *argv[]) {
     	advection_v(&pari, adv_vi, delta_t, E);
         // Half time step: source term for ions
         // (no need to update rho, because it has not changed with the velocity advection)
-        source_term(&pare, &pari, &meshve, &meshvi, nu, 0.5*delta_t, rho);
+        source_term(&pare, &pari,&meshx, &meshve, &meshvi, nu, 0.5*delta_t, rho);
         // Half time-step: advection in x
     	advection_x(&pare, adv_xe, 0.5*delta_t, meshve.array);
     	advection_x(&pari, adv_xi, 0.5*delta_t, meshvi.array);
@@ -297,6 +300,10 @@ int main(int argc, char *argv[]) {
     // Output the ions / electrons density functions at the end
     diag_f(&pare, 1, meshx, meshve, 0, "fe");
     diag_f(&pari, 1, meshx, meshvi, 0, "fi");
+    
+    diag_1d(E, meshx.array, meshx.size, "E", 0);
+    diag_1d(rho, meshx.array, meshx.size, "rho", 0);
+    //diag_1d(E,)
     
     // Be clean (-:
     fclose(file_diag_energy);
