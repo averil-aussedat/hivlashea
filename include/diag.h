@@ -56,8 +56,8 @@ void diag_f(parallel_stuff* par, int i_hdf5,
 	double (*f)[mesh2.size] = malloc((mesh1.size) * sizeof *f); // Array allocated contiguously for hdf5 outputs.
 	//double *f = malloc((mesh1.size) * (mesh2.size) *sizeof(double)); // Array allocated contiguously for hdf5 outputs.
 	double *f1d = malloc((par->size_x_par_x) * (mesh2.size) *sizeof(double)); // Array allocated contiguously for hdf5 outputs.
-	double *f_2 = malloc((mesh1.size-1) *sizeof(double)); // Array allocated contiguously for hdf5 outputs.
-	double *f1d_2 = malloc((par->size_x_par_x)  *sizeof(double)); // Array allocated contiguously for hdf5 outputs.
+	//double *f_2 = malloc((mesh1.size-1) *sizeof(double)); // Array allocated contiguously for hdf5 outputs.
+	//double *f1d_2 = malloc((par->size_x_par_x)  *sizeof(double)); // Array allocated contiguously for hdf5 outputs.
     int i,j;
     int pos;
     for (i=0;i<(par->size_x_par_x) * (mesh2.size);i++){

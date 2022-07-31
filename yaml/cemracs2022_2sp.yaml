@@ -2,7 +2,7 @@ meshx:
   unif:
     min: -1.
     max: 1.
-    N: 256
+    N: 255
 
 meshv:
   unif:
@@ -45,7 +45,7 @@ adv_ve:
   adv1d_periodic_lag:
     d: 5
   v: -100 # d_t(f_i) - 1/mu*E*d_v(f_i) = 0 [parameter value is -1/mu]
-# WARNING: check that you put the same mu value in f0e
+# WARNING: check that you put the same mu value in f0e and meshv
 
 adv_vi:
   adv1d_periodic_lag:

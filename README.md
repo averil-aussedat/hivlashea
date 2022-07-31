@@ -46,7 +46,7 @@ b. Write a "job" file that will be executed (syntax depending on the distant com
 
 ## How to use git (basics) ##
 
-To get the code, you have two ways to do it, it might depend on your connection:
+To get the code, you have two ways to do it, it might depend on your connection (cloning with http needs a token, cloning with ssh needs a ssh key ; if you don't intend to add any modification to the project, https needs nothing):
 
 git clone https://github.com/averil-prost/hivlashea.git
 git clone git@github.com:averil-prost/hivlashea.git
@@ -66,7 +66,7 @@ If you need to add only some of them, type instead:
 Then you need to commit your changes (with a small message explaining the changes) and push your commit on the distant server:
     
     $git commit -m "MESSAGE"
-    $git push origin master
+    $git push origin main
 
 In case of a conflict, if you have never seen one, ask for someone who knows, and learn by doing.
 
