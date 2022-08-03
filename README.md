@@ -20,32 +20,24 @@ Install visualize it (to visualise the hdf5 data):
 
 ## Run the project ##
 
-0. Compile the project:
+To compile the project:
 
     $ ./compile_hivlashea.sh
 
-1. Create a yaml file with all the simulation parameters.
+To update the yaml file with all the simulation parameters (you can copy it beforehand for another test case):
 
-Edit e.g. ./yaml/cemracs2022_2sp.yaml
+    $ gedit ./yaml/cemracs2022_2sp.yaml
 
-2. Run the project.
+To run the project: after compiling, you should have a hivlashea.out file in the build/ folder. You can e.g. go in the build folder and run the project:
 
-If you have compiled the project, you should have a hivlashea.out file in the build/ folder.
+    $ ./hivlashea.out ../yaml/cemracs2022_2sp.yaml
 
-You can e.g. go in the build folder and run the project:
+To make a parallel run of the project (on your local computer), you can e.g. go in the build folder and run the project:
 
-./hivlashea.out ../yaml/cemracs2022_2sp.yaml
+    $ mpirun -np 1 ./hivlashea.out ../yaml/cemracs2022_2sp.yaml
+    $ mpirun -np 2 ./hivlashea.out ../yaml/cemracs2022_2sp.yaml
 
-3. Parallel run of the project (local).
-
-You can e.g. go in the build folder and run the project:
-
-    $ mpirun -np 1 ./hivlashea.out
-    $ mpirun -np 2 ./hivlashea.out
-
-4. Parallel run of the project (supercomputer):
-
-It depends on the supercomputing center... Usually you have to:
+To make a parallel run of the project (on a distant server), this time it is more complicated. It depends on the supercomputing center... Usually you have to:
 
 a. Write another compilation script (just replace the library paths by the correct paths),
    in order to compile the project on the distant computer.
@@ -54,26 +46,27 @@ b. Write a "job" file that will be executed (syntax depending on the distant com
 
 ## How to use git (basics) ##
 
-1. Get the code.
+To get the code, you have two ways to do it, it might depend on your connection (cloning with http needs a token, cloning with ssh needs a ssh key ; if you don't intend to add any modification to the project, https needs nothing):
 
 git clone https://github.com/averil-prost/hivlashea.git
+git clone git@github.com:averil-prost/hivlashea.git
 
-2. After a modification:
+If you need to make any modification from your local copy to the distant project, first look at which files you modified:
 
-    $git status
+    $ git status
 
-Look at the modified files. Add the one needed with
+If you are happy with all modification, you can add all of them with:
 
-    $git add .
+    $ git add .
     
-(if you need to add all of them)
+If you need to add only some of them, type instead:
 
-    $git add FILE1 FILE2...
+    $ git add FILE1 FILE2...
+
+Then you need to commit your changes (with a small message explaining the changes) and push your commit on the distant server:
     
-(if you only need to add some of them)
-
     $git commit -m "MESSAGE"
-    $git push origin master
+    $git push origin main
 
 In case of a conflict, if you have never seen one, ask for someone who knows, and learn by doing.
 
