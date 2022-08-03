@@ -222,6 +222,7 @@ void xdmf_set_time(FILE* xdmf_file, double time) {
   _Generic((e), char*:  e, default: "f")
 #endif
 #define plot_f_cartesian_mesh_2d_6(a, b, c, d, e, f) a, b, c, d, e, f
+#define plot_f_cartesian_mesh_2d_7(a, b, c, d, e, f, g) a, b, c, d, e, f, g
 #define plot_f_cartesian_mesh_2d(...) VARIADIC(plot_f_cartesian_mesh_2d, NUMARG32(__VA_ARGS__), __VA_ARGS__)
 
 /*
@@ -234,9 +235,10 @@ void xdmf_set_time(FILE* xdmf_file, double time) {
  * @param[in] mesh1, mesh2 the two 1d meshes.
  * @param[in] time the plot time. Optional, defaults to -1.
  * @param[in] array_name a name for the array. Optional, defaults to "f".
+ * @param[in] folder : name for the folder
  */
 void plot_f_cartesian_mesh_2d(int iplot, const void* f, mesh_1d mesh1, mesh_1d mesh2,
-        double time, char* array_name) {
+        double time, char* array_name, char* folder) {
     hid_t hfile_id;
     char cplot[6]; // 4 digits + '\0' [+1 more to avoid a warning in sprintf]
     char mesh_name[111];
@@ -268,20 +270,20 @@ void plot_f_cartesian_mesh_2d(int iplot, const void* f, mesh_1d mesh1, mesh_1d m
             }
         }
         // Creation of the hdf5 file for the x1 mesh.
-        sprintf(file_name, "%s-x1.h5", mesh_name);
+        sprintf(file_name, "%s%s-x1.h5", folder, mesh_name);
         hfile_id = hdf5_ser_file_create(file_name);
         hdf5_ser_write_dble_array_2d(hfile_id, array_dims, x1, "/x1");
         hdf5_ser_file_close(hfile_id);
         // Creation of the hdf5 file for the x2 mesh.
-        sprintf(file_name, "%s-x2.h5", mesh_name);
+        sprintf(file_name, "%s%s-x2.h5", folder, mesh_name);
         hfile_id = hdf5_ser_file_create(file_name);
         hdf5_ser_write_dble_array_2d(hfile_id, array_dims, x2, "/x2");
         hdf5_ser_file_close(hfile_id);
     }
     // Creation of the hdf5 file for the f array.
-    sprintf(file_name, "%s%s.xmf", array_name, cplot);
+    sprintf(file_name, "%s%s%s.xmf", folder, array_name, cplot);
     FILE* xdmf_file = xdmf_open_2d(file_name, mesh_name, nnodes_x1, nnodes_x2);
-    sprintf(file_name, "%s%s", array_name, cplot);
+    sprintf(file_name, "%s%s%s", folder, array_name, cplot);
     xdmf_set_time(xdmf_file, time);
     xdmf_array_2d(file_name, array_dims, f, "values", xdmf_file, "Node");
     xdmf_close(&xdmf_file);

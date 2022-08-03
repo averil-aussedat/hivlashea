@@ -9,6 +9,8 @@
 #include <stdlib.h> // function exit (error handling)
                     // constant EXIT_FAILURE (error handling)
                     // type     size_t
+#include <string.h> // functions strlen, strstr
+#include <ctype.h>  // function  isspace
 #define ERROR_MESSAGE(...)            \
     do {                              \
         fprintf(stderr, __VA_ARGS__); \

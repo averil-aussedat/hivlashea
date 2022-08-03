@@ -12,7 +12,7 @@
 typedef struct poisson_solver_direct poisson_solver_direct;
 struct poisson_solver_direct {
     double* x;      // mesh
-    int sizex;      // cells number
+    int sizex;      // mesh points number (so nummber of cells/intervals + 1)
     double lambda;  // simulation parameter
     double nu;      // simulation parameter
 };
@@ -31,7 +31,7 @@ poisson_solver_direct new_poisson_solver_direct(double *x, int sizex,
     return p;
 }
 
-void update_E_from_rho_and_current_1d_OLD(poisson_solver_direct p,
+void update_E_from_rho_and_current_1d_OLDOLD(poisson_solver_direct p,
         double delta_t,
         double* rho, double* current, double* E) {
     // There is one less interval than the number of points
@@ -74,16 +74,19 @@ void update_E_from_rho_and_current_1d_OLD(poisson_solver_direct p,
 /*
  * Copied / pasted from Mehdi BADSI.
  */
-void update_E_from_rho_and_current_1d(poisson_solver_direct p,
+void update_E_from_rho_and_current_1dOLD (poisson_solver_direct p,
         double dt,
         double Mass_e, double* rho, double* current, double* E) {
-    double E_xmax, E_xmin;
-    int Nx = p.sizex - 1;
-    double dx = (p.x[Nx] - p.x[0]) / Nx;
+    double E_xmin, E_xmax; // prescribed values of E at xmin and xmax
+    int Nx = p.sizex - 1; // number of intervals. Index from [0 to Nx]
+    int i; // running index
+    double dx = (p.x[Nx] - p.x[0]) / Nx; 
     double nu = p.nu;
     double lambda = p.lambda;
+    double J_left  = current[0];
     double J_right = current[Nx];
-    double J_left = current[0];
+    double mass_rho_minus=0.0; // Quadrature for  int_{-1}^{x_i} rho(x)dx.
+    double mass_rho_plus =0.0; // Quadrature for -int_{x_i}^{ 1} rho(x)dx
     /*
     printf("J_right = %f; J_left = %f.\n", J_right, J_left);
     printf("nu = %f, lambda = %f\n", nu, lambda);
@@ -98,12 +101,11 @@ void update_E_from_rho_and_current_1d(poisson_solver_direct p,
     */
     
     // Compute the new boundary conditions on the electric_field;
-    E_xmax = E[Nx] + 0.5 * (nu * dt/(lambda*lambda)) * Mass_e - (dt/(lambda*lambda)) * J_right;
-    E_xmin = E[0]  - 0.5 * (nu * dt/(lambda*lambda)) * Mass_e - (dt/(lambda*lambda)) * J_left;
-    
-    double mass_rho_minus; // Quadrature for int_{-1}^{x_i} rho(x)dx.
-    double mass_rho_plus;  // Quadrature for int_{x_i}^{1} rho(x)dx
-    for (int i = 0; i < Nx+1; i++) {
+    // E_xmax = E[Nx] + 0.5 * (nu * dt/(lambda*lambda)) * Mass_e - (dt/(lambda*lambda)) * J_right;
+    // E_xmin = E[0]  - 0.5 * (nu * dt/(lambda*lambda)) * Mass_e - (dt/(lambda*lambda)) * J_left;
+    E_xmin = E[0]  + dt/(lambda*lambda) * (-0.5 * nu * Mass_e - J_left);
+    E_xmax = E[Nx] + dt/(lambda*lambda) * ( 0.5 * nu * Mass_e - J_right);
+    for (i = 0; i < Nx+1; i++) {
         mass_rho_plus  = 0;
         mass_rho_minus = 0;
         for(int k = 0; k <= i-1; k++) {
@@ -114,6 +116,7 @@ void update_E_from_rho_and_current_1d(poisson_solver_direct p,
         }
         E[i] = (1./(2.*lambda*lambda)) * (mass_rho_minus - mass_rho_plus) + 0.5 * (E_xmax + E_xmin);
     }
+
     /*
     for (int index = 0; index <= Nx; index++) {
         printf("E[%d] = %f ", index, E[index]);
@@ -121,6 +124,52 @@ void update_E_from_rho_and_current_1d(poisson_solver_direct p,
     printf("\n");
     exit(1);
     */
+}
+
+
+/*
+ * Double-integration "solver" with trapezes formula. Solves
+ *  E(x) = 1/(2*lambda^2) [\int_{-1}^x rho(y)dy - \int_{x}^1 rho(y)dy] + 1/2(E[-1]+E[1])
+ *
+ *  NO PROPER BOUNDARY CONDITIONS ?
+ *
+ * @param[in] p : poisson solver data
+ * @param[in] dt : time step
+ * @param[in] Mass_e : triple integral of fe - fi on x,v and t\in[0,tn]
+ * @param[out] rho :     int_{v}   (fe(t,x,v) - fi(t,x,v)) dv   for each xi
+ * @param[out] current : int_{v} v (fe(t,x,v) - fi(t,x,v)) dv   for each xi
+ * @param[out] E : electric field for each xi
+ */
+void update_E_from_rho_and_current_1d (poisson_solver_direct p, double dt,
+        double Mass_e, double* rho, double* current, double* E) {
+
+    // printf("Enters Poisson solver\n");
+    double E_xmin, E_xmax; // prescribed values of E at xmin and xmax
+    int Nx = p.sizex - 1; // number of intervals. Index from [0 to Nx]
+    int i; // running index
+    double dx = (p.x[Nx] - p.x[0]) / (double)Nx; 
+    double nu = p.nu;
+    double lambda = p.lambda;
+    double J_left  = current[0];
+    double J_right = current[Nx];
+    double factor = 0.5 * 0.5 * dx / (lambda * lambda); // 0.5 from the expression of E and from trapezes
+    double mass_rho_minus=0.0; // Quadrature for  int_{-1}^{x_i} rho(x)dx.
+    double mass_rho_plus =0.0; // Quadrature for -int_{x_i}^{ 1} rho(x)dx
+
+    // Boundary conditions
+    E_xmin = E[0]  + dt/(lambda*lambda) * (-0.5 * nu * Mass_e - J_left);
+    E_xmax = E[Nx] + dt/(lambda*lambda) * ( 0.5 * nu * Mass_e - J_right);
+    E[0] = E_xmin; E[Nx] = E_xmax;  
+    // printf("[update_E_from_rho_and_current_1d] |E(1) + E(-1)| : %6.9f\n", fabs(E_xmin+E_xmax));
+    for (i=1; i<Nx; ++i) { E[i] = 0.0; } // reset the electric field
+    // Linear-time integration with trapezes method (order 2)
+    for (i=1; i<Nx; ++i) { // interior points only
+        mass_rho_minus += factor * (rho[i-1] + rho[i]);       // forward  integration
+        mass_rho_plus  -= factor * (rho[Nx-i+1] + rho[Nx-i]); // backward integration
+        E[i]    += mass_rho_minus + E_xmin * 0.5;
+        E[Nx-i] += mass_rho_plus  + E_xmax * 0.5;
+    }
+    // printf("Leaves Poisson solver\n");
 }
 
 #endif // ifndef SELA_VP_1D1V_CART_POISSON_DIRECT

@@ -77,46 +77,6 @@ void source_term(parallel_stuff* electrons, parallel_stuff* ions,
     }
 }
 
-/*
- * Given the density functions fi(x, v) and fe(x, v) of ions and electrons,
- * compute the charge density rho = rhoi - rhoe = int_v (fi(x,v) - fe(x,v)) dv.
- * NB.: rho(e/i) could be allocated and destroyed by the function, they
- *      are temporary, but we give them to avoid frequent malloc / free of arrays.
- */
-void update_rho(mesh_1d* meshx, mesh_1d* meshve, mesh_1d* meshvi,
-        parallel_stuff* electrons, parallel_stuff* ions,
-        double* rhoe, double* rhoi, double* rho,
-	    bool is_periodic) {
-	update_spatial_density(electrons, meshx->array, meshx->size, meshve->array, meshve->size, rhoe, is_periodic);
-	update_spatial_density(ions,      meshx->array, meshx->size, meshvi->array, meshvi->size, rhoi, is_periodic);
-	for (size_t i = 0; i < meshx->size; i++) {
-        rho[i] = rhoi[i] - rhoe[i];
-	}
-}
-
-/*
- * Given the density functions fi(x, v) and fe(x, v) of ions and electrons,
- * compute:
- *     >>> the charge density rho = rhoi - rhoe = int_v (fi(x,v) - fe(x,v)) dv.
- *     >>> the current current = currenti - currente = int_v (fi(x,v) - fe(x,v)) v dv.
- * NB.: rho(e/i) and current(e/i) could be allocated and destroyed by the function, they
- *      are temporary, but we give them to avoid frequent malloc / free of arrays.
- */
-void update_rho_and_current(mesh_1d* meshx, mesh_1d* meshve, mesh_1d* meshvi,
-        parallel_stuff* electrons, parallel_stuff* ions,
-        double* Mass_e,
-        double* rhoe, double* rhoi, double* rho,
-        double* currente, double* currenti, double* current,
-	    bool is_periodic) {
-    update_rho(meshx, meshve, meshvi, electrons, ions, rhoe, rhoi, rho, is_periodic);
-    *Mass_e = compute_mass(meshx->array, meshx->size, rhoe);
-	update_current(electrons, meshx->array, meshx->size, meshve->array, meshve->size, currente, is_periodic);
-	update_current(ions,      meshx->array, meshx->size, meshvi->array, meshvi->size, currenti, is_periodic);
-	for (size_t i = 0; i < meshx->size; i++) {
-        current[i] = currenti[i] - currente[i];
-	}
-}
-
 int main(int argc, char *argv[]) {
     // MPI parallelism
     int mpi_world_size, mpi_rank;

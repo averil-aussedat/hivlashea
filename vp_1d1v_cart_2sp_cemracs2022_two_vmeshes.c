@@ -4,30 +4,40 @@
 // ./compile_hivlashea.sh
 // cd build && ./hivlashea.out ../yaml/cemracs2022_2sp.yaml
 
-#include <mpi.h>                  // constants MPI_THREAD_FUNNELED, MPI_COMM_WORLD
-                                  // functions MPI_Init_thread, MPI_Comm_size, MPI_Comm_rank
-#include <stdbool.h>              // type      bool
-#include <stdio.h>                // functions printf, fprintf
-#include <stdlib.h>               // type      size_t
-#include "adv1d_periodic_lag.h"   // function  adv1d_periodic_lag_compute_lag
-#include "advect.h"               // type      adv1d_x_t, adv1d_v_t
-                                  // functions adv1d_x_init, adv1d_y_init, advection_x, advection_v
-#include "diag.h"                 // functions diag_energy, diag_f
-#include "init_any_expr.h"        // function  fun_1d1v, fill_array_1d
-#include "mesh_1d.h"              // type      mesh_1d
-                                  // function  mesh_1d_create
-#include "parameter_reader.h"     // type      PC_tree_t
-                                  // functions PC_get, PC_parse_path
-#include "poisson_direct.h"       // type      poisson_solver_direct
-                                  // function  new_poisson_solver_direct
+#include <mpi.h>                    // constants MPI_THREAD_FUNNELED, MPI_COMM_WORLD
+                                    // functions MPI_Init_thread, MPI_Comm_size, MPI_Comm_rank
+#include <math.h>                   // function  floor
+#include <stdbool.h>                // type      bool
+#include <stdio.h>                  // functions printf, fprintf
+#include <stdlib.h>                 // type      size_t
+// #include "adv1d_non_periodic_lag.h" // function no_boundary_lag_compute_index_and_alpha
+#include "advect.h"                 // types     adv1d_x_t, adv1d_v_t, adv1d_[non_]periodic_lag_t
+                                    // functions adv1d_x_init, adv1d_y_init, advection_x, advection_v
+                                    // functions adv1d_compute_lag, adv1d_compute_i0_and_alpha
+#include "diag.h"                   // functions diag_energy, diag_f
+#include "init_any_expr.h"          // function  fun_1d1v, fill_array_1d
+#include "mesh_1d.h"                // type      mesh_1d
+                                    // function  mesh_1d_create
+#include "parameter_reader.h"       // type      PC_tree_t
+                                    // functions PC_get, PC_parse_path
+#include "poisson_direct.h"         // type      poisson_solver_direct
+                                    // function  new_poisson_solver_direct
 //#include "poisson_periodic_fft.h" // type      poisson_solver_periodic_fft
-                                  // function  new_poisson_solver_periodic_fft
-                                  // COMMONFUN update_E_from_rho_and_current_1d
-#include "remap.h"                // type      parallel_stuff
-                                  // functions init_par_variables, exchange_parallelizations, local_to_global_2d
-#include "rho.h"                  // functions update_spatial_density, update_current, compute_mass
-#include "split.h"                // type      sll_t_splitting_coeff
-#include "string_helpers.h"       // macro     ERROR_MESSAGE
+                                    // function  new_poisson_solver_periodic_fft
+                                    // COMMONFUN update_E_from_rho_and_current_1d
+#include "remap.h"                  // type      parallel_stuff
+                                    // functions init_par_variables, exchange_parallelizations, local_to_global_2d
+#include "rho.h"                    // functions update_spatial_density, update_current, compute_mass
+                                    // update_rho, update_rho_and_current
+#include "split.h"                  // type      sll_t_splitting_coeff
+#include "string_helpers.h"         // macro     ERROR_MESSAGE
+#include "show.h"                   // functions show_mesh1d, show_adv
+
+// MACROS
+#define VERBOSE True // comment to hide terminal output
+#define PLOTS True // comment to remove plot diagnostics
+#define OUTFOLDER "../data/" // where to write .dat and .hdf5
+// #define OUTFOLDER "" // where to write .dat and .hdf5
 
 /*
  * Read the simulation-specific parameters values from the yaml file.
@@ -52,42 +62,23 @@ void read_simulation_parameters(PC_tree_t conf, int mpi_rank, double* lambda, do
 }
 
 /*
- * Given a value target inside (x[0], x[N-1]), computes alpha and index such that
- * x[index] + alpha = target and 0 <= alpha < delta_x.
- *
- * @param[in] target : target value to reach.
- * @param[in] mesh   : the mesh.
- * @param[out] index : integer part.
- * @param[out] alpha : fractional part.
- */
-void no_boundary_lag_compute_index_and_alpha(double target, mesh_1d* mesh, int* index, double* alpha) {
-    double x_min = mesh->min;
-    double x_max = mesh->max;
-    int N = mesh->size;
-    
-    double tmp = ((double)N) * (target - x_min) / (x_max - x_min);
-    int i = (int)floor(tmp);
-    tmp = tmp - (double)i;
-    *index = i;
-    *alpha = tmp;
-}
-
-/*
  * Solve the equation:
- *     f_i^{n+1} = f_i^n + nu * delta_t/2 * f_e
+ *     f_i^{n+1} = f_i^n + nu * dt * f_e
  * It uses Lagrange interpolation with d=1 (4 points, degree 3).
  */
 void source_term(parallel_stuff* electrons, parallel_stuff* ions,
         mesh_1d* meshve, mesh_1d* meshvi,
-        double nu, double dt, double* rho) {
+        // double nu, double dt, double* rho) {
+        double nu, double dt) {
     // Lagrange interpolation to interpolate values of the electron mesh
     // on the ion mesh. The electron velocity mesh is on [-500; 500] whereas the
-    // ion velocity mesh is on [-10; 10] and have the same number of points, thus
+    // ion velocity mesh is on [-10; 10] (the spatial meh is shared). Thus
     // we need to interpolate values of fe on the ion velocity mesh.
     int d = 1;
     double* lag = malloc((2*d+2)*sizeof(double));
-    int index;
-    double alpha;
+    int index, index_v, i_x, i_v, j; // running indexes
+    double alpha, target, tmp;
+    double coeff = nu * dt;
     
     if (!electrons->is_par_x) {
         exchange_parallelizations(electrons);
@@ -97,14 +88,17 @@ void source_term(parallel_stuff* electrons, parallel_stuff* ions,
     }
     local_to_global_2d(electrons, 0, 0);
     local_to_global_2d(ions, 0, 0);
-    double coeff = nu * dt;
-    for (int i_x = 0; i_x < ions->size_x_par_x; i_x++) {
-        for (int i_v = 0; i_v < ions->size_v_par_x; i_v++) {
-            double target = meshvi->array[i_v];
-            no_boundary_lag_compute_index_and_alpha(target, meshve, &index, &alpha);
-            adv1d_periodic_lag_compute_lag(alpha, d, lag);
-            for (int j = -d; j <= d+1; j++) {
-                int index_v = index+j;
+    for (i_x=0; i_x < ions->size_x_par_x; i_x++) {
+        for (i_v=0; i_v < ions->size_v_par_x; i_v++) {
+            target = meshvi->array[i_v];
+            // no_boundary_lag_compute_index_and_alpha(target, meshve, &index, &alpha);
+            // tmp = ((double)(*meshve)->size) * (target - (*meshve)->min) / ((*meshve)->max - (*meshve)->min);
+            tmp = (double)(meshve->size) * (target - meshve->min) / (meshve->max - meshve->min);
+            index = (int)floor(tmp);
+            alpha = tmp - (double)index;
+            adv1d_compute_lag (alpha, d, lag);
+            for (j = -d; j <= d+1; j++) {
+                index_v = index+j;
                 if (index_v < 0 || index_v >= electrons->size_v_par_x) {
                     ERROR_MESSAGE("#The electron velocity mesh is not big enough.\n");
                 }
@@ -113,46 +107,6 @@ void source_term(parallel_stuff* electrons, parallel_stuff* ions,
         }
     }
     free(lag);
-}
-
-/*
- * Given the density functions fi(x, v) and fe(x, v) of ions and electrons,
- * compute the charge density rho = rhoi - rhoe = int_v (fi(x,v) - fe(x,v)) dv.
- * NB.: rho(e/i) could be allocated and destroyed by the function, they
- *      are temporary, but we give them to avoid frequent malloc / free of arrays.
- */
-void update_rho(mesh_1d* meshx, mesh_1d* meshve, mesh_1d* meshvi,
-        parallel_stuff* electrons, parallel_stuff* ions,
-        double* rhoe, double* rhoi, double* rho,
-	    bool is_periodic) {
-	update_spatial_density(electrons, meshx->array, meshx->size, meshve->array, meshve->size, rhoe, is_periodic);
-	update_spatial_density(ions,      meshx->array, meshx->size, meshvi->array, meshvi->size, rhoi, is_periodic);
-	for (size_t i = 0; i < meshx->size; i++) {
-        rho[i] = rhoi[i] - rhoe[i];
-	}
-}
-
-/*
- * Given the density functions fi(x, v) and fe(x, v) of ions and electrons,
- * compute:
- *     >>> the charge density rho = rhoi - rhoe = int_v (fi(x,v) - fe(x,v)) dv.
- *     >>> the current current = currenti - currente = int_v (fi(x,v) - fe(x,v)) v dv.
- * NB.: rho(e/i) and current(e/i) could be allocated and destroyed by the function, they
- *      are temporary, but we give them to avoid frequent malloc / free of arrays.
- */
-void update_rho_and_current(mesh_1d* meshx, mesh_1d* meshve, mesh_1d* meshvi,
-        parallel_stuff* electrons, parallel_stuff* ions,
-        double* Mass_e,
-        double* rhoe, double* rhoi, double* rho,
-        double* currente, double* currenti, double* current,
-	    bool is_periodic) {
-    update_rho(meshx, meshve, meshvi, electrons, ions, rhoe, rhoi, rho, is_periodic);
-    *Mass_e = compute_mass(meshx->array, meshx->size, rhoe);
-	update_current(electrons, meshx->array, meshx->size, meshve->array, meshve->size, currente, is_periodic);
-	update_current(ions,      meshx->array, meshx->size, meshvi->array, meshvi->size, currenti, is_periodic);
-	for (size_t i = 0; i < meshx->size; i++) {
-        current[i] = currenti[i] - currente[i];
-	}
 }
 
 int main(int argc, char *argv[]) {
@@ -166,21 +120,34 @@ int main(int argc, char *argv[]) {
     double *E;
     // Splitting
     sll_t_splitting_coeff split;
-    double delta_t = 0.;
-    int num_iteration = 0;
+    double delta_t = 0., sub_delta_t = 0.0;
+    int num_iteration = 0, num_subiterations=1; // sub_iter = 1 -> no sub_iter
     // Advection
     adv1d_x_t *adv_xe,*adv_xi;
     adv1d_v_t *adv_ve,*adv_vi;
-    // Other simulation parameters
+    // Physical simulation parameters
     double lambda, nu;
     
-    // Electric energy computations
-    double ee;
+    // Outputs
+    double ee; // electric energy
+    // int plot_frequency=1; // 1=every loop
+    int plot_frequency=10; // 1=every loop
+
+    // local variables
+    int itime=0, subi=0;
+
+    #ifdef VERBOSE
+        printf("Welcome in vp_1d1v_cart_2sp_cemracs2022_two_vmeshes.\n");
+    #endif
     
     MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &mpi_thread_support);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_world_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     //printf("#mpi_rank=%d mpi_world_size=%d\n", mpi_rank, mpi_world_size);
+
+    #ifdef VERBOSE
+        printf("\n[Proc %d] Reading parameters...\n", mpi_rank);
+    #endif
     
     // Check that we correctly provide the yaml file
     if (argc != 2) {
@@ -216,9 +183,16 @@ int main(int argc, char *argv[]) {
 	    splitting(PC_get(conf, ".time_parameters"), &split);
 	    delta_t = split.dt;
 	    num_iteration = split.num_iteration;
+        // TODO initialize num_subiterations
+        sub_delta_t = delta_t / (double)num_subiterations;
     } else {
         ERROR_MESSAGE("#Missing time_parameters in %s\n", argv[1]);
     }
+
+    #ifdef VERBOSE
+        printf("[Proc %d] Done reading parameters.\n", mpi_rank);
+        printf("[Proc %d] Creating Poisson solver...\n", mpi_rank);
+    #endif
     
     // Create the Poisson solver
     // WARNING: comment / uncomment the following line AND the include
@@ -226,7 +200,13 @@ int main(int argc, char *argv[]) {
     bool is_periodic = false;
     poisson_solver_direct solver = new_poisson_solver_direct(meshx.array, meshx.size, lambda, nu);
 //    poisson_solver_periodic_fft solver = new_poisson_solver_periodic_fft(meshx.array, meshx.size);
-    
+
+
+    #ifdef VERBOSE
+        printf("[Proc %d] Done creating Poisson solver.\n", mpi_rank);
+        printf("[Proc %d] Initializing simulation...\n", mpi_rank);
+    #endif
+
     // Read the initial condition for electrons
     parallel_stuff pare;
     init_par_variables(&pare, mpi_world_size, mpi_rank, meshx.size, meshve.size, is_periodic);
@@ -235,7 +215,6 @@ int main(int argc, char *argv[]) {
     } else {
         ERROR_MESSAGE("#Missing f0e in %s\n", argv[1]);
     }
-    diag_f(&pare, 1, meshx, meshve, 0, "f0e");
     // Read the initial condition for ions
     parallel_stuff pari;
     init_par_variables(&pari, mpi_world_size, mpi_rank, meshx.size, meshvi.size, is_periodic);
@@ -244,7 +223,6 @@ int main(int argc, char *argv[]) {
     } else {
         ERROR_MESSAGE("#Missing f0i in %s\n", argv[1]);
     }
-    diag_f(&pari, 1, meshx, meshvi, 0, "f0i");
     
     // Read the advection parameters
     if (PC_get(conf, ".adv_xe")) {
@@ -271,15 +249,33 @@ int main(int argc, char *argv[]) {
     } else {
         ERROR_MESSAGE("#Missing adv_vi in %s\n", argv[1]);
     }
+
+    #ifdef VERBOSE
+        if (mpi_rank==0) {
+            printf("------------- Parameters -------------\n");
+            show_mesh1d (&meshx, "meshx");
+            show_mesh1d (&meshvi, "meshvi");
+            show_mesh1d (&meshve, "meshve");
+
+            printf("Final time %f, %d iterations (delta t=%f).\n", split.dt*split.num_iteration, split.num_iteration, split.dt);
+            printf("lambda = %f, nu = %f.\n", lambda, nu);
+
+            show_adv (adv_xe->non_periodic_adv, "adv_xe");
+            show_adv (adv_xi->non_periodic_adv, "adv_xi");
+            show_adv (adv_ve->non_periodic_adv, "adv_ve");
+            show_adv (adv_vi->non_periodic_adv, "adv_vi");
+            printf("--------------------------\n");
+        }
+    #endif
     
     // Create the electric field, charge arrays, and the poisson solver
-    rho = allocate_1d_array(meshx.size);
-    rhoe = allocate_1d_array(meshx.size);
-    rhoi = allocate_1d_array(meshx.size);
-    current = allocate_1d_array(meshx.size);
-    currente = allocate_1d_array(meshx.size);
-    currenti = allocate_1d_array(meshx.size);
-    E = allocate_1d_array(meshx.size);
+    rhoe = allocate_1d_array(meshx.size); // array of int_{v} f_e(t^n,x,v) for each x
+    rhoi = allocate_1d_array(meshx.size); // array of int_{v} f_i(t^n,x,v) for each x
+    rho = allocate_1d_array(meshx.size);  // rhoe - rhoi 
+    currente = allocate_1d_array(meshx.size); // array of int_{v} v f_e(t^n,x,v)  for each x
+    currenti = allocate_1d_array(meshx.size); // array of int_{v} v f_i(t^n,x,v)  for each x
+    current = allocate_1d_array(meshx.size);  // currente - currenti
+    E = allocate_1d_array(meshx.size); // electrical energy at time tn
     
     if (is_periodic) {
         // Compute electric field at initial time
@@ -294,55 +290,105 @@ int main(int argc, char *argv[]) {
             ERROR_MESSAGE("#Missing E0 in %s\n", argv[1]);
         }
     }
+
+    #ifdef PLOTS
+        printf("[Proc %d] Plotting initial conditions fi0, fe0, E...\n", mpi_rank);
+        diag_f(&pari, 0, meshx, meshvi, 0.0, "f0i", OUTFOLDER);
+        diag_f(&pare, 0, meshx, meshve, 0.0, "f0e", OUTFOLDER);
+        diag_1d (E, meshx.array, meshx.size, "E", OUTFOLDER, 0, 0.0);
+        printf("[Proc %d] Done plotting initial conditions.\n", mpi_rank);
+    #endif 
+
+    #ifdef VERBOSE
+        printf("[Proc %d] Done initializing simulation.\n", mpi_rank);
+        printf("[Proc %d] Beginning of the time loop.\n", mpi_rank);
+    #endif
     
     FILE* file_diag_energy = fopen("diag_ee.txt", "w");
     fprintf(file_diag_energy, "Time | Int(Ex^2)\n");
-    for (int i_time = 0; i_time < num_iteration; i_time++) {
-        diag_energy(E, meshx.array, meshx.size, &ee);
-        if (mpi_rank == 0) {
-            fprintf(file_diag_energy, "%1.20lg %1.20lg\n", ((double)i_time)*delta_t, ee);
-        }
+    for (itime = 0; itime < num_iteration; itime++) {
+        // #ifdef VERBOSE
+        //     printf("[Proc %d] Time step %d / %d.\n", mpi_rank, itime, num_iteration);
+        // #endif
+        
+        ///////////////////////////////////////////////////////////////////////////
+        // // Original Strang splitting
+    	// advection_x(&pari, adv_xi, 0.5*delta_t, meshvi.array); // d_t(f_i) + v*d_x(f_i) = 0
+    	// advection_x(&pare, adv_xe, 0.5*delta_t, meshve.array); // d_t(f_e) + v*d_x(f_e) = 0
+        // source_term(&pare, &pari, &meshve, &meshvi, nu, 0.5*delta_t); // d_t f_i = nu * f_e
+        // update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari,
+        //         &Mass_e, rhoe, rhoi, rho, currente, currenti, current, is_periodic);
+        // update_E_from_rho_and_current_1d(solver, delta_t, Mass_e, rho, current, E);
+    	// advection_v(&pare, adv_ve, delta_t, E); // d_t(f_e) - 1/mu*E*d_v(f_e) = 0
+    	// advection_v(&pari, adv_vi, delta_t, E); // d_t(f_i) +      E*d_v(f_i) = 0
+        // source_term(&pare, &pari, &meshve, &meshvi, nu, 0.5*delta_t); // source term for ions
+    	// advection_x(&pare, adv_xe, 0.5*delta_t, meshve.array); // advection in x
+    	// advection_x(&pari, adv_xi, 0.5*delta_t, meshvi.array); // advection in x
+        ///////////////////////////////////////////////////////////////////////////
+
         // Strang splitting
-        // Half time-step: advection in x
-        //     d_t(f_{i/e}) + v*d_x(f_{i/e}) = 0
-    	advection_x(&pare, adv_xe, 0.5*delta_t, meshve.array);
-    	advection_x(&pari, adv_xi, 0.5*delta_t, meshvi.array);
-        // Half time step: source term for ions
-        //     f_i^{n+1} = f_i^n + nu * delta_t/2 * f_e
-		update_rho(&meshx, &meshve, &meshvi, &pare, &pari, rhoe, rhoi, rho, is_periodic);
-        source_term(&pare, &pari, &meshve, &meshvi, nu, 0.5*delta_t, rho);
-		// Solve Poisson
-        update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari,
-                &Mass_e, rhoe, rhoi, rho, currente, currenti, current, is_periodic);
-        update_E_from_rho_and_current_1d(solver, delta_t, Mass_e, rho, current, E);
-    	
-		// Full time-step: advection in v
-		//     d_t(f_i) - 1/mu*E*d_v(f_i) = 0
-		//     d_t(f_i) + E*d_v(f_i) = 0
-    	advection_v(&pare, adv_ve, delta_t, E);
-    	advection_v(&pari, adv_vi, delta_t, E);
-        // Half time step: source term for ions
-        // (no need to update rho, because it has not changed with the velocity advection)
-        source_term(&pare, &pari, &meshve, &meshvi, nu, 0.5*delta_t, rho);
-        // Half time-step: advection in x
-    	advection_x(&pare, adv_xe, 0.5*delta_t, meshve.array);
-    	advection_x(&pari, adv_xi, 0.5*delta_t, meshvi.array);
-		// Solve Poisson
-        update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari,
-                &Mass_e, rhoe, rhoi, rho, currente, currenti, current, is_periodic);
-        update_E_from_rho_and_current_1d(solver, delta_t, Mass_e, rho, current, E);
+        // sub-iterations 
+        for (subi=0; subi<num_subiterations-1; ++subi) {
+        	advection_x(&pare, adv_xe, 0.5*sub_delta_t, meshve.array); // d_t(f_e) + v*d_x(f_e) = 0
+
+            update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari, &Mass_e, rhoe, rhoi, rho, currente, currenti, current, is_periodic);
+            update_E_from_rho_and_current_1d(solver, sub_delta_t, Mass_e, rho, current, E); // lambda^2 d_x E = rho
+            advection_v(&pare, adv_ve, sub_delta_t, E); // d_t(f_e) - 1/mu*E*d_v(f_e) = 0
+
+        	advection_x(&pare, adv_xe, 0.5*sub_delta_t, meshve.array); // d_t(f_e) + v*d_x(f_e) = 0
+        }
+
+        // Half time-step        
+    	advection_x(&pari, adv_xi, 0.5*delta_t, meshvi.array); // d_t(f_i) + v*d_x(f_i) = 0
+        advection_x(&pare, adv_xe, 0.5*sub_delta_t, meshve.array); // d_t(f_e) + v*d_x(f_e) = 0
+
+		// Full time-step
+        update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari, &Mass_e, rhoe, rhoi, rho, currente, currenti, current, is_periodic);
+        update_E_from_rho_and_current_1d(solver, sub_delta_t, Mass_e, rho, current, E); // lambda^2 d_x E = rho
+        source_term(&pare, &pari, &meshve, &meshvi, nu, delta_t); // d_t f_i = nu * f_e
+    	advection_v(&pari, adv_vi, delta_t, E); // d_t(f_i) +      E*d_v(f_i) = 0
+    	advection_v(&pare, adv_ve, sub_delta_t, E); // d_t(f_e) - 1/mu*E*d_v(f_e) = 0
+
+        // Second half time step 
+    	advection_x(&pare, adv_xe, 0.5*sub_delta_t, meshve.array); // advection in x
+    	advection_x(&pari, adv_xi, 0.5*delta_t, meshvi.array); // advection in x
+
+        // printf("\tdiag E\n");
+        // diag_energy(E, meshx.array, meshx.size, &ee); 
+        // if (mpi_rank == 0) {
+        //     fprintf(file_diag_energy, "%1.20lg %1.20lg\n", ((double)itime+1)*delta_t, ee);
+        // }
+
+        #ifdef PLOTS
+            if ((itime > 0) && (itime < num_iteration-1) && ((itime+1) % plot_frequency == 0)) {
+                printf("[Proc %d] Plotting at time t=%.2f, itime=%d/%d.\n", mpi_rank, (itime+1)*delta_t, itime+1, num_iteration);
+                diag_f(&pare, itime+1, meshx, meshve, (itime+1)*delta_t, "fe", OUTFOLDER);
+                diag_f(&pari, itime+1, meshx, meshvi, (itime+1)*delta_t, "fi", OUTFOLDER);
+                diag_1d (E, meshx.array, meshx.size, "E", OUTFOLDER, itime+1, (itime+1)*delta_t);
+            }
+        #endif // ifdef PLOTS
     }
-    	//advection_x(&pare, adv_xe, 0.5*delta_t, meshve.array);
-    	//advection_v(&pare, adv_ve, delta_t, E);
-    	//advection_x(&pari, adv_xi, 0.5*delta_t, meshvi.array);
+
+    #ifdef VERBOSE
+        printf("[Proc %d] End of the time loop.\n", mpi_rank);
+    #endif
     
-    // Output the ions / electrons density functions at the end
-    diag_f(&pare, 1, meshx, meshve, 0, "fe");
-    diag_f(&pari, 1, meshx, meshvi, 0, "fi");
+    #ifdef PLOTS
+        printf("[Proc %d] Plotting terminal values fi0, fe0, E...\n", mpi_rank);
+        // Output the ions / electrons density functions at the end
+        diag_f(&pare, num_iteration, meshx, meshve, num_iteration*delta_t, "fe", OUTFOLDER);
+        diag_f(&pari, num_iteration, meshx, meshvi, num_iteration*delta_t, "fi", OUTFOLDER);
+        diag_1d (E, meshx.array, meshx.size, "E", OUTFOLDER, num_iteration, num_iteration*delta_t);
+        printf("[Proc %d] Done plotting terminal values.\n", mpi_rank);
+    #endif 
     
     // Be clean (-:
     fclose(file_diag_energy);
     MPI_Finalize();
+
+    #ifdef VERBOSE
+        printf("Bye\n");
+    #endif
     return 0;
 }
 

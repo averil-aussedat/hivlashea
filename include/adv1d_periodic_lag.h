@@ -75,47 +75,6 @@ void adv1d_periodic_lag_compute_i0_and_alpha(double coeff, double dt, double xmi
     *alpha = *alpha-((double)*i0);
 }
 
-/*
- * Computes Lagrange coefficients.
- *
- * @param[in]  x displacement
- * @param[in]  d degree of the interpolator is 2d+1
- * @param[out] lag coefficients of the interpolator
- */
-void adv1d_periodic_lag_compute_lag(double x, int d, double* lag) {
-    int i;
-    double a;
-    
-    if (d>0) {
-        a = 1.;
-        // Because of parity : (x-i)*(x+i) = x^2-i^2
-        for (i = 2; i <= d; i++)
-            a *= (x*x-((double)i)*((double)i))/(((double)d)*((double)d));
-        a *= (x+1.)/((double)d);
-        a *= (x-((double)d)-1.)/((double)d);
-        lag[d]   = a*(x-1.)/((double)d);
-        lag[d+1] = a*x/((double)d);
-        a *= x*(x-1.)/(((double)d)*((double)d));
-        for (i = -d; i <= -1; i++)
-            lag[i+d] = a/((x-(double)i)/((double)d));
-        for (i = 2; i <= d+1; i++)
-            lag[i+d] = a/((x-(double)i)/((double)d));
-        a = 1.;
-        for (i=-d; i <= d+1; i++) {
-            lag[i+d] *= a;
-            a *= (double)d/((double)(d+i+1));
-        }
-        a = 1.;
-        for (i = d+1; i >= -d; i--) {
-            lag[i+d] *= a;
-            a *= (double)d/((double)(i-1-d-1));
-        }
-    } else {
-        lag[0] = 1. - x;
-        lag[1] = x;
-    }
-}
-
 void adv1d_periodic_lag_semi_lag_advect_classical(double* buf, int N, int i0, double* lag, int d, double* f) {
     int i, j;
     

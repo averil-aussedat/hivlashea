@@ -34,9 +34,16 @@ void update_spatial_density(parallel_stuff* par_variables, double *x, int sizex,
     pos = 0;
     for (size_t i_x = 0; i_x < par_variables->size_x_par_x; i_x++) {
         par_variables->send_buf[pos] = 0.;
-        // Integration: left rectangles method
-        for (size_t i_v = 0; i_v < par_variables->size_v_par_x-1; i_v++)
+        // // Integration: left rectangles method
+        // for (size_t i_v = 0; i_v < par_variables->size_v_par_x-1; i_v++) {
+        //     par_variables->send_buf[pos] += par_variables->f_parallel_in_x[i_x][i_v];
+        // }
+        // Integration: trapezes method
+        par_variables->send_buf[pos] += par_variables->f_parallel_in_x[i_x][0]*0.5;
+        for (size_t i_v = 1; i_v < par_variables->size_v_par_x-1; i_v++) {
             par_variables->send_buf[pos] += par_variables->f_parallel_in_x[i_x][i_v];
+        }
+        par_variables->send_buf[pos] += par_variables->f_parallel_in_x[i_x][par_variables->size_v_par_x-1]*0.5;
         par_variables->send_buf[pos] *= delta_v;
     	pos++;
     }
@@ -102,9 +109,16 @@ void update_current(parallel_stuff* par_variables, double *x, int sizex,
     pos = 0;
     for (size_t i_x = 0; i_x < par_variables->size_x_par_x; i_x++) {
         par_variables->send_buf[pos] = 0.;
-        // Integration: left rectangles method
-        for (size_t i_v = 0; i_v < par_variables->size_v_par_x-1; i_v++)
+        // // Integration: left rectangles method
+        // for (size_t i_v = 0; i_v < par_variables->size_v_par_x-1; i_v++)
+        //     par_variables->send_buf[pos] += par_variables->f_parallel_in_x[i_x][i_v] * v[i_v];
+        // par_variables->send_buf[pos] *= delta_v;
+        // Integration: trapezes method
+        par_variables->send_buf[pos] += par_variables->f_parallel_in_x[i_x][0]*0.5*v[0];
+        for (size_t i_v = 1; i_v < par_variables->size_v_par_x-1; i_v++) {
             par_variables->send_buf[pos] += par_variables->f_parallel_in_x[i_x][i_v] * v[i_v];
+        }
+        par_variables->send_buf[pos] += par_variables->f_parallel_in_x[i_x][par_variables->size_v_par_x]*0.5*v[par_variables->size_v_par_x-1];
         par_variables->send_buf[pos] *= delta_v;
     	pos++;
     }
@@ -126,6 +140,9 @@ void update_current(parallel_stuff* par_variables, double *x, int sizex,
     }
 }
 
+/*
+ * Creates diagnostics of a function f.
+ */
 void compute_diag_f(parallel_stuff* par_variables, double *x, int sizex,
         double *v, int sizev, double* diag) {
     size_t i, i_x, i_v;
@@ -226,6 +243,46 @@ void compute_diag_f(parallel_stuff* par_variables, double *x, int sizex,
         for (i = par_variables->layout_par_x.boxes[process].i_min; i <= par_variables->layout_par_x.boxes[process].i_max; i++)
             diag[2] += par_variables->recv_buf[pos++];
     diag[2] *= delta_x;
+}
+
+/*
+ * Given the density functions fi(x, v) and fe(x, v) of ions and electrons,
+ * compute the charge density rho = rhoi - rhoe = int_v (fi(x,v) - fe(x,v)) dv.
+ * NB.: rho(e/i) could be allocated and destroyed by the function, they
+ *      are temporary, but we give them to avoid frequent malloc / free of arrays.
+ */
+void update_rho(mesh_1d* meshx, mesh_1d* meshve, mesh_1d* meshvi,
+        parallel_stuff* electrons, parallel_stuff* ions,
+        double* rhoe, double* rhoi, double* rho,
+	    bool is_periodic) {
+	update_spatial_density(electrons, meshx->array, meshx->size, meshve->array, meshve->size, rhoe, is_periodic);
+	update_spatial_density(ions,      meshx->array, meshx->size, meshvi->array, meshvi->size, rhoi, is_periodic);
+	for (size_t i = 0; i < meshx->size; i++) {
+        rho[i] = rhoi[i] - rhoe[i];
+	}
+}
+
+/*
+ * Given the density functions fi(x, v) and fe(x, v) of ions and electrons,
+ * compute:
+ *     >>> the charge density rho = rhoi - rhoe = int_v (fi(x,v) - fe(x,v)) dv.
+ *     >>> the current current = currenti - currente = int_v (fi(x,v) - fe(x,v)) v dv.
+ * NB.: rho(e/i) and current(e/i) could be allocated and destroyed by the function, they
+ *      are temporary, but we give them to avoid frequent malloc / free of arrays.
+ */
+void update_rho_and_current(mesh_1d* meshx, mesh_1d* meshve, mesh_1d* meshvi,
+        parallel_stuff* electrons, parallel_stuff* ions,
+        double* Mass_e,
+        double* rhoe, double* rhoi, double* rho,
+        double* currente, double* currenti, double* current,
+	    bool is_periodic) {
+    update_rho(meshx, meshve, meshvi, electrons, ions, rhoe, rhoi, rho, is_periodic);
+    *Mass_e = compute_mass(meshx->array, meshx->size, rhoe);
+	update_current(electrons, meshx->array, meshx->size, meshve->array, meshve->size, currente, is_periodic);
+	update_current(ions,      meshx->array, meshx->size, meshvi->array, meshvi->size, currenti, is_periodic);
+	for (size_t i = 0; i < meshx->size; i++) {
+        current[i] = currenti[i] - currente[i];
+	}
 }
 
 

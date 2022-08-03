@@ -1,9 +1,10 @@
 #ifndef SELA_VP_1D1V_CART_DIAG
 #define SELA_VP_1D1V_CART_DIAG
-#include "hdf5_io.h"  // function plot_f_cartesian_mesh_2d
-#include "remap.h"    // type parallel_stuff
-                      // function exchange_parallelizations
-#include "mesh_1d.h"  // type mesh_1d
+#include "hdf5_io.h"        // function plot_f_cartesian_mesh_2d
+#include "math_helpers.h"   // functions min, max
+#include "remap.h"          // type parallel_stuff
+                            // function exchange_parallelizations
+#include "mesh_1d.h"        // type mesh_1d
                       
 
 void diag_energy(double *E, double *x, int sizex, double *val){
@@ -21,7 +22,18 @@ void diag_energy(double *E, double *x, int sizex, double *val){
     //printf("%lg %d\n", *val, sizex - 1);
 }
 
-void diag_1d(double *E, double *x, int sizex, char* array_name, int iplot){
+/*
+ * Save the 1d function E in a two-column file (x,E)
+ *
+ * @param[in] E : array of values
+ * @param[in] x : array of locations (space mesh)
+ * @param[in] sizex : number of points of the mesh x
+ * @param[in] array_name : file name
+ * @param[in] folder : saving folder 
+ * @param[in] iplot : id of the plot (number)
+ * @param[in] time : simulation physical time
+ */
+void diag_1d(double *E, double *x, int sizex, char* array_name, char* folder, int iplot, double time) {
     int i;
     FILE* file;
     char str[256];
@@ -30,18 +42,20 @@ void diag_1d(double *E, double *x, int sizex, char* array_name, int iplot){
     
     char cplot[6]; // 4 digits + '\0' [+1 more to avoid a warning in sprintf]
 
-    if (iplot < 10)
+    if (iplot < 10) {
         sprintf(cplot, "000%d", iplot & 0xf); // 0xf = 15
-    else if (iplot < 100)
+    } else if (iplot < 100) {
         sprintf(cplot, "00%d", iplot & 0x7f); // 0x7f = 127
-    else if (iplot < 1000)
+    } else if (iplot < 1000) {
         sprintf(cplot, "0%d", iplot & 0x3ff); // 0x3ff = 1023
-    else
+    } else {
         sprintf(cplot, "%d", iplot & 0x3fff); // 0x3fff = 16383
+    }
     cplot[4] = 0;
 
-    sprintf(str,"%s%s.dat",array_name,cplot);
+    sprintf(str,"%s%s%s.dat",folder,array_name,cplot);
     file=fopen(str,"w");
+    fprintf(file,"%f\n", time);
     for (i=0;i<sizex;i++){
     	fprintf(file,"%1.20lg %1.20lg\n", x[i],E[i]);
     	//printf("%1.20lg %1.20lg\n", x[i],E[i]);
@@ -51,30 +65,38 @@ void diag_1d(double *E, double *x, int sizex, char* array_name, int iplot){
 
 
 void diag_f(parallel_stuff* par, int i_hdf5, 
-		mesh_1d mesh1, mesh_1d mesh2, double time, char* array_name){
+		mesh_1d mesh1, mesh_1d mesh2, double time, char* array_name, char* folder){
 	
 	double (*f)[mesh2.size] = malloc((mesh1.size) * sizeof *f); // Array allocated contiguously for hdf5 outputs.
 	//double *f = malloc((mesh1.size) * (mesh2.size) *sizeof(double)); // Array allocated contiguously for hdf5 outputs.
 	double *f1d = malloc((par->size_x_par_x) * (mesh2.size) *sizeof(double)); // Array allocated contiguously for hdf5 outputs.
-	double *f_2 = malloc((mesh1.size-1) *sizeof(double)); // Array allocated contiguously for hdf5 outputs.
-	double *f1d_2 = malloc((par->size_x_par_x)  *sizeof(double)); // Array allocated contiguously for hdf5 outputs.
+	// double *f_2 = malloc((mesh1.size-1) *sizeof(double)); // Array allocated contiguously for hdf5 outputs.
+	// double *f1d_2 = malloc((par->size_x_par_x)  *sizeof(double)); // Array allocated contiguously for hdf5 outputs.
     int i,j;
     int pos;
+    double minf=1e5, maxf=-1e5; // to be printed
     for (i=0;i<(par->size_x_par_x) * (mesh2.size);i++){
     	f1d[i] = 0.;
     }
-    if (!par->is_par_x)
+    if (!par->is_par_x) {
         exchange_parallelizations(par);
-    for(i=0;i<par->mpi_world_size;i++){
+    }
+    for (i=0;i<par->mpi_world_size;i++) {
     	par->recv_counts[i] *=mesh2.size;
     	par->displs[i] *=mesh2.size;
     }    
     pos = 0;
     for (i = 0; i < par->size_x_par_x; i++) {
-        for (j = 0; j < mesh2.size-1; j++)
+        for (j = 0; j < mesh2.size-1; j++) {
             f1d[pos++] = par->f_parallel_in_x[i][j];
+            minf = min (minf, f1d[pos-1]);
+            maxf = max (maxf, f1d[pos-1]);
+        }
         f1d[pos++] = par->f_parallel_in_x[i][0];    
+        minf = min (minf, f1d[pos-1]);
+        maxf = max (maxf, f1d[pos-1]);
     }
+    printf("[diag_f] (min,max) %s : %f, %f.\n", array_name, minf, maxf);
 //     printf("par->recv_counts=\n");
 //     for(i=0;i<par->mpi_world_size;i++){
 //     	printf("%d\n",par->recv_counts[i]);
@@ -104,7 +126,7 @@ void diag_f(parallel_stuff* par, int i_hdf5,
     	par->displs[i] /=mesh2.size;
     }
 	if (par->mpi_rank == 0){
-		//plot_f_cartesian_mesh_2d(i_hdf5, f[0], mesh1, mesh2, time, array_name);
+		//plot_f_cartesian_mesh_2d(i_hdf5, f[0], mesh1, mesh2, time, array_name, folder);
     	for (i=0;i< (mesh2.size);i++){
     		f[mesh1.size-1][i] = f[0][i];
     	}		
@@ -112,9 +134,12 @@ void diag_f(parallel_stuff* par, int i_hdf5,
 //     	for (j=0;j< (mesh1.size);j++){
 //     		printf("%d %d %1.20lg\n",j,i,f[j][i]);
 //     	}}	
-		plot_f_cartesian_mesh_2d(i_hdf5, f[0], mesh1, mesh2, time, array_name);
+		// plot_f_cartesian_mesh_2d(i_hdf5, f[0], mesh1, mesh2, time, array_name, folder);
+		plot_f_cartesian_mesh_2d(i_hdf5, f[0], mesh1, mesh2, time, array_name, folder);
 	}		
 
+    free (f);
+    free (f1d);
 }
 
 
