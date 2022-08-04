@@ -92,7 +92,6 @@ void source_term(parallel_stuff* electrons, parallel_stuff* ions,
         for (i_v=0; i_v < ions->size_v_par_x; i_v++) {
             target = meshvi->array[i_v];
             // no_boundary_lag_compute_index_and_alpha(target, meshve, &index, &alpha);
-            // tmp = ((double)(*meshve)->size) * (target - (*meshve)->min) / ((*meshve)->max - (*meshve)->min);
             tmp = (double)(meshve->size) * (target - meshve->min) / (meshve->max - meshve->min);
             index = (int)floor(tmp);
             alpha = tmp - (double)index;
@@ -131,7 +130,7 @@ int main(int argc, char *argv[]) {
     // Outputs
     double ee; // electric energy
     // int plot_frequency=1; // 1=every loop
-    int plot_frequency=10; // 1=every loop
+    int plot_frequency=50; // 1=every loop
 
     // local variables
     int itime=0, subi=0;
@@ -201,7 +200,6 @@ int main(int argc, char *argv[]) {
     poisson_solver_direct solver = new_poisson_solver_direct(meshx.array, meshx.size, lambda, nu);
 //    poisson_solver_periodic_fft solver = new_poisson_solver_periodic_fft(meshx.array, meshx.size);
 
-
     #ifdef VERBOSE
         printf("[Proc %d] Done creating Poisson solver.\n", mpi_rank);
         printf("[Proc %d] Initializing simulation...\n", mpi_rank);
@@ -258,6 +256,7 @@ int main(int argc, char *argv[]) {
             show_mesh1d (&meshve, "meshve");
 
             printf("Final time %f, %d iterations (delta t=%f).\n", split.dt*split.num_iteration, split.num_iteration, split.dt);
+            printf("Subiterations : %d (sub delta t=%f).\n", num_subiterations, sub_delta_t);
             printf("lambda = %f, nu = %f.\n", lambda, nu);
 
             show_adv (adv_xe->non_periodic_adv, "adv_xe");
@@ -271,10 +270,10 @@ int main(int argc, char *argv[]) {
     // Create the electric field, charge arrays, and the poisson solver
     rhoe = allocate_1d_array(meshx.size); // array of int_{v} f_e(t^n,x,v) for each x
     rhoi = allocate_1d_array(meshx.size); // array of int_{v} f_i(t^n,x,v) for each x
-    rho = allocate_1d_array(meshx.size);  // rhoe - rhoi 
+    rho = allocate_1d_array(meshx.size);  // rhoi - rhoe 
     currente = allocate_1d_array(meshx.size); // array of int_{v} v f_e(t^n,x,v)  for each x
     currenti = allocate_1d_array(meshx.size); // array of int_{v} v f_i(t^n,x,v)  for each x
-    current = allocate_1d_array(meshx.size);  // currente - currenti
+    current = allocate_1d_array(meshx.size);  // currenti - currente
     E = allocate_1d_array(meshx.size); // electrical energy at time tn
     
     if (is_periodic) {
@@ -292,10 +291,11 @@ int main(int argc, char *argv[]) {
     }
 
     #ifdef PLOTS
-        printf("[Proc %d] Plotting initial conditions fi0, fe0, E...\n", mpi_rank);
-        diag_f(&pari, 0, meshx, meshvi, 0.0, "f0i", OUTFOLDER);
-        diag_f(&pare, 0, meshx, meshve, 0.0, "f0e", OUTFOLDER);
+        printf("[Proc %d] Plotting initial conditions...\n", mpi_rank);
+        diag_f(&pare, 0, meshx, meshve, 0.0, "fe", OUTFOLDER, is_periodic);
+        diag_f(&pari, 0, meshx, meshvi, 0.0, "fi", OUTFOLDER, is_periodic);
         diag_1d (E, meshx.array, meshx.size, "E", OUTFOLDER, 0, 0.0);
+        diag_1d (rho, meshx.array, meshx.size, "rho", OUTFOLDER, 0, 0.0);
         printf("[Proc %d] Done plotting initial conditions.\n", mpi_rank);
     #endif 
 
@@ -326,6 +326,7 @@ int main(int argc, char *argv[]) {
     	// advection_x(&pari, adv_xi, 0.5*delta_t, meshvi.array); // advection in x
         ///////////////////////////////////////////////////////////////////////////
 
+
         // Strang splitting
         // sub-iterations 
         for (subi=0; subi<num_subiterations-1; ++subi) {
@@ -339,34 +340,55 @@ int main(int argc, char *argv[]) {
         }
 
         // Half time-step        
+        // printf("adv x i 1\n");
+        // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
     	advection_x(&pari, adv_xi, 0.5*delta_t, meshvi.array); // d_t(f_i) + v*d_x(f_i) = 0
+        // printf("adv x e 1\n");
+        // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
         advection_x(&pare, adv_xe, 0.5*sub_delta_t, meshve.array); // d_t(f_e) + v*d_x(f_e) = 0
 
 		// Full time-step
+        // printf("before rho/E update\n");
+        // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
         update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari, &Mass_e, rhoe, rhoi, rho, currente, currenti, current, is_periodic);
         update_E_from_rho_and_current_1d(solver, sub_delta_t, Mass_e, rho, current, E); // lambda^2 d_x E = rho
         source_term(&pare, &pari, &meshve, &meshvi, nu, delta_t); // d_t f_i = nu * f_e
-    	advection_v(&pari, adv_vi, delta_t, E); // d_t(f_i) +      E*d_v(f_i) = 0
+        // printf("adv v i\n");
+        // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
+    	advection_v(&pari, adv_vi, delta_t, E); // d_t(f_i) + E*d_v(f_i) = 0
+        // printf("adv v e\n");
+        // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
     	advection_v(&pare, adv_ve, sub_delta_t, E); // d_t(f_e) - 1/mu*E*d_v(f_e) = 0
 
         // Second half time step 
+        // printf("adv x e 2\n");
+        // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
     	advection_x(&pare, adv_xe, 0.5*sub_delta_t, meshve.array); // advection in x
+        // printf("adv x i 2\n");
+        // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
     	advection_x(&pari, adv_xi, 0.5*delta_t, meshvi.array); // advection in x
 
-        // printf("\tdiag E\n");
-        // diag_energy(E, meshx.array, meshx.size, &ee); 
-        // if (mpi_rank == 0) {
-        //     fprintf(file_diag_energy, "%1.20lg %1.20lg\n", ((double)itime+1)*delta_t, ee);
-        // }
+        diag_energy(E, meshx.array, meshx.size, &ee); 
+        if (mpi_rank == 0) {
+            fprintf(file_diag_energy, "%1.20lg %1.20lg\n", ((double)itime+1)*delta_t, ee);
+        }
+
+        // printf("End of time step :\n");
+        // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
+
 
         #ifdef PLOTS
             if ((itime > 0) && (itime < num_iteration-1) && ((itime+1) % plot_frequency == 0)) {
                 printf("[Proc %d] Plotting at time t=%.2f, itime=%d/%d.\n", mpi_rank, (itime+1)*delta_t, itime+1, num_iteration);
-                diag_f(&pare, itime+1, meshx, meshve, (itime+1)*delta_t, "fe", OUTFOLDER);
-                diag_f(&pari, itime+1, meshx, meshvi, (itime+1)*delta_t, "fi", OUTFOLDER);
+                diag_f(&pare, itime+1, meshx, meshve, (itime+1)*delta_t, "fe", OUTFOLDER, is_periodic);
+                diag_f(&pari, itime+1, meshx, meshvi, (itime+1)*delta_t, "fi", OUTFOLDER, is_periodic);
                 diag_1d (E, meshx.array, meshx.size, "E", OUTFOLDER, itime+1, (itime+1)*delta_t);
+                diag_1d (rho, meshx.array, meshx.size, "rho", OUTFOLDER, itime+1, (itime+1)*delta_t);
             }
         #endif // ifdef PLOTS
+
+        // printf("End of time step after plots :\n");
+        // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
     }
 
     #ifdef VERBOSE
@@ -374,11 +396,12 @@ int main(int argc, char *argv[]) {
     #endif
     
     #ifdef PLOTS
-        printf("[Proc %d] Plotting terminal values fi0, fe0, E...\n", mpi_rank);
+        printf("[Proc %d] Plotting terminal values...\n", mpi_rank);
         // Output the ions / electrons density functions at the end
-        diag_f(&pare, num_iteration, meshx, meshve, num_iteration*delta_t, "fe", OUTFOLDER);
-        diag_f(&pari, num_iteration, meshx, meshvi, num_iteration*delta_t, "fi", OUTFOLDER);
+        diag_f(&pare, num_iteration, meshx, meshve, num_iteration*delta_t, "fe", OUTFOLDER, is_periodic);
+        diag_f(&pari, num_iteration, meshx, meshvi, num_iteration*delta_t, "fi", OUTFOLDER, is_periodic);
         diag_1d (E, meshx.array, meshx.size, "E", OUTFOLDER, num_iteration, num_iteration*delta_t);
+        diag_1d (rho, meshx.array, meshx.size, "rho", OUTFOLDER, num_iteration, num_iteration*delta_t);
         printf("[Proc %d] Done plotting terminal values.\n", mpi_rank);
     #endif 
     

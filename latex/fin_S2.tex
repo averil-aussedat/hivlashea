@@ -1,0 +1,164 @@
+\documentclass{article}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% packages 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[latin1]{inputenc} 
+\usepackage[T1]{fontenc} % hyphenation
+\usepackage{fullpage} % DO NOT USE IN BEAMER
+\usepackage{theorem}
+\usepackage{amssymb,amsmath}  % all you like in math fonts
+\usepackage[dvipsnames,table]{xcolor} % color.
+\usepackage{graphicx}
+\usepackage{mathtools} % coloneqq
+\usepackage{stmaryrd} % ll/rr brackets
+\usepackage{babel} % indentation 
+\usepackage{mathrsfs} % \mathscr 
+\usepackage{float} % [H]
+\usepackage{enumitem}
+%\usepackage{tikz} % hihiiii
+\usepackage{lipsum}
+\usepackage[hidelinks]{hyperref} % links & cliquable toc. LAST (but cleverref)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% misc 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Fin de la semaine 2 du CEMRACS~: comparaison entre les codes de Mehdi et Yann}
+\date{}
+
+\allowdisplaybreaks
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% commands
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\vv}[1]{\begin{pmatrix} #1 \end{pmatrix}} % raccourci pour vecteur
+\renewcommand{\div}{\,\text{div}\,} % divergence
+\newcommand{\dom}{\,\text{dom}\,}
+\newcommand{\prox}{\,\text{prox}}
+\newcommand{\supp}{\,\text{supp}}
+\newcommand{\argmin}[1]{\,\underset{#1}{\text{argmin}}\,}
+\newcommand{\foraall}{\mathring{\forall}\,} % for almost all
+\newcommand{\ind}{{\textrm{1\hspace{-0.6ex}I}}}% indicatrice (1 double barre) (courtesy of OB)
+\newcommand{\figd}{0.5\textheight} % image height, meant to be locally changed 
+\newcommand{\dir}{.} % image directory, meant to be locally changed 
+\newcommand{\subcaption}[1]{\vspace*{5pt}\begin{minipage}{0.8\linewidth}\begin{center}\footnotesize\emph{#1}\end{center}\end{minipage}}
+
+% local vocabulary
+\newcommand{\dt}{\Delta t}
+
+\setlist[itemize,1]{label=$-$}
+\setlist[itemize,2]{label=$-$}
+\setlist[itemize,3]{label=$-$}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+	\maketitle
+	
+	Ce document a pour vocation d'établir une sauvegarde de l'état des codes au 4 août 2022, avec une comparaison des résultats dans un cas particulier. Le but est de résoudre Vlasov-Poisson à deux espèces, sur un domaine spatial $\Omega\coloneqq [-1,1]$. L'intérêt est de considérer des conditions au bord non périodiques (voir rédaction latex par Nicolas).
+	
+	\section{Code de Mehdi}
+	
+	Ce code a pour vocation de fournir une solution de référence, à comparer avec la méthode semi-lagrangienne. Pour le transport, c'est un schéma upwind qui est employé, avec splitting et condition CFL. Pour la résolution de Poisson, une forme intégrale pour $E$ est employée, avec la méthode des trapèzes. 
+	
+	\section{Code de Yann}
+	
+	Résolution de Vlasov-Poisson bi-espèce, par méthode semi-lagrangienne avec splitting. La décomposition de splitting utilisée est la suivante~: 
+	\begin{align*}
+		&\begin{cases}
+			\partial_t f_i(t,x,v) + v \partial_x f_i(t,x,v) = 0 & \dt/2 \\
+			\partial_t f_e(t,x,v) + v \partial_x f_e(t,x,v) = 0 & \dt/2
+		\end{cases} \\
+		&\begin{cases}
+			\lambda^2 \partial_t E(t,\pm 1) + J(t,\pm1) = \pm \frac{\nu}{2} m_e (t) & \dt \\
+			\lambda^2 \partial_x E(t,x) = \rho (t,x) & \dt \\
+			\partial_t f_i (t,x,v) = \nu f_e (t,x,v) & \dt \\
+			\partial_t f_e (t,x,v) - \frac{1}{\mu} E(t,x) \partial_v f_e (t,x,v) = 0 & \dt \\
+			\partial_t f_i (t,x,v) + E(t,x) \partial_v f_i (t,x,v) = 0 & \dt
+		\end{cases} \\
+		&\begin{cases}
+			\partial_t f_e(t,x,v) + v \partial_x f_e(t,x,v) = 0 & \dt/2 \\
+			\partial_t f_i(t,x,v) + v \partial_x f_i(t,x,v) = 0 & \dt/2
+		\end{cases} 
+	\end{align*}
+	Pour chacune des advections 1D, la vitesse est constante (par rapport à la variable d'advection), et on dispose de la solution exacte donnée par la méthode des caractéristiques. L'évaluation hors du maillage est faite par interpolation polynomiale sur un stencil centré de taille $2d+2$. Les conditions au bord sont exactes en inflow (toujours 0) et extrapolées polynomialement en outflow (avec un polynôme d'ordre $k_b$ interpolant les $k_b$ points extrémaux du maillage).
+	
+	La résolution de Poisson est faite en deux parties : la condition au bord est mise à jour avec Euler explicite, puis la valeur de $E$ est déduite par intégration de $\rho$. Plus précisément, la connaissance de $E(\pm 1)$ permet de définir deux "candidats" en intégrant dans deux sens différents~:
+	\begin{align*}
+		E^{f}(t,x) &= E(t,-1) + \frac{1}{\lambda^2} \int_{-1}^x \rho(t,y) dy && \text{forward}, \\
+		E^{b}(t,x) &= E(t,1) - \frac{1}{\lambda^2} \int_{x}^{1} \rho(t,y) dy && \text{backward}.
+	\end{align*}
+	La résolution numérique calcule les deux candidats à l'aide de la méthode des trapèzes, et en prend la combinaison convexe $E(t,x) \coloneqq \frac{1 - x}{2} E^{f}(t,x) + \frac{x-(-1)}{2} E^{b}(t,x)$. Ainsi, les deux conditions au bord sont satisfaites, et l'intégration est d'ordre 2. 
+	
+	Enfin, la prise en compte du second membre pour $f_i$ est faite par Euler explicite. 
+	
+	\section{Paramètres}
+	
+	On a pris pour paramètres de maillage
+	\begin{itemize}
+	\item en espace~: $N=255$ intervalles dans $[-1,1]$,
+	\item en vitesse pour $f_e$~: $N=511$ intervalles dans $[-100,100]$, et
+	\item en vitesse pour $f_i$~: $N=511$ intervalles dans $[-10,10]$.
+	\end{itemize}
+	Les conditions initiales sont
+	\begin{align*}
+		E(0,x) = 0, \quad f_{i,0}(x,v) \coloneqq \frac{\exp\left(-\frac{v^2}{2}\right)}{\sqrt{2 \pi}}, \quad\text{et}\quad f_{i,0}(x,v) \coloneqq \sqrt{\mu} \frac{\exp\left(-\frac{\mu v^2}{2}\right)}{\sqrt{2 \pi}} \text { avec }\mu=10^{-2}.
+	\end{align*}
+	Le stencil d'interpolation est pris à $d=1$ pour toutes les advections, et $k_b=2$. Les paramètres physiques sont $\lambda\coloneqq 0.1$, $\nu = 1$, et $\mu = 10^{-2}$. 
+	
+	\section{Résultats}
+	
+	On compare d'abord les résultats pour $T=0.05$. Le semi-lagrangien a demandé $5,000$ itérations, avec $\dt = 10^{-5}$.
+	
+	\begin{figure}[H]
+		\renewcommand{\figd}{0.9\linewidth}
+		\renewcommand{\dir}{/home/averil/Documents/Stages/CEMRACS_2022/hivlashea/images} 
+		\centering
+		\includegraphics[width=\figd]{\dir/E_Badsi2022_T005} \\
+		\includegraphics[width=\figd]{\dir/rho_Badsi2022_T005} \\
+		\includegraphics[width=\figd]{\dir/Ion_Badsi2022_T005} \\
+		\includegraphics[width=\figd]{\dir/Electron_Badsi2022_T005} 
+		\caption {Comparaison entre le code de Mehdi (à gauche) et de Yann (à droite).}
+		\subcaption {Respectivement~: le champ électrique $E$, la densité (intégrée en vitesse) $\rho = \rho_i - \rho_e$, la densité ionique $f_i$ et la densité électronique $f_e$ dans l'espace des phases. Les maillages en vitesse sont décorrélés.}
+	\end{figure}
+	
+	\section{À venir}
+	
+	Plusieurs idées pour l'évolution du code semi-lagrangien~:
+	\begin{itemize}
+	\item Atteindre l'ordre 2 dans toutes les strates. Le splitting et la résolution de Poisson (à l'intérieur) sont d'ordre 2~: il est moral de se dire que les advections sont d'ordre 2 $d$ et $k_b$ assez grands (sous des hypothèses de régularité). Il reste la résolution des conditions au bord pour Poisson, qui pourrait être faite avec Crank-Nicholson sous réserve de stocker les bonnes valeurs de $J$ et $m_e$, et la prise en compte du terme source pour $f_i$, qui demande encore du travail. 
+	\item Prendre en compte la différence d'évolution entre $f_i$ et $f_e$, par le biais de sous-itérations pour $f_e$. On pourra par exemple considérer un sous-pas de temps $\dt/m$, et itérer les étapes de splitting ne concernant pas $f_i$ $m-1$ fois, puis le splitting complet (en gardant le sous-pas de temps pour $f_e$ et $E$). 
+	\item Passer en interpolation par splines. L'idée est de résoudre le problème de l'instabilité des polynômes, qui ne garantit pas que les densités restent positives. Notamment, les simulations précédentes montrent des échappées négatives au bord des zones de choc. La propriété de partition de l'unité des splines pourra résoudre cette incohérence avec la physique. 
+	\item Éventuellement : comprendre comment gérer les conditions initiales avec le splitting. On pourra essayer de rendre les conditions au bord exactes sur une classe de fonctions simples, par exemple les indicatrices. Les quadratures utilisées pourraient être d'ordre plus élevé, mais cela va de pair avec un splitting plus évolué, donc à pas de temps négatif, ce qui demande du travail. 
+	\end{itemize}
+	
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

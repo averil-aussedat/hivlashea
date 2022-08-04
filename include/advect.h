@@ -313,20 +313,20 @@ void adv1d_non_periodic_lag_semi_lag_advect_classical (
 
     // Shifted buffer. i runs along buf[.]
     if (coeff >= 0) { // advection towards the right : inflow at left, i0 negative
-        mini=0;
-        maxi=imin(N+2*d+1,d-i0-1);
+        mini = 0;
+        maxi = imin(N+2*d+1,d-i0-1);
         // printf("inflow : going from %d to %d\n", mini, maxi);
         for (i=mini; i<=maxi; i++) { // filling the inflow condition (0.0)
             buf[i] = 0.0;
         }
-        mini=maxi+1;
+        mini = maxi+1;
         maxi = N+d+imin(-i0,d+1); // respects the size of f and buf. min(N+d-i0, N+1+2d)
-        // printf("middle : going from %d to %d, N+d-i0=%d, N+2d+1=%d\n", mini, maxi, N+d-i0, N+1+2*d);
+        // printf("middle : going from %d to %d,  f from %d to %d\n", mini, maxi, mini-d+i0, maxi-d+i0);
         for (i=mini; i<=maxi; i++) { // values of f^{n}
             buf[i] = f_in_and_out[i-(d-i0)];
         }
-        mini=maxi+1;
-        maxi=N+2*d+1;
+        mini = maxi+1;
+        maxi = N+2*d+1;
         // printf("end : going from %d to %d\n", mini, maxi);
         for (i=maxi; i<=maxi; i++) { // remaining terms of the buffer
             buf[i] = 0.0;
@@ -343,14 +343,14 @@ void adv1d_non_periodic_lag_semi_lag_advect_classical (
         for (i=maxi; i>=mini; --i) { // filling the infow condition (0.0)
             buf[i] = 0.0;
         }
-        maxi=mini-1;
+        maxi = mini-1;
         mini = imax(0,d-i0); // taking as many f values as possible
-        // printf("middle : going from %d to %d, f from %d to %d\n", maxi, mini,maxi-(d+i0)-1-d+i0, mini-d+i0);
+        // printf("middle : going from %d to %d, f from %d to %d\n", maxi, mini,maxi-d+i0, mini-d+i0);
         for (i=maxi; i>=mini; --i) { // values of f^{n}
             buf[i] = f_in_and_out[i-d+i0]; // starts from f[N] and decreases. N+i-(maxi-(d+i0)-1)
         }
-        maxi=mini-1;
-        mini=0;
+        maxi = mini-1;
+        mini = 0;
         // printf("end : going from %d to %d\n", maxi, mini);
         for (i=maxi; i>=mini; --i) { // remaining terms of the buffer
             buf[i] = 0.0;
@@ -362,14 +362,106 @@ void adv1d_non_periodic_lag_semi_lag_advect_classical (
         }
     }
     
+    if (coeff>=0) {
+        f_in_and_out[0] = 0.;
+        mini=1; maxi=N;
+    } else {
+        f_in_and_out[N] = 0.;
+        mini=0; maxi=N-1;
+    }
+    // mini=0; maxi=N;
     // advection part : Lagrange interpolation 
-    for (i = 0; i <= N; i++) { // for each internal dof
+    // printf("f : ");
+    for (i = mini; i <= maxi; i++) { // for each internal dof
         f_in_and_out[i] = 0.;
         for (j = -d; j <= d+1; j++) { // interpolation
             f_in_and_out[i] += lag[j+d] * buf[i+d+j];
         } // interpolation
         // printf("Setting i=%d with buf values from %d to %d\n", i, i, i+2*d+1);
+        // printf("%5.2e\t", f_in_and_out[i]);
     } // for each internal dof
+    // printf("\n");
+}
+
+
+/*
+ * Computes the advection with polynomial extension of 
+ * the boundary condition. 
+ *
+ * @param[in] coeff the speed of the advection
+ * @param[in] N the number of intervals
+ * @param[in] i0 (int) : index displacement of the advection
+ * @param[in] lag (double*) : array of size 2d+2, coefficients of Lagrange polynomials
+ * @param[in] d (int) : stencil width of the interpolation (2d+2 points)
+ * @param[in] kb (int) : order of polynomial extension (0 constant, 1 linear...)
+ * @param[in] extrap (double*) : size kb+1, recursion coefficients (kb=0 -> [1.0], kb=1 -> [-1.,2.], ...)
+ * @param[out] buf : already-initialized temporary variable, same size as f_in_and_out
+ * @param[out] f_in_and_out : array of size N+2d
+ *
+ */
+void adv1d_non_periodic_lag_semi_lag_advect_classical_invert (
+        double coeff, int N, int i0, double* lag, int d, 
+        int kb, double* extrap,
+        double* buf, double* f_in_and_out) {
+    int i=0, j=0, maxi=0, mini=0;
+    bool invert = (coeff < 0.0);
+
+    double* f_right = (double*) malloc ((N+1)*sizeof(double));
+    if (invert) {
+        for (i=0; i<=N; ++i) {
+            f_right [i] = f_in_and_out [N-i];
+        }
+        // i0 = -i0-1;
+        // alpha = 1.0-alpha;        
+    } else {
+        for (i=0; i<=N; ++i) {
+            f_right [i] = f_in_and_out [i];
+        }
+    }
+
+    mini = 0;
+    maxi = imin(N+2*d+1,d-i0-1);
+    // printf("inflow : going from %d to %d\n", mini, maxi);
+    for (i=mini; i<=maxi; i++) { // filling the inflow condition (0.0)
+        buf[i] = 0.0;
+    }
+    mini = maxi+1;
+    maxi = N+d+imin(-i0,d+1); // respects the size of f and buf. min(N+d-i0, N+1+2d)
+    // printf("middle : going from %d to %d,  f from %d to %d\n", mini, maxi, mini-d+i0, maxi-d+i0);
+    for (i=mini; i<=maxi; i++) { // values of f^{n}
+        buf[i] = f_right[i-(d-i0)];
+    }
+    mini = maxi+1;
+    maxi = N+2*d+1;
+    // printf("end : going from %d to %d\n", mini, maxi);
+    for (i=maxi; i<=maxi; i++) { // remaining terms of the buffer
+        buf[i] = 0.0;
+        for (j=0; j<kb+1; ++j) { // polynomial extrapolation of order kb 
+            // printf("extrap i=%d, buf[%d]\n", i, i-kb-1+j);
+            buf[i] += extrap[j] * buf[i-kb-1+j];
+        }
+        // printf("Setting buf[%d] to %f\n", i, buf[i]);
+    }
+
+    // advection part : Lagrange interpolation 
+    for (i = 0; i <= N; i++) { // for each internal dof
+        f_right[i] = 0.;
+        for (j = -d; j <= d+1; j++) { // interpolation
+            f_right[i] += lag[j+d] * buf[i+d+j];
+        } // interpolation
+        // printf("Setting i=%d with buf values from %d to %d\n", i, i, i+2*d+1);
+    } // for each internal dof
+    
+    if (invert) {
+        for (i=0; i<=N; ++i) {
+            f_in_and_out [i] = f_right [N-i];
+        }
+    } else {
+        for (i=0; i<=N; ++i) {
+            f_in_and_out [i] = f_right [i];
+        }
+    }
+    free (f_right);
 }
 
 /*
@@ -390,8 +482,6 @@ void adv1d_non_periodic_lag_compute(adv1d_non_periodic_lag_t* adv,
     int i0;
     int kb;
     double alpha;
-
-    // printf("\t\t\tcoucou 1, d = %d\n", adv->d);
     
     d = adv->d;
     N = adv->N;
@@ -399,25 +489,10 @@ void adv1d_non_periodic_lag_compute(adv1d_non_periodic_lag_t* adv,
     max = adv->max;
     v = adv->v;
     kb = adv->kb;
-    // printf("Lag d=%d  N=%d v=%1.20lg\n",adv->d,adv->N,adv->v);
-    
-    // printf("\t\t\tcoucou 2\n");
-    // adv1d_non_periodic_lag_compute_i0_and_alpha(v, dt, min, max, N, &i0, &alpha);
-    // adv1d_non_periodic_lag_compute_lag(alpha, d, adv->lag);
-    // printf("\t\t\tcoucou 3, d = %d\n", adv->d);
     adv1d_compute_i0_and_alpha(v, dt, min, max, N, &i0, &alpha);
-    // printf("\t\t\tcoucou 3, d = %d\n", adv->d);
-    // printf("\t\t\tcoucou 3\n");
     // printf("Lag d=%d  N=%d v=%1.20lg alpha=%f i0=%d\n",adv->d,adv->N,adv->v, alpha, i0);
     adv1d_compute_lag(alpha, d, adv->lag);
-    // printf("\t\t\tcoucou 4, d = %d\n", adv->d);
-    // printf("\t\t\tcoucou 4\n");
-    // printf("Lag : ");
-    // for (int k=0; k<=2*adv->d+1; ++k)
-    //     printf("%f ",adv->lag[k]);
-    // printf("\n");
     adv1d_non_periodic_lag_semi_lag_advect_classical(v, N, i0, adv->lag, d, kb, adv->extrap, adv->buf, f_in_and_out);
-    // printf("\t\t\tcoucou 5, d = %d\n", adv->d);
 }
 
 
@@ -503,24 +578,28 @@ void advection_x(parallel_stuff* par_variables, adv1d_x_t* adv, double dt, doubl
         adv1d_periodic_lag_t* chosen_adv = adv->periodic_adv;
         tmp = chosen_adv->v;
         for (i_v = 0; i_v < par_variables->size_v_par_v; i_v++){
-            for (i_x = 0; i_x < par_variables->size_x_par_v; i_x++)
+            for (i_x = 0; i_x < par_variables->size_x_par_v; i_x++) {
                 par_variables->f_1d[i_x] = par_variables->f_parallel_in_v[i_x][i_v];
+            }
             chosen_adv->v = tmp*v[i_v+par_variables->global_indices[1]];
             adv1d_periodic_lag_compute(chosen_adv, par_variables->f_1d, dt);
-            for (i_x = 0; i_x < par_variables->size_x_par_v; i_x++)
+            for (i_x = 0; i_x < par_variables->size_x_par_v; i_x++) {
                 par_variables->f_parallel_in_v[i_x][i_v] = par_variables->f_1d[i_x];
+            }
         chosen_adv->v = tmp;
         }
     } else {
         adv1d_non_periodic_lag_t* chosen_adv = adv->non_periodic_adv;
         tmp = chosen_adv->v;
         for (i_v = 0; i_v < par_variables->size_v_par_v; i_v++){
-            for (i_x = 0; i_x < par_variables->size_x_par_v; i_x++)
+            for (i_x = 0; i_x < par_variables->size_x_par_v; i_x++) {
                 par_variables->f_1d[i_x] = par_variables->f_parallel_in_v[i_x][i_v];
+            }
             chosen_adv->v = tmp*v[i_v+par_variables->global_indices[1]];
             adv1d_non_periodic_lag_compute(chosen_adv, par_variables->f_1d, dt);
-            for (i_x = 0; i_x < par_variables->size_x_par_v; i_x++)
+            for (i_x = 0; i_x < par_variables->size_x_par_v; i_x++) {
                 par_variables->f_parallel_in_v[i_x][i_v] = par_variables->f_1d[i_x];
+            }
         }
         chosen_adv->v = tmp;
     }

@@ -264,7 +264,7 @@ void apply_remap_2d(parallel_stuff* par_variables, remap_plan_2d* plan) {
             // the index at that point.
             for (i = min_values[0] ; i <= par_variables->local_indices[0] ; i++)
                 for (j = min_values[1] ; j <= par_variables->local_indices[1] ; j++)
-                            plan->send_buf[loc++] = data_in[i][j];
+                    plan->send_buf[loc++] = data_in[i][j];
         }
     }
     MPI_Alltoallv(plan->send_buf, plan->send_counts, plan->send_displs, MPI_DOUBLE_PRECISION,
@@ -291,7 +291,7 @@ void apply_remap_2d(parallel_stuff* par_variables, remap_plan_2d* plan) {
             global_to_local_2d(par_variables, box.i_max, box.j_max);
             for (i = min_values[0] ; i <= par_variables->local_indices[0] ; i++)
                 for (j = min_values[1] ; j <= par_variables->local_indices[1] ; j++)
-                            data_out[i][j] = plan->recv_buf[loc++];
+                    data_out[i][j] = plan->recv_buf[loc++];
         }
     }
 }

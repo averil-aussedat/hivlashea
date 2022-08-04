@@ -76,7 +76,7 @@ void update_spatial_density(parallel_stuff* par_variables, double *x, int sizex,
  */
 double compute_mass(double *x, int sizex, double* rho) {
     double delta_x = (x[sizex - 1] - x[0]) / (double)(sizex - 1);
-    double mass = 0;
+    double mass = 0.0;
     // Integration: trapezius method
     mass += rho[0] / 2.;
     for (size_t i_x = 1; i_x < sizex - 1; i_x++) {
@@ -118,7 +118,7 @@ void update_current(parallel_stuff* par_variables, double *x, int sizex,
         for (size_t i_v = 1; i_v < par_variables->size_v_par_x-1; i_v++) {
             par_variables->send_buf[pos] += par_variables->f_parallel_in_x[i_x][i_v] * v[i_v];
         }
-        par_variables->send_buf[pos] += par_variables->f_parallel_in_x[i_x][par_variables->size_v_par_x]*0.5*v[par_variables->size_v_par_x-1];
+        par_variables->send_buf[pos] += par_variables->f_parallel_in_x[i_x][par_variables->size_v_par_x-1]*0.5*v[par_variables->size_v_par_x-1];
         par_variables->send_buf[pos] *= delta_v;
     	pos++;
     }

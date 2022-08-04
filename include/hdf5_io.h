@@ -240,23 +240,23 @@ void xdmf_set_time(FILE* xdmf_file, double time) {
 void plot_f_cartesian_mesh_2d(int iplot, const void* f, mesh_1d mesh1, mesh_1d mesh2,
         double time, char* array_name, char* folder) {
     hid_t hfile_id;
-    char cplot[6]; // 4 digits + '\0' [+1 more to avoid a warning in sprintf]
+    // char cplot[6]; // 4 digits + '\0' [+1 more to avoid a warning in sprintf]
     char mesh_name[111];
     char file_name[117];
     int nnodes_x1 = mesh1.size;
     int nnodes_x2 = mesh2.size;
     hsize_t array_dims[2] = { nnodes_x1, nnodes_x2 };
     
-    if (iplot < 10)
-        sprintf(cplot, "000%d", iplot & 0xf); // 0xf = 15
-    else if (iplot < 100)
-        sprintf(cplot, "00%d", iplot & 0x7f); // 0x7f = 127
-    else if (iplot < 1000)
-        sprintf(cplot, "0%d", iplot & 0x3ff); // 0x3ff = 1023
-    else
-        sprintf(cplot, "%d", iplot & 0x3fff); // 0x3fff = 16383
-    cplot[4] = 0;
-    sprintf(mesh_name, "cartesian_mesh-%s", array_name);
+    // if (iplot < 10)
+    //     sprintf(cplot, "000%d", iplot & 0xf); // 0xf = 15
+    // else if (iplot < 100)
+    //     sprintf(cplot, "00%d", iplot & 0x7f); // 0x7f = 127
+    // else if (iplot < 1000)
+    //     sprintf(cplot, "0%d", iplot & 0x3ff); // 0x3ff = 1023
+    // else
+    //     sprintf(cplot, "%d", iplot & 0x3fff); // 0x3fff = 16383
+    // cplot[4] = 0;
+    // sprintf(mesh_name, "cartesian_mesh-%s", array_name);
     
     if (iplot == 1) {
 		double (*x1)[nnodes_x2] = malloc((nnodes_x1) * sizeof *x1); 
@@ -281,9 +281,11 @@ void plot_f_cartesian_mesh_2d(int iplot, const void* f, mesh_1d mesh1, mesh_1d m
         hdf5_ser_file_close(hfile_id);
     }
     // Creation of the hdf5 file for the f array.
-    sprintf(file_name, "%s%s%s.xmf", folder, array_name, cplot);
+    // sprintf(file_name, "%s%s%s.xmf", folder, array_name, cplot);
+    sprintf(file_name, "%s%s%06d.xmf", folder, array_name, iplot);
     FILE* xdmf_file = xdmf_open_2d(file_name, mesh_name, nnodes_x1, nnodes_x2);
-    sprintf(file_name, "%s%s%s", folder, array_name, cplot);
+    // sprintf(file_name, "%s%s%s", folder, array_name, cplot);
+    sprintf(file_name, "%s%s%06d", folder, array_name, iplot);
     xdmf_set_time(xdmf_file, time);
     xdmf_array_2d(file_name, array_dims, f, "values", xdmf_file, "Node");
     xdmf_close(&xdmf_file);

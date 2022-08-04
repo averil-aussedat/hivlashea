@@ -40,20 +40,20 @@ void diag_1d(double *E, double *x, int sizex, char* array_name, char* folder, in
     // int N = sizex - 1;
     // double dx = (x[N] - x[0])/(double)N;
     
-    char cplot[6]; // 4 digits + '\0' [+1 more to avoid a warning in sprintf]
+    // char cplot[6]; // 4 digits + '\0' [+1 more to avoid a warning in sprintf]
+    // if (iplot < 10) {
+    //     sprintf(cplot, "000%d", iplot & 0xf); // 0xf = 15
+    // } else if (iplot < 100) {
+    //     sprintf(cplot, "00%d", iplot & 0x7f); // 0x7f = 127
+    // } else if (iplot < 1000) {
+    //     sprintf(cplot, "0%d", iplot & 0x3ff); // 0x3ff = 1023
+    // } else {
+    //     sprintf(cplot, "%d", iplot & 0x3fff); // 0x3fff = 16383
+    // }
+    // cplot[4] = 0;
+    // sprintf(str,"%s%s%s.dat",folder,array_name,cplot);
 
-    if (iplot < 10) {
-        sprintf(cplot, "000%d", iplot & 0xf); // 0xf = 15
-    } else if (iplot < 100) {
-        sprintf(cplot, "00%d", iplot & 0x7f); // 0x7f = 127
-    } else if (iplot < 1000) {
-        sprintf(cplot, "0%d", iplot & 0x3ff); // 0x3ff = 1023
-    } else {
-        sprintf(cplot, "%d", iplot & 0x3fff); // 0x3fff = 16383
-    }
-    cplot[4] = 0;
-
-    sprintf(str,"%s%s%s.dat",folder,array_name,cplot);
+    sprintf(str,"%s%s%06d.dat",folder,array_name,iplot);
     file=fopen(str,"w");
     fprintf(file,"%f\n", time);
     for (i=0;i<sizex;i++){
@@ -64,8 +64,8 @@ void diag_1d(double *E, double *x, int sizex, char* array_name, char* folder, in
 }
 
 
-void diag_f(parallel_stuff* par, int i_hdf5, 
-		mesh_1d mesh1, mesh_1d mesh2, double time, char* array_name, char* folder){
+void diag_f(parallel_stuff* par, int i_hdf5, mesh_1d mesh1, mesh_1d mesh2, 
+		double time, char* array_name, char* folder, bool is_periodic){
 	
 	double (*f)[mesh2.size] = malloc((mesh1.size) * sizeof *f); // Array allocated contiguously for hdf5 outputs.
 	//double *f = malloc((mesh1.size) * (mesh2.size) *sizeof(double)); // Array allocated contiguously for hdf5 outputs.
@@ -87,16 +87,18 @@ void diag_f(parallel_stuff* par, int i_hdf5,
     }    
     pos = 0;
     for (i = 0; i < par->size_x_par_x; i++) {
-        for (j = 0; j < mesh2.size-1; j++) {
+        for (j = 0; j < mesh2.size; j++) {
             f1d[pos++] = par->f_parallel_in_x[i][j];
             minf = min (minf, f1d[pos-1]);
             maxf = max (maxf, f1d[pos-1]);
         }
-        f1d[pos++] = par->f_parallel_in_x[i][0];    
+        if (is_periodic) {
+            f1d[pos++] = par->f_parallel_in_x[i][0];
+        }
         minf = min (minf, f1d[pos-1]);
         maxf = max (maxf, f1d[pos-1]);
     }
-    printf("[diag_f] (min,max) %s : %f, %f.\n", array_name, minf, maxf);
+    printf("[diag_f] (min,max) %s : %e, %e.\n", array_name, minf, maxf);
 //     printf("par->recv_counts=\n");
 //     for(i=0;i<par->mpi_world_size;i++){
 //     	printf("%d\n",par->recv_counts[i]);
@@ -127,14 +129,15 @@ void diag_f(parallel_stuff* par, int i_hdf5,
     }
 	if (par->mpi_rank == 0){
 		//plot_f_cartesian_mesh_2d(i_hdf5, f[0], mesh1, mesh2, time, array_name, folder);
-    	for (i=0;i< (mesh2.size);i++){
-    		f[mesh1.size-1][i] = f[0][i];
-    	}		
+        if (is_periodic) {
+            for (i=0;i< (mesh2.size);i++){ 
+                f[mesh1.size-1][i] = f[0][i];
+            }		
+        }
 //     	for (i=0;i< (mesh2.size);i++){
 //     	for (j=0;j< (mesh1.size);j++){
 //     		printf("%d %d %1.20lg\n",j,i,f[j][i]);
 //     	}}	
-		// plot_f_cartesian_mesh_2d(i_hdf5, f[0], mesh1, mesh2, time, array_name, folder);
 		plot_f_cartesian_mesh_2d(i_hdf5, f[0], mesh1, mesh2, time, array_name, folder);
 	}		
 
