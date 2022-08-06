@@ -28,7 +28,7 @@
 #define VERBOSE True // comment to hide terminal output
 
 int advection1D_test () {
-    int N = 50; // number of intervals/cells
+    int N = 99; // number of intervals/cells
     int i=0; // index
     adv1d_non_periodic_lag_t* adv = (adv1d_non_periodic_lag_t*)malloc(sizeof(adv1d_non_periodic_lag_t));
 
@@ -104,7 +104,7 @@ int advection1D_test () {
  */
 double solverE_test (int sizex) {
     int i=0;
-    double lambda = 0.1, nu=1.0, dx = (1.0 - (-1.0))/(sizex-1);
+    double lambda = 1.0, nu=1.0, dx = (1.0 - (-1.0))/(sizex-1);
     double * x = (double*)malloc(sizex*sizeof(double));
 
     for (i=0; i<sizex; ++i) { // uniform mesh from -1. to 1. with sizex points, i.e sizex-1 cells 
@@ -125,7 +125,7 @@ double solverE_test (int sizex) {
             Mass_e = 0.0;
             for (i=0; i<sizex; ++i) {
                 current[i] = 0.0; // conjugated with Mass_e=0, yields no update of E in +-1            
-                rho[i] = lambda*lambda * cos(x[i]); // pair function
+                rho[i] = cos(x[i]); // pair function
                 E[i] = 0.0; // initially null !!!! set boundary conditions accordingly
                 realE[i] = sin(x[i]); // analytical solution
             }
@@ -171,8 +171,7 @@ int main(int argc, char *argv[]) {
 
     FILE* errfile = fopen("test_errors.dat", "w");
     for (int sizex=100; sizex<=1000; sizex+=100) {
-
-        fprintf(errfile, "%f\t%.10f\n", 2.0/((sizex-1)-1), solverE_test (sizex-1));
+        fprintf(errfile, "%f\t%.10f\n", 2.0/(sizex-1), solverE_test (sizex));
     }
 
     // advection1D_test ();  

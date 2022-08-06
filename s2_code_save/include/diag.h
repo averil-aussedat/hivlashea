@@ -33,7 +33,7 @@ void diag_energy(double *E, double *x, int sizex, double *val){
  * @param[in] iplot : id of the plot (number)
  * @param[in] time : simulation physical time
  */
-void diag_1d(double *func, double *x, int sizex, char* array_name, char* folder, int iplot, double time) {
+void diag_1d(double *E, double *x, int sizex, char* array_name, char* folder, int iplot, double time) {
     int i;
     FILE* file;
     char str[256];
@@ -57,7 +57,7 @@ void diag_1d(double *func, double *x, int sizex, char* array_name, char* folder,
     file=fopen(str,"w");
     fprintf(file,"%f\n", time);
     for (i=0;i<sizex;i++){
-    	fprintf(file,"%1.20lg %1.20lg\n", x[i],func[i]);
+    	fprintf(file,"%1.20lg %1.20lg\n", x[i],E[i]);
     	//printf("%1.20lg %1.20lg\n", x[i],E[i]);
     }
     fclose(file);

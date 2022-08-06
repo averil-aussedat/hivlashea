@@ -1,0 +1,60 @@
+meshx:
+  unif:
+    min: -1.
+    max: 1.
+    N: 63
+
+meshve:
+  unif:
+    min: -50.
+    max: 50.
+    N: 31
+
+meshvi:
+  unif:
+    min: -10.
+    max: 10.
+    N: 31
+
+f0e:
+  userDefined:
+    definition: (x, v) -> exp(-v^2 / 2.) / sqrt(2. * pi) # Maxwellian
+
+f0i:
+  userDefined:
+    definition: (x, v) -> v^2 * (1. + a * cos(mode * x)) * exp(-v^2 / (2.*sigma^2)) / (sqrt(2. * pi)*sigma^3) # TSI
+    parameters:
+      a: 0.01
+      mode: 0.29919930034188507033 #mode=2*Pi/L, L=21
+      sigma: 0.5
+
+E0:
+  userDefined:
+    definition: (x) -> 0
+
+time_parameters:
+  dt: 0.001 # must be <= (around) min(dx)/max(v)
+  num_iteration: 100
+
+adv_x:
+  adv1d_non_periodic_lag:
+    d: 2
+    kb: 3
+  v: 1. # d_t(f_{i/e}) + v*d_x(f_{i/e}) = 0 [parameter value is 1]
+
+adv_ve:
+  adv1d_non_periodic_lag:
+    d: 2
+    kb: 3
+  v: -10.0 # d_t(f_i) - 1/mu*E*d_v(f_i) = 0 [parameter value is -1/mu]
+
+adv_vi:
+  adv1d_non_periodic_lag:
+    d: 2
+    kb: 3
+  v: 1. # d_t(f_i) + E*d_v(f_i) = 0 [parameter value is 1]
+
+simulation_parameters:
+  lambda: 1.0
+  nu: 0.
+

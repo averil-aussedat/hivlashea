@@ -185,7 +185,7 @@ void update_E_from_rho_and_current_1d_nbc (poisson_solver_direct p, double dt,
  * @param[out] current : int_{v} v (fe(t,x,v) - fi(t,x,v)) dv   for each xi
  * @param[out] E : electric field for each xi
  */
-void update_E_from_rho_and_current_1d_cb (poisson_solver_direct p, double dt,
+void update_E_from_rho_and_current_1d (poisson_solver_direct p, double dt,
         double Mass_e, double* rho, double* current, double* E) {
 
     // printf("Enters Poisson solver\n");
@@ -193,28 +193,19 @@ void update_E_from_rho_and_current_1d_cb (poisson_solver_direct p, double dt,
     int Nx = p.sizex - 1; // number of intervals. Index from [0 to Nx]
     int i; // running index
     double dx = (p.x[Nx] - p.x[0]) / (double)Nx; 
-    // printf("dx : %f\n", dx);
     double nu = p.nu;
     double lambda = p.lambda;
     double J_left  = current[0];
     double J_right = current[Nx];
     double factor = 0.5 * dx / (lambda * lambda); // 0.5 from the expression of E and from trapezes
     double convex_factor = 0.0; 
-    double mass_rho_minus=0.0; // Quadrature for   1/lambda^2 int_{-1}^{x_i} rho(x)dx.
-    double mass_rho_plus =0.0; // Quadrature for - 1/lambda^2 int_{x_i}^{ 1} rho(x)dx
-
-    double* Eforward = (double*)malloc (p.sizex*sizeof(double));
-    double* Ebackward = (double*)malloc (p.sizex*sizeof(double));
+    double mass_rho_minus=0.0; // Quadrature for  int_{-1}^{x_i} rho(x)dx.
+    double mass_rho_plus =0.0; // Quadrature for -int_{x_i}^{ 1} rho(x)dx
 
     // Boundary conditions
     E_xmin = E[0]  + dt/(lambda*lambda) * (-0.5 * nu * Mass_e - J_left);
     E_xmax = E[Nx] + dt/(lambda*lambda) * ( 0.5 * nu * Mass_e - J_right);
-
-    E_xmin = 0.0;
-    E_xmax = 0.0;
-
     E[0] = E_xmin; E[Nx] = E_xmax;  
-
     // printf("[update_E_from_rho_and_current_1d] |E(1) + E(-1)| : %6.9f\n", fabs(E_xmin+E_xmax));
     for (i=1; i<Nx; ++i) { E[i] = 0.0; } // reset the electric field
     // Linear-time integration with trapezes method (order 2)
@@ -230,35 +221,6 @@ void update_E_from_rho_and_current_1d_cb (poisson_solver_direct p, double dt,
         // printf("%d and %d : %f\n", i, Nx-i, convex_factor);
     }
 
-    Eforward[0] = E_xmin;
-    for (int ii=1; ii<p.sizex; ++ii) {
-        Eforward[ii] = Eforward[ii-1] + factor * (rho[ii-1] + rho[ii]);
-    }
-
-    Ebackward[p.sizex-1] = E_xmax;
-    for (int ii=p.sizex-2; ii>=0; --ii) {
-        Ebackward[ii] = Ebackward[ii+1] - factor * (rho[ii+1] + rho[ii]);
-    }
-
-    double errf=0.0, errb=0.0, errc=0.0, mmu = 0.0;
-    for (int ii=0; ii<p.sizex; ++ii) {
-        errf = fmax(errf, fabs(Eforward[ii] - E[ii]));
-        errb = fmax(errb, fabs(Ebackward[ii] - E[ii]));
-        // mmu = 1.0 - (double)ii/(double)(p.sizex-1);
-        mmu = (double)ii/(double)(p.sizex-1);
-        errc = fmax(errc, fabs(((1.0 - mmu) * Eforward[ii] + mmu * Ebackward[ii]) - E[ii]));
-
-        E[ii] = (1.0 - mmu) * Eforward[ii] + mmu * Ebackward[ii];
-    }
-    // printf("errf : %e, errb : %e, errc : %e\n", errf, errb);
-
-    // double err_dxE = 0.0;
-    // for (i=1; i<Nx; ++i) {
-    //     printf("Ei : %e, rho_i : %e, err : %e \n", E[i], rho[i], lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
-    //     err_dxE = fmax(err_dxE, lambda*lambda*(E[i+1] - E[i-1])/(2*dx) - rho[i]);
-    // }
-    // printf("Err_dxE : %e\n", err_dxE);
-
     // printf("Mass e : %e, Jleft : %e, Jright : %e, evolution : (%e,%e), Exmin/max : (%e, %e).\n", Mass_e, J_left, J_right, 
     //     dt/(lambda*lambda) * (-0.5 * nu * Mass_e - J_left), dt/(lambda*lambda) * ( 0.5 * nu * Mass_e - J_right), E_xmin, E_xmax);
 
@@ -267,40 +229,6 @@ void update_E_from_rho_and_current_1d_cb (poisson_solver_direct p, double dt,
     // E[0] = mass_rho_plus; E[Nx] = mass_rho_minus;
 
     // printf("Leaves Poisson solver\n");
-
-    free(Eforward);
-    free(Ebackward);
-}
-
-/*
- * "solver" with trapezes formula. Solves
- *  E(x) = E(-1) - 1/(lambda*lambda) \int_{x}^{ 1} rho(y) dy
- *  E(x) = E( 1) + 1/(lambda*lambda) \int_{-1}^{x} rho(y) dy
- *  and takes a convex combination of both.
- *
- * @param[in] N : number of intervals of the space mesh
- * @param[in] dx : space step
- * @param[in] lambda : Debye length, real
- * @param[out] rho :  int_{v}   (fe(t,x,v) - fi(t,x,v)) dv   for each xi
- * @param[out] E : electric field for each xi
- */
-void update_E_from_rho_and_current_1d (int N, double dx, double lambda, double* rho, double* E) {
-
-    int i=0, i0 = (int)(N/2); // middle of the domain 
-    double factor = 0.5 * dx / (lambda*lambda); // 0.5 from trapezes
-
-    if (2*i0 != N) {
-        printf("\n\n[update_E_from_rho_and_current_1d] WARNING : 0 n'appartient pas au maillage. Milieu i0 = %d, N=%d.\n\n", i0, N);
-    }
-
-    // Boundary conditions
-    E[i0] = 0.0; // not even needed since it is never updated and E[0]=0 at t=0, but more safe
-    for (i=i0+1; i<=N; ++i) {
-        E[i] = E[i-1] + factor * (rho[i-1] + rho[i]);
-    }
-    for (i=i0-1; i>=0; --i) {
-        E[i] = E[i+1] - factor * (rho[i+1] + rho[i]);
-    }
 }
 
 #endif // ifndef SELA_VP_1D1V_CART_POISSON_DIRECT

@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
     // Splitting
     sll_t_splitting_coeff split;
     double delta_t = 0., sub_delta_t = 0.0;
-    int num_iteration = 0, num_subiterations=1; // sub_iter = 1 -> no sub_iter. Set later in the code
+    int num_iteration = 0, num_subiterations=1; // sub_iter = 1 -> no sub_iter
     // Advection
     adv1d_x_t *adv_xe,*adv_xi;
     adv1d_v_t *adv_ve,*adv_vi;
@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
     // Outputs
     double ee; // electric energy
     // int plot_frequency=1; // 1=every loop
-    int plot_frequency=20; // 1=every loop
+    int plot_frequency=50; // 1=every loop
 
     // local variables
     int itime=0, subi=0;
@@ -182,6 +182,8 @@ int main(int argc, char *argv[]) {
 	    splitting(PC_get(conf, ".time_parameters"), &split);
 	    delta_t = split.dt;
 	    num_iteration = split.num_iteration;
+        // TODO initialize num_subiterations
+        sub_delta_t = delta_t / (double)num_subiterations;
     } else {
         ERROR_MESSAGE("#Missing time_parameters in %s\n", argv[1]);
     }
@@ -246,10 +248,6 @@ int main(int argc, char *argv[]) {
         ERROR_MESSAGE("#Missing adv_vi in %s\n", argv[1]);
     }
 
-    // // setting the subiteration parameter to ~1/mu 
-    // num_subiterations = imax((int)floor(fabs(adv_ve->non_periodic_adv->v)),1); 
-    // sub_delta_t = delta_t / (double)num_subiterations;
-
     #ifdef VERBOSE
         if (mpi_rank==0) {
             printf("------------- Parameters -------------\n");
@@ -282,9 +280,7 @@ int main(int argc, char *argv[]) {
         // Compute electric field at initial time
         update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari,
                 &Mass_e, rhoe, rhoi, rho, currente, currenti, current, is_periodic);
-        // update_E_from_rho_and_current_1d(solver, delta_t, Mass_e, rho, current, E);
-        update_E_from_rho_and_current_1d (meshx.size-1, (meshx.max-meshx.min)/(meshx.size-1), solver.lambda, rho, E);
-
+        update_E_from_rho_and_current_1d(solver, delta_t, Mass_e, rho, current, E);
     } else {
         // Read electric field (at initial time)
         if (PC_get(conf, ".E0")) {
@@ -337,8 +333,7 @@ int main(int argc, char *argv[]) {
         	advection_x(&pare, adv_xe, 0.5*sub_delta_t, meshve.array); // d_t(f_e) + v*d_x(f_e) = 0
 
             update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari, &Mass_e, rhoe, rhoi, rho, currente, currenti, current, is_periodic);
-            // update_E_from_rho_and_current_1d(solver, sub_delta_t, Mass_e, rho, current, E); // lambda^2 d_x E = rho
-            update_E_from_rho_and_current_1d (meshx.size-1, (meshx.max-meshx.min)/(meshx.size-1), solver.lambda, rho, E);
+            update_E_from_rho_and_current_1d(solver, sub_delta_t, Mass_e, rho, current, E); // lambda^2 d_x E = rho
             advection_v(&pare, adv_ve, sub_delta_t, E); // d_t(f_e) - 1/mu*E*d_v(f_e) = 0
 
         	advection_x(&pare, adv_xe, 0.5*sub_delta_t, meshve.array); // d_t(f_e) + v*d_x(f_e) = 0
@@ -356,34 +351,7 @@ int main(int argc, char *argv[]) {
         // printf("before rho/E update\n");
         // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
         update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari, &Mass_e, rhoe, rhoi, rho, currente, currenti, current, is_periodic);
-        // update_E_from_rho_and_current_1d(solver, sub_delta_t, Mass_e, rho, current, E); // lambda^2 d_x E = rho
-        update_E_from_rho_and_current_1d (meshx.size-1, (meshx.max-meshx.min)/(meshx.size-1), solver.lambda, rho, E);
-
-        if (itime == num_iteration-1) {
-            double err_dxE = 0.0, dx = (meshx.max-meshx.min)/(meshx.size-1);
-            for (int i=0; i<meshx.size-1; ++i) {
-                printf("Ei : %e, rho_i : %e, err : %e \n", E[i], rho[i], lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
-                err_dxE = fmax(err_dxE, lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
-            }
-            printf("Err_dxE : %e\n", err_dxE);
-
-            printf("E : ");
-            for (int i=0; i<meshx.size; ++i) {
-                printf("%e\t", E[i]);
-                // printf("Ei : %e, rho_i : %e, err : %e \n", E[i], rho[i], lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
-                // err_dxE = fmax(err_dxE, lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
-            }
-            printf("\n");
-
-            printf("rho : ");
-            for (int i=0; i<meshx.size; ++i) {
-                printf("%e\t", rho[i]);
-                // printf("Ei : %e, rho_i : %e, err : %e \n", E[i], rho[i], lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
-                // err_dxE = fmax(err_dxE, lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
-            }
-            printf("\n");
-        }
-
+        update_E_from_rho_and_current_1d(solver, sub_delta_t, Mass_e, rho, current, E); // lambda^2 d_x E = rho
         source_term(&pare, &pari, &meshve, &meshvi, nu, delta_t); // d_t f_i = nu * f_e
         // printf("adv v i\n");
         // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
@@ -436,22 +404,6 @@ int main(int argc, char *argv[]) {
         diag_1d (rho, meshx.array, meshx.size, "rho", OUTFOLDER, num_iteration, num_iteration*delta_t);
         printf("[Proc %d] Done plotting terminal values.\n", mpi_rank);
     #endif 
-
-    printf("E : ");
-    for (int i=0; i<meshx.size; ++i) {
-        printf("%e\t", E[i]);
-        // printf("Ei : %e, rho_i : %e, err : %e \n", E[i], rho[i], lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
-        // err_dxE = fmax(err_dxE, lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
-    }
-    printf("\n");
-
-    printf("rho : ");
-    for (int i=0; i<meshx.size; ++i) {
-        printf("%e\t", rho[i]);
-        // printf("Ei : %e, rho_i : %e, err : %e \n", E[i], rho[i], lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
-        // err_dxE = fmax(err_dxE, lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
-    }
-    printf("\n");
     
     // Be clean (-:
     fclose(file_diag_energy);
