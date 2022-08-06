@@ -119,8 +119,8 @@ int main(int argc, char *argv[]) {
     double *E;
     // Splitting
     sll_t_splitting_coeff split;
-    double delta_t = 0., sub_delta_t = 0.0;
-    int num_iteration = 0, num_subiterations=1; // sub_iter = 1 -> no sub_iter. Set later in the code
+    double delta_t = 0.;
+    int num_iteration = 0; 
     // Advection
     adv1d_x_t *adv_xe,*adv_xi;
     adv1d_v_t *adv_ve,*adv_vi;
@@ -129,11 +129,12 @@ int main(int argc, char *argv[]) {
     
     // Outputs
     double ee; // electric energy
+    double mm; // mass difference 
     // int plot_frequency=1; // 1=every loop
     int plot_frequency=10; // 1=every loop
 
     // local variables
-    int itime=0, subi=0;
+    int itime=0;
 
     #ifdef VERBOSE
         printf("Welcome in vp_1d1v_cart_2sp_cemracs2022_two_vmeshes.\n");
@@ -246,13 +247,6 @@ int main(int argc, char *argv[]) {
         ERROR_MESSAGE("#Missing adv_vi in %s\n", argv[1]);
     }
 
-    // setting the subiteration parameter to ~1/mu 
-    if (adv_ve->periodic_adv) {
-        num_subiterations = imax((int)floor(fabs(adv_ve->periodic_adv->v)),1); 
-    } else {
-        num_subiterations = imax((int)floor(fabs(adv_ve->non_periodic_adv->v)),1); 
-    }
-    sub_delta_t = delta_t / (double)num_subiterations;
 
     #ifdef VERBOSE
         if (mpi_rank==0) {
@@ -262,7 +256,6 @@ int main(int argc, char *argv[]) {
             show_mesh1d (&meshve, "meshve");
 
             printf("Final time %f, %d iterations (delta t=%f).\n", split.dt*split.num_iteration, split.num_iteration, split.dt);
-            printf("Subiterations : %d (sub delta t=%f).\n", num_subiterations, sub_delta_t);
             printf("lambda = %f, nu = %f.\n", lambda, nu);
 
             // show_adv (adv_xe->non_periodic_adv, "adv_xe");
@@ -314,6 +307,8 @@ int main(int argc, char *argv[]) {
     
     FILE* file_diag_energy = fopen("diag_ee.txt", "w");
     fprintf(file_diag_energy, "Time | Int(Ex^2)\n");
+    FILE* file_diag_mass   = fopen("diag_mm.txt", "w");
+    fprintf(file_diag_mass, "Time | mi - me - lambda^2 * (E(1)+E(-1))\n");
     for (itime = 0; itime < num_iteration; itime++) {
         // #ifdef VERBOSE
         //     printf("[Proc %d] Time step %d / %d.\n", mpi_rank, itime, num_iteration);
@@ -336,17 +331,6 @@ int main(int argc, char *argv[]) {
 
 
         // Strang splitting
-        // sub-iterations 
-        for (subi=0; subi<num_subiterations-1; ++subi) {
-        	advection_x(&pare, adv_xe, 0.5*sub_delta_t, meshve.array); // d_t(f_e) + v*d_x(f_e) = 0
-
-            update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari, &Mass_e, rhoe, rhoi, rho, currente, currenti, current, is_periodic);
-            // update_E_from_rho_and_current_1d(solver, sub_delta_t, Mass_e, rho, current, E); // lambda^2 d_x E = rho
-            update_E_from_rho_and_current_1d (meshx.size-1, (meshx.max-meshx.min)/(meshx.size-1), solver.lambda, rho, E);
-            advection_v(&pare, adv_ve, sub_delta_t, E); // d_t(f_e) - 1/mu*E*d_v(f_e) = 0
-
-        	advection_x(&pare, adv_xe, 0.5*sub_delta_t, meshve.array); // d_t(f_e) + v*d_x(f_e) = 0
-        }
 
         // Half time-step        
         // printf("adv x i 1\n");
@@ -354,13 +338,13 @@ int main(int argc, char *argv[]) {
     	advection_x(&pari, adv_xi, 0.5*delta_t, meshvi.array); // d_t(f_i) + v*d_x(f_i) = 0
         // printf("adv x e 1\n");
         // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
-        advection_x(&pare, adv_xe, 0.5*sub_delta_t, meshve.array); // d_t(f_e) + v*d_x(f_e) = 0
+        advection_x(&pare, adv_xe, 0.5*delta_t, meshve.array); // d_t(f_e) + v*d_x(f_e) = 0
 
 		// Full time-step
         // printf("before rho/E update\n");
         // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
         update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari, &Mass_e, rhoe, rhoi, rho, currente, currenti, current, is_periodic);
-        // update_E_from_rho_and_current_1d(solver, sub_delta_t, Mass_e, rho, current, E); // lambda^2 d_x E = rho
+        // update_E_from_rho_and_current_1d(solver, delta_t, Mass_e, rho, current, E); // lambda^2 d_x E = rho
         update_E_from_rho_and_current_1d (meshx.size-1, (meshx.max-meshx.min)/(meshx.size-1), solver.lambda, rho, E);
 
         // if (itime == num_iteration-1) {
@@ -394,19 +378,21 @@ int main(int argc, char *argv[]) {
     	advection_v(&pari, adv_vi, delta_t, E); // d_t(f_i) + E*d_v(f_i) = 0
         // printf("adv v e\n");
         // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
-    	advection_v(&pare, adv_ve, sub_delta_t, E); // d_t(f_e) - 1/mu*E*d_v(f_e) = 0
+    	advection_v(&pare, adv_ve, delta_t, E); // d_t(f_e) - 1/mu*E*d_v(f_e) = 0
 
         // Second half time step 
         // printf("adv x e 2\n");
         // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
-    	advection_x(&pare, adv_xe, 0.5*sub_delta_t, meshve.array); // advection in x
+    	advection_x(&pare, adv_xe, 0.5*delta_t, meshve.array); // advection in x
         // printf("adv x i 2\n");
         // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
     	advection_x(&pari, adv_xi, 0.5*delta_t, meshvi.array); // advection in x
 
         diag_energy(E, meshx.array, meshx.size, &ee); 
+        // diag_mass_conservation (rhoi, rhoe, lambda, E, &mm); 
         if (mpi_rank == 0) {
             fprintf(file_diag_energy, "%1.20lg %1.20lg\n", ((double)itime+1)*delta_t, ee);
+            fprintf(file_diag_mass, "%1.20lg %1.20lg\n", ((double)itime+1)*delta_t, ee);
         }
 
         // printf("End of time step :\n");
@@ -459,6 +445,7 @@ int main(int argc, char *argv[]) {
     
     // Be clean (-:
     fclose(file_diag_energy);
+    fclose(file_diag_mass);
     MPI_Finalize();
 
     #ifdef VERBOSE
