@@ -5,10 +5,82 @@
 #include "remap.h"          // type parallel_stuff
                             // function exchange_parallelizations
 #include "mesh_1d.h"        // type mesh_1d
-                      
-// double kinetic_energy (parallel_stuff* par, mesh_1d meshx, mesh_1d meshv, double factor) {
 
-// }
+
+/*
+ * Computes integral over x and v of factor*v^2/2 * f, with f contained in par.
+ *
+ */
+double kinetic_energy (parallel_stuff* par_variables, mesh_1d meshx, mesh_1d meshv, double factor) {
+    double energy = 0.0;
+
+    // to simplify
+    if (!par_variables->is_par_x)
+        exchange_parallelizations(par_variables);
+
+    for (size_t i_x = 0; i_x < par_variables->size_x_par_x; i_x++) {
+        for (size_t i_v = 0; i_v < par_variables->size_v_par_x; ++i_v) {
+            energy += par_variables->f_parallel_in_x[i_x][i_v] * meshv.array[i_v] * meshv.array[i_v];
+        }
+    }
+    energy *= (meshv.max-meshv.min)/(meshv.size-1.0); // * dv
+    energy *= (meshx.max-meshx.min)/(meshx.size-1.0); // * dx
+    energy *= factor * 0.5;
+
+    // MPI_Allreduce
+}
+
+/*
+ * Computes rho = int_{v=v_min}^{v_max} f(x,v) dv. If the current parallelization is on v,
+ * starts by changing it to parallel on x.
+ *
+ * @param[in, out] par_variables
+ * @param[in]      spatial_mesh (x[0..size_x-1], size_x) : mesh on x
+ * @param[in]      velocity_mesh (v[0..size_v-1], size_v) : mesh on v
+ * @param[out]     rho : charge density (integral of f on v)
+ */
+void update_spatial_density(parallel_stuff* par_variables, double *x, int sizex,
+        double *v, int sizev, double* rho, bool is_periodic) {
+    int pos;
+    
+    double delta_v = (v[sizev - 1] - v[0]) / (double)(sizev - 1);
+    
+    if (!par_variables->is_par_x)
+        exchange_parallelizations(par_variables);
+    
+    // Integration of f_local in v to generate linearised rho_local
+    pos = 0;
+    for (size_t i_x = 0; i_x < par_variables->size_x_par_x; i_x++) {
+        par_variables->send_buf[pos] = 0.;
+        // // Integration: left rectangles method
+        // for (size_t i_v = 0; i_v < par_variables->size_v_par_x-1; i_v++) {
+        //     par_variables->send_buf[pos] += par_variables->f_parallel_in_x[i_x][i_v];
+        // }
+        // Integration: trapezes method
+        par_variables->send_buf[pos] += par_variables->f_parallel_in_x[i_x][0]*0.5;
+        for (size_t i_v = 1; i_v < par_variables->size_v_par_x-1; i_v++) {
+            par_variables->send_buf[pos] += par_variables->f_parallel_in_x[i_x][i_v];
+        }
+        par_variables->send_buf[pos] += par_variables->f_parallel_in_x[i_x][par_variables->size_v_par_x-1]*0.5;
+        par_variables->send_buf[pos] *= delta_v;
+    	pos++;
+    }
+    // Gather the concatenation of all the linearised rho_locals
+    MPI_Allgatherv(par_variables->send_buf, 
+    	par_variables->size_x_par_x, MPI_DOUBLE_PRECISION,
+        par_variables->recv_buf, par_variables->recv_counts, 
+        par_variables->displs, MPI_DOUBLE_PRECISION, MPI_COMM_WORLD);
+    
+    // Rebuild rho from the concatenation of the linearised rho_locals
+    pos = 0;
+    for (int process = 0; process < par_variables->mpi_world_size; process++) {
+        for (size_t i = par_variables->layout_par_x.boxes[process].i_min; i <= par_variables->layout_par_x.boxes[process].i_max; i++)
+            rho[i] = par_variables->recv_buf[pos++];
+//        printf("Last i value is: %d.\n", par_variables->layout_par_x.boxes[process].i_max);
+//        printf("sizex - 1 value is: %d.\n", sizex - 1);
+    }
+    
+}
 
 
 void diag_energy(double *E, double *x, int sizex, double *val){

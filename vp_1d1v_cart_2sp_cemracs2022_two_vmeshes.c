@@ -247,7 +247,11 @@ int main(int argc, char *argv[]) {
     }
 
     // setting the subiteration parameter to ~1/mu 
-    num_subiterations = imax((int)floor(fabs(adv_ve->non_periodic_adv->v)),1); 
+    if (adv_ve->periodic_adv) {
+        num_subiterations = imax((int)floor(fabs(adv_ve->periodic_adv->v)),1); 
+    } else {
+        num_subiterations = imax((int)floor(fabs(adv_ve->non_periodic_adv->v)),1); 
+    }
     sub_delta_t = delta_t / (double)num_subiterations;
 
     #ifdef VERBOSE
@@ -261,10 +265,10 @@ int main(int argc, char *argv[]) {
             printf("Subiterations : %d (sub delta t=%f).\n", num_subiterations, sub_delta_t);
             printf("lambda = %f, nu = %f.\n", lambda, nu);
 
-            show_adv (adv_xe->non_periodic_adv, "adv_xe");
-            show_adv (adv_xi->non_periodic_adv, "adv_xi");
-            show_adv (adv_ve->non_periodic_adv, "adv_ve");
-            show_adv (adv_vi->non_periodic_adv, "adv_vi");
+            // show_adv (adv_xe->non_periodic_adv, "adv_xe");
+            // show_adv (adv_xi->non_periodic_adv, "adv_xi");
+            // show_adv (adv_ve->non_periodic_adv, "adv_ve");
+            // show_adv (adv_vi->non_periodic_adv, "adv_vi");
             printf("--------------------------\n");
         }
     #endif
@@ -410,7 +414,7 @@ int main(int argc, char *argv[]) {
 
 
         #ifdef PLOTS
-            if ((itime > 0) && (itime < num_iteration-1) && ((itime+1) % plot_frequency == 0)) {
+            if ((itime < num_iteration-1) && ((itime+1) % plot_frequency == 0)) {
                 printf("[Proc %d] Plotting at time t=%.2f, itime=%d/%d.\n", mpi_rank, (itime+1)*delta_t, itime+1, num_iteration);
                 diag_f(&pare, itime+1, meshx, meshve, (itime+1)*delta_t, "fe", OUTFOLDER, is_periodic);
                 diag_f(&pari, itime+1, meshx, meshvi, (itime+1)*delta_t, "fi", OUTFOLDER, is_periodic);
