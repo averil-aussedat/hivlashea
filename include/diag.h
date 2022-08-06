@@ -6,6 +6,10 @@
                             // function exchange_parallelizations
 #include "mesh_1d.h"        // type mesh_1d
                       
+// double kinetic_energy (parallel_stuff* par, mesh_1d meshx, mesh_1d meshv, double factor) {
+
+// }
+
 
 void diag_energy(double *E, double *x, int sizex, double *val){
     int i;
