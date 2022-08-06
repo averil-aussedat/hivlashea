@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
     // Outputs
     double ee; // electric energy
     // int plot_frequency=1; // 1=every loop
-    int plot_frequency=20; // 1=every loop
+    int plot_frequency=10; // 1=every loop
 
     // local variables
     int itime=0, subi=0;
@@ -246,9 +246,9 @@ int main(int argc, char *argv[]) {
         ERROR_MESSAGE("#Missing adv_vi in %s\n", argv[1]);
     }
 
-    // // setting the subiteration parameter to ~1/mu 
-    // num_subiterations = imax((int)floor(fabs(adv_ve->non_periodic_adv->v)),1); 
-    // sub_delta_t = delta_t / (double)num_subiterations;
+    // setting the subiteration parameter to ~1/mu 
+    num_subiterations = imax((int)floor(fabs(adv_ve->non_periodic_adv->v)),1); 
+    sub_delta_t = delta_t / (double)num_subiterations;
 
     #ifdef VERBOSE
         if (mpi_rank==0) {
@@ -359,30 +359,30 @@ int main(int argc, char *argv[]) {
         // update_E_from_rho_and_current_1d(solver, sub_delta_t, Mass_e, rho, current, E); // lambda^2 d_x E = rho
         update_E_from_rho_and_current_1d (meshx.size-1, (meshx.max-meshx.min)/(meshx.size-1), solver.lambda, rho, E);
 
-        if (itime == num_iteration-1) {
-            double err_dxE = 0.0, dx = (meshx.max-meshx.min)/(meshx.size-1);
-            for (int i=0; i<meshx.size-1; ++i) {
-                printf("Ei : %e, rho_i : %e, err : %e \n", E[i], rho[i], lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
-                err_dxE = fmax(err_dxE, lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
-            }
-            printf("Err_dxE : %e\n", err_dxE);
+        // if (itime == num_iteration-1) {
+        //     double err_dxE = 0.0, dx = (meshx.max-meshx.min)/(meshx.size-1);
+        //     for (int i=0; i<meshx.size-1; ++i) {
+        //         printf("Ei : %e, rho_i : %e, err : %e \n", E[i], rho[i], lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
+        //         err_dxE = fmax(err_dxE, lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
+        //     }
+        //     printf("Err_dxE : %e\n", err_dxE);
 
-            printf("E : ");
-            for (int i=0; i<meshx.size; ++i) {
-                printf("%e\t", E[i]);
-                // printf("Ei : %e, rho_i : %e, err : %e \n", E[i], rho[i], lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
-                // err_dxE = fmax(err_dxE, lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
-            }
-            printf("\n");
+        //     printf("E : ");
+        //     for (int i=0; i<meshx.size; ++i) {
+        //         printf("%e\t", E[i]);
+        //         // printf("Ei : %e, rho_i : %e, err : %e \n", E[i], rho[i], lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
+        //         // err_dxE = fmax(err_dxE, lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
+        //     }
+        //     printf("\n");
 
-            printf("rho : ");
-            for (int i=0; i<meshx.size; ++i) {
-                printf("%e\t", rho[i]);
-                // printf("Ei : %e, rho_i : %e, err : %e \n", E[i], rho[i], lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
-                // err_dxE = fmax(err_dxE, lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
-            }
-            printf("\n");
-        }
+        //     printf("rho : ");
+        //     for (int i=0; i<meshx.size; ++i) {
+        //         printf("%e\t", rho[i]);
+        //         // printf("Ei : %e, rho_i : %e, err : %e \n", E[i], rho[i], lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
+        //         // err_dxE = fmax(err_dxE, lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
+        //     }
+        //     printf("\n");
+        // }
 
         source_term(&pare, &pari, &meshve, &meshvi, nu, delta_t); // d_t f_i = nu * f_e
         // printf("adv v i\n");
@@ -437,21 +437,21 @@ int main(int argc, char *argv[]) {
         printf("[Proc %d] Done plotting terminal values.\n", mpi_rank);
     #endif 
 
-    printf("E : ");
-    for (int i=0; i<meshx.size; ++i) {
-        printf("%e\t", E[i]);
-        // printf("Ei : %e, rho_i : %e, err : %e \n", E[i], rho[i], lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
-        // err_dxE = fmax(err_dxE, lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
-    }
-    printf("\n");
+    // printf("E : ");
+    // for (int i=0; i<meshx.size; ++i) {
+    //     printf("%e\t", E[i]);
+    //     // printf("Ei : %e, rho_i : %e, err : %e \n", E[i], rho[i], lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
+    //     // err_dxE = fmax(err_dxE, lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
+    // }
+    // printf("\n");
 
-    printf("rho : ");
-    for (int i=0; i<meshx.size; ++i) {
-        printf("%e\t", rho[i]);
-        // printf("Ei : %e, rho_i : %e, err : %e \n", E[i], rho[i], lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
-        // err_dxE = fmax(err_dxE, lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
-    }
-    printf("\n");
+    // printf("rho : ");
+    // for (int i=0; i<meshx.size; ++i) {
+    //     printf("%e\t", rho[i]);
+    //     // printf("Ei : %e, rho_i : %e, err : %e \n", E[i], rho[i], lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
+    //     // err_dxE = fmax(err_dxE, lambda*lambda*(E[i+1] - E[i])/dx - rho[i]);
+    // }
+    // printf("\n");
     
     // Be clean (-:
     fclose(file_diag_energy);
