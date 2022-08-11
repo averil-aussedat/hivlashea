@@ -329,7 +329,6 @@ void adv1d_non_periodic_lag_semi_lag_advect_classical (
         maxi = N+2*d+1;
         // printf("end : going from %d to %d\n", mini, maxi);
         for (i=mini; i<=maxi; i++) { // remaining terms of the buffer
-        //for (i=maxi; i<=maxi; i++) { // remaining terms of the buffer
             buf[i] = 0.0;
             for (j=0; j<kb+1; ++j) { // polynomial extrapolation of order kb 
                 // printf("extrap i=%d, buf[%d]\n", i, i-kb-1+j);
@@ -383,6 +382,12 @@ void adv1d_non_periodic_lag_semi_lag_advect_classical (
     } // for each internal dof
     // printf("\n");
 }
+
+/*
+    TODO : 
+    prendre du degré plus faible en arrivant au bord
+    pour que le stencil reste à l'intérieur (choisir le max en fonction de d)
+ */
 
 
 /*

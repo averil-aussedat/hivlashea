@@ -125,13 +125,16 @@ int main(int argc, char *argv[]) {
     adv1d_x_t *adv_xe,*adv_xi;
     adv1d_v_t *adv_ve,*adv_vi;
     // Physical simulation parameters
-    double lambda, nu;
+    double lambda, nu, mu;
     
     // Outputs
-    double ee; // electric energy
-    double mm; // mass difference 
+    double ee=0.0; // energy
+    double mm=0.0; // mass conservation evaluation (mi-me-2lambda^2*E(1))
+    double diffM3 = 0.0; // int_{t=0}^tn M_3(t,1) - M_3(t,-1) dt
     // int plot_frequency=1; // 1=every loop
-    int plot_frequency=10; // 1=every loop
+    // int plot_frequency=10; // 1=every loop
+    // int plot_frequency=50; // 1=every loop
+    int plot_frequency=200; // 1=every loop
 
     // local variables
     int itime=0;
@@ -238,6 +241,11 @@ int main(int argc, char *argv[]) {
     }
     if (PC_get(conf, ".adv_ve")) {
 	    adv1d_v_init(&adv_ve, PC_get(conf, ".adv_ve"), meshve.array, meshve.size, mpi_rank);
+        if (adv_ve->periodic_adv) {
+            mu = -1.0 / adv_ve->periodic_adv->v;
+        } else {
+            mu = -1.0 / adv_ve->non_periodic_adv->v;
+        }
     } else {
         ERROR_MESSAGE("#Missing adv_ve in %s\n", argv[1]);
     }
@@ -388,11 +396,12 @@ int main(int argc, char *argv[]) {
         // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
     	advection_x(&pari, adv_xi, 0.5*delta_t, meshvi.array); // advection in x
 
-        diag_energy(E, meshx.array, meshx.size, &ee); 
-        // diag_mass_conservation (rhoi, rhoe, lambda, E, &mm); 
+        // diag_energy(E, meshx.array, meshx.size, &ee); 
+        diag_energy(&pari, &pare, meshx, meshvi, meshve, delta_t, E, lambda, mu, &diffM3, &ee);
+        diag_mass_conservation (meshx, rhoi, rhoe, lambda, E, &mm); 
         if (mpi_rank == 0) {
             fprintf(file_diag_energy, "%1.20lg %1.20lg\n", ((double)itime+1)*delta_t, ee);
-            fprintf(file_diag_mass, "%1.20lg %1.20lg\n", ((double)itime+1)*delta_t, ee);
+            fprintf(file_diag_mass, "%1.20lg %1.20lg\n", ((double)itime+1)*delta_t, mm);
         }
 
         // printf("End of time step :\n");
@@ -406,6 +415,7 @@ int main(int argc, char *argv[]) {
                 //diag_f(&pari, itime+1, meshx, meshvi, (itime+1)*delta_t, "fi", OUTFOLDER, is_periodic);
                 diag_1d (E, meshx.array, meshx.size, "E", OUTFOLDER, itime+1, (itime+1)*delta_t);
                 diag_1d (rho, meshx.array, meshx.size, "rho", OUTFOLDER, itime+1, (itime+1)*delta_t);
+                printf("energy : %e, mi - me - 2 lambda^2 * E(1) : %e\n", ee, mm);
             }
         #endif // ifdef PLOTS
 
