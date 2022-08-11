@@ -175,8 +175,8 @@ void diag_f(parallel_stuff* par, int i_hdf5, mesh_1d mesh1, mesh_1d mesh2,
 		plot_f_cartesian_mesh_2d(i_hdf5, f[0], mesh1, mesh2, time, array_name, folder);
 	}		
 
-    free (f);
-    free (f1d);
+   // free (f);
+   // free (f1d);
 }
 
 

@@ -293,8 +293,8 @@ int main(int argc, char *argv[]) {
 
     #ifdef PLOTS
         printf("[Proc %d] Plotting initial conditions...\n", mpi_rank);
-        diag_f(&pare, 0, meshx, meshve, 0.0, "fe", OUTFOLDER, is_periodic);
-        diag_f(&pari, 0, meshx, meshvi, 0.0, "fi", OUTFOLDER, is_periodic);
+        //diag_f(&pare, 0, meshx, meshve, 0.0, "fe", OUTFOLDER, is_periodic);
+        //diag_f(&pari, 0, meshx, meshvi, 0.0, "fi", OUTFOLDER, is_periodic);
         diag_1d (E, meshx.array, meshx.size, "E", OUTFOLDER, 0, 0.0);
         diag_1d (rho, meshx.array, meshx.size, "rho", OUTFOLDER, 0, 0.0);
         printf("[Proc %d] Done plotting initial conditions.\n", mpi_rank);
@@ -402,8 +402,8 @@ int main(int argc, char *argv[]) {
         #ifdef PLOTS
             if ((itime < num_iteration-1) && ((itime+1) % plot_frequency == 0)) {
                 printf("[Proc %d] Plotting at time t=%.2f, itime=%d/%d.\n", mpi_rank, (itime+1)*delta_t, itime+1, num_iteration);
-                diag_f(&pare, itime+1, meshx, meshve, (itime+1)*delta_t, "fe", OUTFOLDER, is_periodic);
-                diag_f(&pari, itime+1, meshx, meshvi, (itime+1)*delta_t, "fi", OUTFOLDER, is_periodic);
+                //diag_f(&pare, itime+1, meshx, meshve, (itime+1)*delta_t, "fe", OUTFOLDER, is_periodic);
+                //diag_f(&pari, itime+1, meshx, meshvi, (itime+1)*delta_t, "fi", OUTFOLDER, is_periodic);
                 diag_1d (E, meshx.array, meshx.size, "E", OUTFOLDER, itime+1, (itime+1)*delta_t);
                 diag_1d (rho, meshx.array, meshx.size, "rho", OUTFOLDER, itime+1, (itime+1)*delta_t);
             }
@@ -420,8 +420,8 @@ int main(int argc, char *argv[]) {
     #ifdef PLOTS
         printf("[Proc %d] Plotting terminal values...\n", mpi_rank);
         // Output the ions / electrons density functions at the end
-        diag_f(&pare, num_iteration, meshx, meshve, num_iteration*delta_t, "fe", OUTFOLDER, is_periodic);
-        diag_f(&pari, num_iteration, meshx, meshvi, num_iteration*delta_t, "fi", OUTFOLDER, is_periodic);
+        //diag_f(&pare, num_iteration, meshx, meshve, num_iteration*delta_t, "fe", OUTFOLDER, is_periodic);
+        //diag_f(&pari, num_iteration, meshx, meshvi, num_iteration*delta_t, "fi", OUTFOLDER, is_periodic);
         diag_1d (E, meshx.array, meshx.size, "E", OUTFOLDER, num_iteration, num_iteration*delta_t);
         diag_1d (rho, meshx.array, meshx.size, "rho", OUTFOLDER, num_iteration, num_iteration*delta_t);
         printf("[Proc %d] Done plotting terminal values.\n", mpi_rank);
