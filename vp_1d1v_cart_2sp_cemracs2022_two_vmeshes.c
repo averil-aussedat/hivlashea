@@ -36,7 +36,8 @@
 // MACROS
 #define VERBOSE True // comment to hide terminal output
 #define PLOTS True // comment to remove plot diagnostics
-#define OUTFOLDER "../data/" // where to write .dat and .hdf5
+//#define OUTFOLDER "../data/" // where to write .dat and .hdf5
+#define OUTFOLDER "./" // where to write .dat and .hdf5
 // #define OUTFOLDER "" // where to write .dat and .hdf5
 
 /*
@@ -131,10 +132,10 @@ int main(int argc, char *argv[]) {
     double ee=0.0; // energy
     double mm=0.0; // mass conservation evaluation (mi-me-2lambda^2*E(1))
     double diffM3 = 0.0; // int_{t=0}^tn M_3(t,1) - M_3(t,-1) dt
-    // int plot_frequency=1; // 1=every loop
+    int plot_frequency=1; // 1=every loop
     // int plot_frequency=10; // 1=every loop
     // int plot_frequency=50; // 1=every loop
-    int plot_frequency=200; // 1=every loop
+    //int plot_frequency=200; // 1=every loop
 
     // local variables
     int itime=0;
@@ -301,8 +302,8 @@ int main(int argc, char *argv[]) {
 
     #ifdef PLOTS
         printf("[Proc %d] Plotting initial conditions...\n", mpi_rank);
-        //diag_f(&pare, 0, meshx, meshve, 0.0, "fe", OUTFOLDER, is_periodic);
-        //diag_f(&pari, 0, meshx, meshvi, 0.0, "fi", OUTFOLDER, is_periodic);
+        diag_f(&pare, 0, meshx, meshve, 0.0, "fe", OUTFOLDER, is_periodic);
+        diag_f(&pari, 0, meshx, meshvi, 0.0, "fi", OUTFOLDER, is_periodic);
         diag_1d (E, meshx.array, meshx.size, "E", OUTFOLDER, 0, 0.0);
         diag_1d (rho, meshx.array, meshx.size, "rho", OUTFOLDER, 0, 0.0);
         printf("[Proc %d] Done plotting initial conditions.\n", mpi_rank);
@@ -380,13 +381,15 @@ int main(int argc, char *argv[]) {
         //     printf("\n");
         // }
 
-        source_term(&pare, &pari, &meshve, &meshvi, nu, delta_t); // d_t f_i = nu * f_e
+        source_term(&pare, &pari, &meshve, &meshvi, nu, 0.5*delta_t); // d_t f_i = nu * f_e
         // printf("adv v i\n");
         // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
     	advection_v(&pari, adv_vi, delta_t, E); // d_t(f_i) + E*d_v(f_i) = 0
         // printf("adv v e\n");
         // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
     	advection_v(&pare, adv_ve, delta_t, E); // d_t(f_e) - 1/mu*E*d_v(f_e) = 0
+
+        source_term(&pare, &pari, &meshve, &meshvi, nu, 0.5*delta_t); // d_t f_i = nu * f_e
 
         // Second half time step 
         // printf("adv x e 2\n");
@@ -400,7 +403,11 @@ int main(int argc, char *argv[]) {
         diag_energy(&pari, &pare, meshx, meshvi, meshve, delta_t, E, lambda, mu, &diffM3, &ee);
         diag_mass_conservation (meshx, rhoi, rhoe, lambda, E, &mm); 
         if (mpi_rank == 0) {
-            fprintf(file_diag_energy, "%1.20lg %1.20lg\n", ((double)itime+1)*delta_t, ee);
+        update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari, &Mass_e, rhoe, rhoi, rho, currente, currenti, current, is_periodic);
+        // update_E_from_rho_and_current_1d(solver, delta_t, Mass_e, rho, current, E); // lambda^2 d_x E = rho
+        update_E_from_rho_and_current_1d (meshx.size-1, (meshx.max-meshx.min)/(meshx.size-1), solver.lambda, rho, E);
+
+            fprintf(file_diag_energy, "%1.20lg %1.20lg %1.20lg %1.20lg\n", ((double)itime+1)*delta_t, ee,diffM3,E[meshx.size-1]);
             fprintf(file_diag_mass, "%1.20lg %1.20lg\n", ((double)itime+1)*delta_t, mm);
         }
 
@@ -415,7 +422,7 @@ int main(int argc, char *argv[]) {
                 //diag_f(&pari, itime+1, meshx, meshvi, (itime+1)*delta_t, "fi", OUTFOLDER, is_periodic);
                 diag_1d (E, meshx.array, meshx.size, "E", OUTFOLDER, itime+1, (itime+1)*delta_t);
                 diag_1d (rho, meshx.array, meshx.size, "rho", OUTFOLDER, itime+1, (itime+1)*delta_t);
-                printf("energy : %e, mi - me - 2 lambda^2 * E(1) : %e\n", ee, mm);
+                printf("energy : %e %e, mi - me - 2 lambda^2 * E(1) : %e\n", ee, ee-diffM3,mm);
             }
         #endif // ifdef PLOTS
 
@@ -430,8 +437,8 @@ int main(int argc, char *argv[]) {
     #ifdef PLOTS
         printf("[Proc %d] Plotting terminal values...\n", mpi_rank);
         // Output the ions / electrons density functions at the end
-        //diag_f(&pare, num_iteration, meshx, meshve, num_iteration*delta_t, "fe", OUTFOLDER, is_periodic);
-        //diag_f(&pari, num_iteration, meshx, meshvi, num_iteration*delta_t, "fi", OUTFOLDER, is_periodic);
+        diag_f(&pare, num_iteration, meshx, meshve, num_iteration*delta_t, "fe", OUTFOLDER, is_periodic);
+        diag_f(&pari, num_iteration, meshx, meshvi, num_iteration*delta_t, "fi", OUTFOLDER, is_periodic);
         diag_1d (E, meshx.array, meshx.size, "E", OUTFOLDER, num_iteration, num_iteration*delta_t);
         diag_1d (rho, meshx.array, meshx.size, "rho", OUTFOLDER, num_iteration, num_iteration*delta_t);
         printf("[Proc %d] Done plotting terminal values.\n", mpi_rank);
