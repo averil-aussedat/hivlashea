@@ -271,15 +271,17 @@ void adv1d_non_periodic_lag_init(adv1d_non_periodic_lag_t* *adv, PC_tree_t conf,
     (*adv)->lag = malloc((2*(*adv)->d+2)*sizeof(double));
     (*adv)->buf = malloc((sizex+1+2*(*adv)->d)*sizeof(double)); // at least one outside value
     (*adv)->extrap = malloc(((*adv)->kb+1)*sizeof(double));
-    init_extrap ((*adv)->kb, (*adv)->extrap);
+    if((*adv)->kb>=0)init_extrap ((*adv)->kb, (*adv)->extrap);
     if (mpi_rank == 0) {
         printf("#adv1d_non_periodic_lag:d=%d min=%1.20lg max=%1.20lg N=%d v=%1.20lg kb=%d\n",(*adv)->d,
             (*adv)->min,(*adv)->max,(*adv)->N,(*adv)->v, (*adv)->kb);
         // printf("#extrap : ");
+        if((*adv)->kb>=0){
         for (i=0; i<=(*adv)->kb; ++i) {
             printf("%f ", (*adv)->extrap[i]);
         }
         printf("\n");
+        }
     }
 }
 
@@ -330,9 +332,11 @@ void adv1d_non_periodic_lag_semi_lag_advect_classical (
         // printf("end : going from %d to %d\n", mini, maxi);
         for (i=mini; i<=maxi; i++) { // remaining terms of the buffer
             buf[i] = 0.0;
+            if(kb>=0){
             for (j=0; j<kb+1; ++j) { // polynomial extrapolation of order kb 
                 // printf("extrap i=%d, buf[%d]\n", i, i-kb-1+j);
                 buf[i] += extrap[j] * buf[i-kb-1+j];
+            }
             }
             // printf("Setting buf[%d] to %f\n", i, buf[i]);
         }
@@ -354,9 +358,11 @@ void adv1d_non_periodic_lag_semi_lag_advect_classical (
         // printf("end : going from %d to %d\n", maxi, mini);
         for (i=maxi; i>=mini; --i) { // remaining terms of the buffer
             buf[i] = 0.0;
+			if(kb>=0){
             for (j=0; j<kb+1; ++j) { // polynomial extrapolation of order kb 
                 // printf("extrap i=%d, buf[%d]\n", i, i+j+1);
                 buf[i] += extrap[kb-j] * buf[i+j+1];
+            }
             }
             // printf("Setting buf[%d] to %f\n", i, buf[i]);
         }
