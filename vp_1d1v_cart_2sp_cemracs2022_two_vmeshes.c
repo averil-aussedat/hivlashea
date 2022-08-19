@@ -199,7 +199,8 @@ int main(int argc, char *argv[]) {
     // Create the Poisson solver
     // WARNING: comment / uncomment the following line AND the include
     // at the beginning of this file to change Poisson solver.
-    bool is_periodic = false;
+    bool is_periodicx = false;
+    bool is_periodicv = false;
     poisson_solver_direct solver = new_poisson_solver_direct(meshx.array, meshx.size, lambda, nu);
 //    poisson_solver_periodic_fft solver = new_poisson_solver_periodic_fft(meshx.array, meshx.size);
 
@@ -210,7 +211,7 @@ int main(int argc, char *argv[]) {
 
     // Read the initial condition for electrons
     parallel_stuff pare;
-    init_par_variables(&pare, mpi_world_size, mpi_rank, meshx.size, meshve.size, is_periodic);
+    init_par_variables(&pare, mpi_world_size, mpi_rank, meshx.size, meshve.size, is_periodicx, is_periodicv);
     if (PC_get(conf, ".f0e")) {
 	    fun_1d1v(PC_get(conf, ".f0e"), &pare, meshx.array, meshve.array);
     } else {
@@ -218,12 +219,37 @@ int main(int argc, char *argv[]) {
     }
     // Read the initial condition for ions
     parallel_stuff pari;
-    init_par_variables(&pari, mpi_world_size, mpi_rank, meshx.size, meshvi.size, is_periodic);
+    init_par_variables(&pari, mpi_world_size, mpi_rank, meshx.size, meshvi.size, is_periodicx, is_periodicv);
     if (PC_get(conf, ".f0i")) {
 	    fun_1d1v(PC_get(conf, ".f0i"), &pari, meshx.array, meshvi.array);
     } else {
         ERROR_MESSAGE("#Missing f0i in %s\n", argv[1]);
     }
+
+    if (PC_get(conf, ".f0efromfile")) {
+    	char *array_name;
+    	array_name = (char*)malloc(sizeof(char)*256);
+    	if (PC_get(PC_get(conf, ".f0efromfile"), ".file")) { 
+        	PC_string(PC_get(PC_get(conf, ".f0efromfile"), ".file"), &array_name);
+        	printf("array_name=%s\n",array_name);
+        	read_f_par(&pare,meshx.size, meshve.size,array_name);
+    	} else {
+        	ERROR_MESSAGE("#Missing file in f0efromfile\n");
+    	}		
+    }
+
+    if (PC_get(conf, ".f0ifromfile")) {
+    	char *array_name2;
+    	array_name2 = (char*)malloc(sizeof(char)*256);
+    	if (PC_get(PC_get(conf, ".f0ifromfile"), ".file")) {    	
+        	PC_string(PC_get(PC_get(conf, ".f0ifromfile"), ".file"), &array_name2);
+        	read_f_par(&pari,meshx.size, meshve.size,array_name2);
+    	} else {
+        	ERROR_MESSAGE("#Missing file in f0ifromfile\n");
+    	}		
+    }
+
+
     
     // Read the advection parameters
     if (PC_get(conf, ".adv_xe")) {
@@ -284,26 +310,31 @@ int main(int argc, char *argv[]) {
     current = allocate_1d_array(meshx.size);  // currenti - currente
     E = allocate_1d_array(meshx.size); // electrical energy at time tn
     
-    if (is_periodic) {
+    if (is_periodicx) {
         // Compute electric field at initial time
         update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari,
-                &Mass_e, rhoe, rhoi, rho, currente, currenti, current, is_periodic);
+                &Mass_e, rhoe, rhoi, rho, currente, currenti, current, is_periodicx);
         // update_E_from_rho_and_current_1d(solver, delta_t, Mass_e, rho, current, E);
         update_E_from_rho_and_current_1d (meshx.size-1, (meshx.max-meshx.min)/(meshx.size-1), solver.lambda, rho, E);
 
     } else {
         // Read electric field (at initial time)
-        if (PC_get(conf, ".E0")) {
-	        fill_array_1d(PC_get(conf, ".E0"), E, meshx.array, meshx.size);
-        } else {
-            ERROR_MESSAGE("#Missing E0 in %s\n", argv[1]);
-        }
+        update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari, &Mass_e, rhoe, rhoi, rho, currente, currenti, current, is_periodicx);
+        // update_E_from_rho_and_current_1d(solver, delta_t, Mass_e, rho, current, E); // lambda^2 d_x E = rho
+        update_E_from_rho_and_current_1d (meshx.size-1, (meshx.max-meshx.min)/(meshx.size-1), solver.lambda, rho, E);
+
+
+//         if (PC_get(conf, ".E0")) {
+// 	        fill_array_1d(PC_get(conf, ".E0"), E, meshx.array, meshx.size);
+//         } else {
+//             ERROR_MESSAGE("#Missing E0 in %s\n", argv[1]);
+//         }
     }
 
     #ifdef PLOTS
         printf("[Proc %d] Plotting initial conditions...\n", mpi_rank);
-        diag_f(&pare, 0, meshx, meshve, 0.0, "fe", OUTFOLDER, is_periodic);
-        diag_f(&pari, 0, meshx, meshvi, 0.0, "fi", OUTFOLDER, is_periodic);
+        diag_f(&pare, 0, meshx, meshve, 0.0, "fe", OUTFOLDER, is_periodicx);
+        diag_f(&pari, 0, meshx, meshvi, 0.0, "fi", OUTFOLDER, is_periodicx);
         diag_1d (E, meshx.array, meshx.size, "E", OUTFOLDER, 0, 0.0);
         diag_1d (rho, meshx.array, meshx.size, "rho", OUTFOLDER, 0, 0.0);
         printf("[Proc %d] Done plotting initial conditions.\n", mpi_rank);
@@ -352,7 +383,7 @@ int main(int argc, char *argv[]) {
 		// Full time-step
         // printf("before rho/E update\n");
         // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
-        update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari, &Mass_e, rhoe, rhoi, rho, currente, currenti, current, is_periodic);
+        update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari, &Mass_e, rhoe, rhoi, rho, currente, currenti, current, is_periodicx);
         // update_E_from_rho_and_current_1d(solver, delta_t, Mass_e, rho, current, E); // lambda^2 d_x E = rho
         update_E_from_rho_and_current_1d (meshx.size-1, (meshx.max-meshx.min)/(meshx.size-1), solver.lambda, rho, E);
 
@@ -381,7 +412,7 @@ int main(int argc, char *argv[]) {
         //     printf("\n");
         // }
 
-        source_term(&pare, &pari, &meshve, &meshvi, nu, 0.5*delta_t); // d_t f_i = nu * f_e
+        //source_term(&pare, &pari, &meshve, &meshvi, nu, 0.5*delta_t); // d_t f_i = nu * f_e
         // printf("adv v i\n");
         // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
     	advection_v(&pari, adv_vi, delta_t, E); // d_t(f_i) + E*d_v(f_i) = 0
@@ -389,7 +420,7 @@ int main(int argc, char *argv[]) {
         // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
     	advection_v(&pare, adv_ve, delta_t, E); // d_t(f_e) - 1/mu*E*d_v(f_e) = 0
 
-        source_term(&pare, &pari, &meshve, &meshvi, nu, 0.5*delta_t); // d_t f_i = nu * f_e
+        //source_term(&pare, &pari, &meshve, &meshvi, nu, 0.5*delta_t); // d_t f_i = nu * f_e
 
         // Second half time step 
         // printf("adv x e 2\n");
@@ -403,7 +434,7 @@ int main(int argc, char *argv[]) {
         diag_energy(&pari, &pare, meshx, meshvi, meshve, delta_t, E, lambda, mu, &diffM3, &ee);
         diag_mass_conservation (meshx, rhoi, rhoe, lambda, E, &mm); 
         if (mpi_rank == 0) {
-        update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari, &Mass_e, rhoe, rhoi, rho, currente, currenti, current, is_periodic);
+        update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari, &Mass_e, rhoe, rhoi, rho, currente, currenti, current, is_periodicx);
         // update_E_from_rho_and_current_1d(solver, delta_t, Mass_e, rho, current, E); // lambda^2 d_x E = rho
         update_E_from_rho_and_current_1d (meshx.size-1, (meshx.max-meshx.min)/(meshx.size-1), solver.lambda, rho, E);
 
@@ -418,8 +449,8 @@ int main(int argc, char *argv[]) {
         #ifdef PLOTS
             if ((itime < num_iteration-1) && ((itime+1) % plot_frequency == 0)) {
                 printf("[Proc %d] Plotting at time t=%.2f, itime=%d/%d.\n", mpi_rank, (itime+1)*delta_t, itime+1, num_iteration);
-                //diag_f(&pare, itime+1, meshx, meshve, (itime+1)*delta_t, "fe", OUTFOLDER, is_periodic);
-                //diag_f(&pari, itime+1, meshx, meshvi, (itime+1)*delta_t, "fi", OUTFOLDER, is_periodic);
+                //diag_f(&pare, itime+1, meshx, meshve, (itime+1)*delta_t, "fe", OUTFOLDER, is_periodicx);
+                //diag_f(&pari, itime+1, meshx, meshvi, (itime+1)*delta_t, "fi", OUTFOLDER, is_periodicx);
                 diag_1d (E, meshx.array, meshx.size, "E", OUTFOLDER, itime+1, (itime+1)*delta_t);
                 diag_1d (rho, meshx.array, meshx.size, "rho", OUTFOLDER, itime+1, (itime+1)*delta_t);
                 printf("energy : %e %e, mi - me - 2 lambda^2 * E(1) : %e\n", ee, ee-diffM3,mm);
@@ -437,8 +468,8 @@ int main(int argc, char *argv[]) {
     #ifdef PLOTS
         printf("[Proc %d] Plotting terminal values...\n", mpi_rank);
         // Output the ions / electrons density functions at the end
-        diag_f(&pare, num_iteration, meshx, meshve, num_iteration*delta_t, "fe", OUTFOLDER, is_periodic);
-        diag_f(&pari, num_iteration, meshx, meshvi, num_iteration*delta_t, "fi", OUTFOLDER, is_periodic);
+        diag_f(&pare, num_iteration, meshx, meshve, num_iteration*delta_t, "fe", OUTFOLDER, is_periodicx);
+        diag_f(&pari, num_iteration, meshx, meshvi, num_iteration*delta_t, "fi", OUTFOLDER, is_periodicx);
         diag_1d (E, meshx.array, meshx.size, "E", OUTFOLDER, num_iteration, num_iteration*delta_t);
         diag_1d (rho, meshx.array, meshx.size, "rho", OUTFOLDER, num_iteration, num_iteration*delta_t);
         printf("[Proc %d] Done plotting terminal values.\n", mpi_rank);

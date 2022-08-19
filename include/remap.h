@@ -390,7 +390,7 @@ sll_t_layout_2d initialize_layout_with_distributed_2d_array(
 
 void init_par_variables(parallel_stuff* par_variables, 
 	    int mpi_world_size, int mpi_rank, int sizex, int sizev,
-	    bool is_periodic) {
+	    bool is_periodicx, bool is_periodicv) {
     size_t i;
     (*par_variables).mpi_world_size = mpi_world_size;
     (*par_variables).mpi_rank       = mpi_rank;
@@ -398,8 +398,8 @@ void init_par_variables(parallel_stuff* par_variables,
     // For a periodic case, we may distribute sizex-1 points among the processes,
     // and construct the last point as equal to the point in 0.
     // For a non periodic case, we need to have the last index be sizex.
-    int total_nb_points_on_x = is_periodic ? sizex - 1 : sizex;
-    int total_nb_points_on_v = sizev - 1;
+    int total_nb_points_on_x = is_periodicx ? sizex - 1 : sizex;
+    int total_nb_points_on_v = is_periodicv ? sizev - 1 : sizev;
     (*par_variables).layout_par_x = initialize_layout_with_distributed_2d_array(
         total_nb_points_on_x, total_nb_points_on_v, mpi_world_size, 1);
     (*par_variables).layout_par_v = initialize_layout_with_distributed_2d_array(

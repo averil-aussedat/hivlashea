@@ -148,10 +148,45 @@ void diag_1d(double *func, double *x, int sizex, char* array_name, char* folder,
 }
 
 
+void read_f(double **f,int size1,int size2,char * array_name){
+
+	int i,j;
+	FILE* file;
+	double res;
+	//printf("size=%d %d\n",size1,size2);
+	file = fopen(array_name,"r");
+	
+	res = 0.;
+	
+	for(i=0;i<size1;i++){
+		for(j=0;j<size2;j++){
+			//printf("%1.20lg\n",res);
+			fscanf(file,"%lf",&res);
+			f[i][j] = res;
+			//printf("%1.20lg\n",res);
+		}
+	}	
+	fclose(file);
+	//printf("size=%d %d\n",size1,size2);
+
+}
+
+
+void read_f_par(parallel_stuff* par, int size1, int size2,char* array_name){	
+    if (!par->is_par_x) {
+        exchange_parallelizations(par);
+    }
+	read_f(par->f_parallel_in_x,size1,size2,array_name);
+    if (!par->is_par_x) {
+        exchange_parallelizations(par);
+    }
+}
+
+
 void diag_f(parallel_stuff* par, int i_hdf5, mesh_1d mesh1, mesh_1d mesh2, 
 		double time, char* array_name, char* folder, bool is_periodic){
 	
-	double (*f)[mesh2.size] = malloc((mesh1.size) * sizeof *f); // Array allocated contiguously for hdf5 outputs.
+	double (*f)[mesh2.size] = malloc((mesh1.size) * sizeof(*f)); // Array allocated contiguously for hdf5 outputs.
 	//double *f = malloc((mesh1.size) * (mesh2.size) *sizeof(double)); // Array allocated contiguously for hdf5 outputs.
 	double *f1d = malloc((par->size_x_par_x) * (mesh2.size) *sizeof(double)); // Array allocated contiguously for hdf5 outputs.
 	// double *f_2 = malloc((mesh1.size-1) *sizeof(double)); // Array allocated contiguously for hdf5 outputs.
@@ -170,6 +205,12 @@ void diag_f(parallel_stuff* par, int i_hdf5, mesh_1d mesh1, mesh_1d mesh2,
     	par->displs[i] *=mesh2.size;
     }    
     pos = 0;
+    if(is_periodic){
+    	printf("is_periodic\n");
+    }else{
+    	printf("is not periodic\n");
+    }
+    printf("par->size_x_par_x=%d is_periodic=%d\n",par->size_x_par_x,is_periodic);
     for (i = 0; i < par->size_x_par_x; i++) {
         for (j = 0; j < mesh2.size; j++) {
             f1d[pos++] = par->f_parallel_in_x[i][j];
