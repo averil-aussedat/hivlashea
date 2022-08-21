@@ -44,23 +44,24 @@ Two-species Vlasov-Poisson solver on [-1,1] \\times \\RR using
 
 using JLD
 using Plots
+using DelimitedFiles
 
 include("initial_data.jl")  # constant mu
                             # functions fi_0, fe_0, E0 
 
 # Physical parameters
-const nu      =  1.0; # Collision frequency
-const lambda  =  0.1; # Debye length
-const T       =  0.2; # Time horizon
+const nu      =  20.0 #1.0; # Collision frequency
+const lambda  =  0.5 #0.1; # Debye length
+const T       =  10. #0.2; # Time horizon
 
 # Discretization parameters
-const Nx      =  300; # Number of points of the space mesh
-const Nv      =  500; # Number of points of the speed mesh
+const Nx      =  600; # Number of points of the space mesh
+const Nv      =  1001; # Number of points of the speed mesh
 const xmin    = -1.0; # lower bound space mesh
 const xmax    =  1.0; # upper bound space mesh
 # The grid in velocity corresponds to the electronic one which contains the support of boths ions and electron density function
-const vmin    = -5.0/sqrt(mu); # lower bound speed mesh
-const vmax    =  5.0/sqrt(mu); # upper bound speed mesh
+const vmin    = -10. #-5.0/sqrt(mu); # lower bound speed mesh
+const vmax    =  10. #5.0/sqrt(mu); # upper bound speed mesh
 const dx      =  (xmax - xmin)/Nx; # space step
 const dv      =  (vmax - vmin)/Nv; # speed step
 const CFL_x   =  0.5*dx/vmax;
@@ -91,6 +92,8 @@ EE = E0(xx)         # electric field
 fi = fi_0(xx,vv)    # electron density 
 fe = fe_0(xx,vv)    # ion density
 rho = 0.0*xx        # charge density
+rhoi = 0.0*xx        # ion charge density
+rhoe = 0.0*xx        # electron charge density
 
 t = 0.0
 iplot = 0
@@ -101,14 +104,29 @@ fi[:,begin] .*= 0.0; fi[:,end] .*= 0.0; # non-emmiting wall
 fe[begin,:] .*= 0.0; fe[end,:] .*= 0.0; # speed distribution is almost 0 
 fe[:,begin] .*= 0.0; fe[:,end] .*= 0.0; # non-emmiting wall
 
-contourf(xx[2:end-1],vv[fislice],fi[begin+1:end-1,fislice]',colormap=thecmap,title="Ions at t=$t/$T",xlabel="x",ylabel="v",linewidth=0);
+rho .= vec(sum(fi.-fe,dims=2)) * dv       
+rhoi .= vec(sum(fi,dims=2)) * dv       
+rhoe .= vec(sum(fe,dims=2)) * dv       
+
+
+#contourf(xx[2:end-1],vv[fislice],fi[begin+1:end-1,fislice]',colormap=thecmap,title="Ions at t=$t/$T",xlabel="x",ylabel="v",linewidth=0);
+#png("jlimages/fi$iplot.png")
+contourf(xx[2:end-1],vv[2:end-1],fi[begin+1:end-1,begin+1:end-1]',colormap=thecmap,title="Ions at t=$t/$T",xlabel="x",ylabel="v",linewidth=0);
 png("jlimages/fi$iplot.png")
 contourf(xx[2:end-1],vv[2:end-1],fe[begin+1:end-1,begin+1:end-1]',colormap=thecmap,title="Electrons at t=$t/$T",xlabel="x",ylabel="v",linewidth=0);
 png("jlimages/fe$iplot.png")
-plot(xx,EE,legend=false,title="E at t=$t/$T",xlabel="x",ylabel="E",ylim=[-10.0,10.0]);
+plot(xx,EE,legend=false,title="E at t=$t/$T",xlabel="x",ylabel="E") #,ylim=[-10.0,10.0]);
 png("jlimages/E$iplot.png")
-plot(xx,rho,legend=false,title="rho at t=$t/$T",xlabel="x",ylabel="rho",ylim=[-0.05,0.5]);
-png("jlimages/rho$iplot.png")
+plot(xx,rho,legend=false,title="rho at t=$t/$T",xlabel="x",ylabel="rho") #,ylim=[-0.05,0.5]);
+png("jlimages/initrho$iplot.png")
+plot(xx,rhoi,legend=false,title="rhoi at t=$t/$T",xlabel="x",ylabel="rhoi") #,ylim=[-0.05,0.5]);
+png("jlimages/initrhoi$iplot.png")
+plot(xx,rhoe,legend=false,title="rhoe at t=$t/$T",xlabel="x",ylabel="rhoe") #,ylim=[-0.05,0.5]);
+png("jlimages/initrhoe$iplot.png")
+
+open("jlimages/init_rho_$iplot.txt", "w") do io
+    writedlm(io, [xx rho rhoe rhoi EE])
+end
 
 try 
     global iplot=0;
@@ -119,24 +137,38 @@ try
         if ((mod(n+1,floor(Int,Nt/8))==0) || (n==Nt))
             println("Iteration $n / $Nt, time t = ", dt * n)
 
-            contourf(xx[2:end-1],vv[fislice],fi[begin+1:end-1,fislice]',colormap=thecmap,title="Ions at t=$t/$T",xlabel="x",ylabel="v",linewidth=0);
+            #contourf(xx[2:end-1],vv[fislice],fi[begin+1:end-1,fislice]',colormap=thecmap,title="Ions at t=$t/$T",xlabel="x",ylabel="v",linewidth=0);
+            #png("jlimages/fi$iplot.png")
+            contourf(xx[2:end-1],vv[2:end-1],fi[begin+1:end-1,begin+1:end-1]',colormap=thecmap,title="Ions at t=$t/$T",xlabel="x",ylabel="v",linewidth=0);
             png("jlimages/fi$iplot.png")
             save("jlfiles/fi$iplot.jld", "fi", fi)
             contourf(xx[2:end-1],vv[2:end-1],fe[begin+1:end-1,begin+1:end-1]',colormap=thecmap,title="Electrons at t=$t/$T",xlabel="x",ylabel="v",linewidth=0);
             png("jlimages/fe$iplot.png")
             save("jlfiles/fe$iplot.jld", "fe", fe)
-            plot(xx,EE,legend=false,title="E at t=$t/$T",xlabel="x",ylabel="E",ylim=[-10.0,10.0]);
+            plot(xx,EE,legend=false,title="E at t=$t/$T",xlabel="x",ylabel="E") #,ylim=[-10.0,10.0]);
             png("jlimages/E$iplot.png")
             save("jlfiles/E$iplot.jld", "E", EE)
-            plot(xx,rho,legend=false,title="rho at t=$t/$T",xlabel="x",ylabel="rho",ylim=[-0.05,0.5]);
+            plot(xx,rho,legend=false,title="rho at t=$t/$T",xlabel="x",ylabel="rho") #,ylim=[-0.05,0.5]);
             png("jlimages/rho$iplot.png")
             save("jlfiles/rho$iplot.jld", "rho", rho)
+            plot(xx,rhoi,legend=false,title="rhoi at t=$t/$T",xlabel="x",ylabel="rhoi") #,ylim=[-0.05,0.5]);
+            png("jlimages/rhoi$iplot.png")
+            save("jlfiles/rhoi$iplot.jld", "rhoi", rhoi)
+            plot(xx,rhoe,legend=false,title="rhoe at t=$t/$T",xlabel="x",ylabel="rhoe") #,ylim=[-0.05,0.5]);
+            png("jlimages/rhoe$iplot.png")
+            save("jlfiles/rhoe$iplot.jld", "rhoe", rhoe)
+
+			open("jlimages/rho_$iplot.txt", "w") do io
+    			writedlm(io, [xx rho rhoe rhoi EE])
+			end
 
             iplot += 1;
         end
 
         # electronic charge density and total mass
         rho .= vec(sum(fi.-fe,dims=2)) * dv       
+        rhoi .= vec(sum(abs.(fi),dims=2)) * dv       
+       	rhoe .= vec(sum(abs.(fe),dims=2)) * dv       
 
         # compute current at boundaries : rectangle integration of \int_{v} v * (fi(t,+-1,v) - fe(t,+-1,v)) dv
         J_l = dv * sum(vv .* (fi[begin,:] - fe[begin,:]))

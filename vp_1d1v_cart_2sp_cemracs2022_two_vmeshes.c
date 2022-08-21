@@ -243,7 +243,7 @@ int main(int argc, char *argv[]) {
     	array_name2 = (char*)malloc(sizeof(char)*256);
     	if (PC_get(PC_get(conf, ".f0ifromfile"), ".file")) {    	
         	PC_string(PC_get(PC_get(conf, ".f0ifromfile"), ".file"), &array_name2);
-        	read_f_par(&pari,meshx.size, meshve.size,array_name2);
+        	read_f_par(&pari,meshx.size, meshvi.size,array_name2);
     	} else {
         	ERROR_MESSAGE("#Missing file in f0ifromfile\n");
     	}		
@@ -337,6 +337,8 @@ int main(int argc, char *argv[]) {
         diag_f(&pari, 0, meshx, meshvi, 0.0, "fi", OUTFOLDER, is_periodicx);
         diag_1d (E, meshx.array, meshx.size, "E", OUTFOLDER, 0, 0.0);
         diag_1d (rho, meshx.array, meshx.size, "rho", OUTFOLDER, 0, 0.0);
+        diag_1d (rhoi, meshx.array, meshx.size, "rhoi", OUTFOLDER, 0, 0.0);
+        diag_1d (rhoe, meshx.array, meshx.size, "rhoe", OUTFOLDER, 0, 0.0);
         printf("[Proc %d] Done plotting initial conditions.\n", mpi_rank);
     #endif 
 
@@ -412,7 +414,7 @@ int main(int argc, char *argv[]) {
         //     printf("\n");
         // }
 
-        //source_term(&pare, &pari, &meshve, &meshvi, nu, 0.5*delta_t); // d_t f_i = nu * f_e
+        source_term(&pare, &pari, &meshve, &meshvi, nu, 0.5*delta_t); // d_t f_i = nu * f_e
         // printf("adv v i\n");
         // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
     	advection_v(&pari, adv_vi, delta_t, E); // d_t(f_i) + E*d_v(f_i) = 0
@@ -420,7 +422,7 @@ int main(int argc, char *argv[]) {
         // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
     	advection_v(&pare, adv_ve, delta_t, E); // d_t(f_e) - 1/mu*E*d_v(f_e) = 0
 
-        //source_term(&pare, &pari, &meshve, &meshvi, nu, 0.5*delta_t); // d_t f_i = nu * f_e
+        source_term(&pare, &pari, &meshve, &meshvi, nu, 0.5*delta_t); // d_t f_i = nu * f_e
 
         // Second half time step 
         // printf("adv x e 2\n");
@@ -453,6 +455,8 @@ int main(int argc, char *argv[]) {
                 //diag_f(&pari, itime+1, meshx, meshvi, (itime+1)*delta_t, "fi", OUTFOLDER, is_periodicx);
                 diag_1d (E, meshx.array, meshx.size, "E", OUTFOLDER, itime+1, (itime+1)*delta_t);
                 diag_1d (rho, meshx.array, meshx.size, "rho", OUTFOLDER, itime+1, (itime+1)*delta_t);
+                diag_1d (rhoi, meshx.array, meshx.size, "rhoi", OUTFOLDER, itime+1, (itime+1)*delta_t);
+                diag_1d (rhoe, meshx.array, meshx.size, "rhoe", OUTFOLDER, itime+1, (itime+1)*delta_t);
                 printf("energy : %e %e, mi - me - 2 lambda^2 * E(1) : %e\n", ee, ee-diffM3,mm);
             }
         #endif // ifdef PLOTS
@@ -472,6 +476,8 @@ int main(int argc, char *argv[]) {
         diag_f(&pari, num_iteration, meshx, meshvi, num_iteration*delta_t, "fi", OUTFOLDER, is_periodicx);
         diag_1d (E, meshx.array, meshx.size, "E", OUTFOLDER, num_iteration, num_iteration*delta_t);
         diag_1d (rho, meshx.array, meshx.size, "rho", OUTFOLDER, num_iteration, num_iteration*delta_t);
+        diag_1d (rhoi, meshx.array, meshx.size, "rhoi", OUTFOLDER, num_iteration, num_iteration*delta_t);
+        diag_1d (rhoe, meshx.array, meshx.size, "rhoe", OUTFOLDER, num_iteration, num_iteration*delta_t);
         printf("[Proc %d] Done plotting terminal values.\n", mpi_rank);
     #endif 
 
