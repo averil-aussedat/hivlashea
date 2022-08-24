@@ -6,18 +6,18 @@
 
 #############
 # testcase=0: full 2-species maxwellian case
-
+#=
 const testcase=0
 const mu = 0.01
 fi_0(x, v) = ones(size(x)) * exp.(-0.5 .* (v').^2)./sqrt(2pi);
 fe_0(x, v) = ones(size(x)) * sqrt(mu).*exp.(-0.5 * mu .* (v').^2)./sqrt(2*pi);
 E0(x) = 0.0*x; # to be checked before using Ampere solver
 # end testcase=0
-
+=#
 
 #############
 # testcase=1: full 2-species masked maxwellian case
-#=
+
 const testcase=1
 const mu = 0.01#0.5
 mask(x;d=0.1,xl=-0.1,xr=0.1) = 0.5*(tanh((x-xl)/d)-tanh((x-xr)/d))
@@ -25,7 +25,7 @@ fe_0(x, v) = mask.(x) .* sqrt(abs(mu)).*exp.(-0.5 * abs(mu) .* (v').^2)./sqrt(2*
 fi_0(x, v) = mask.(x) .* exp.(-0.5  .* (v').^2)./sqrt(2*pi);
 E0(x) = 0.0*x; # to be checked before using Ampere solver
 # end testcase=1
-=#
+
 
 #############
 # testcase=2: constant 1-species validation (paper Malkov-Kudryavtsev)

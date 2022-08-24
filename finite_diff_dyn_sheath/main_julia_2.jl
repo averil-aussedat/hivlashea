@@ -44,8 +44,9 @@ Two-species Vlasov-Poisson solver on [-1,1] \\times \\RR using
 
 using JLD
 using Plots
-using ProgressMeter
+#using ProgressMeter
 using Printf
+using DelimitedFiles
 
 include("initial_data_2.jl")  # constant mu and analytic initializations
 # functions fi_0, fe_0, E0 
@@ -55,8 +56,8 @@ const nu = 2.#0.0; # Collision frequency
 const lambda = 0.1#1;#0.5; # Debye length
 
 # Discretization parameters
-const Nx = 512;#24;#1024;#301; # Number of points of the space mesh
-const Nv = 513;#24;#1024#500; # Number of points of the speed mesh
+const Nx = 512 #512;#24;#1024;#301; # Number of points of the space mesh
+const Nv = 513 #513;#24;#1024#500; # Number of points of the speed mesh
 const xmin = -1.# -1.5#-1.0; # lower bound space mesh
 const xmax = 1.#1.5#1.0; # upper bound space mesh
 # The grid in velocity corresponds to the electronic one which contains the support of boths ions and electron density function
@@ -69,11 +70,11 @@ const CFL_v = abs(mu) * dv / 10;
 
 # Solver and other functionality choices
 const init_file=0 # =0: initialization thanks to analytic expression, =1: initialization from file
-const field_solver=2 # =0: Ampere solver, =1: Poisson solver E(Nx/2=0), =2: Poisson solver with current
+const field_solver=1 # =0: Ampere solver, =1: Poisson solver E(Nx/2=0), =2: Poisson solver with current
 # testcases are implemented in file initial_data.jl :
 # 0: full 2-species, 1: cst 1-species validation, 2: time variable 1-species validation
 const animate=0 # =0: no gif animation, =1: gif animation
-const bar_prog=1 # =1: see the progression, else: nothing
+const bar_prog=0 # =1: see the progression, else: nothing
 
 # plot parameters
 const savedir = "jlimages/"
@@ -257,9 +258,9 @@ function main(T)
         elseif field_solver==1
         # second way of computing EE update electric field with Poisson equation and E(Nx/2) fixed to 0
         # --> we get E at time n
-        
-            i0 = floor(Int, Nx/2)
-            if 2*i0==Nx
+        	
+            i0 = floor(Int, Nx/2)+1
+            if 2*i0==Nx+2
                 # Boundary condition
                 #EEtemp[i0]=0.
                 EE[i0]=0.
@@ -308,10 +309,15 @@ function main(T)
  
 
         # plots every Nplots iterations (and at initial and final times)
-        Nplots=10
+        Nplots=Nt/100 #10
         if ((mod(n+1,floor(Int,Nt/Nplots))==0) || (n==Nt) || (n==1))
             println("Iteration $n / $Nt, time t = ", dt * (n-1))
             title = @sprintf(" at t=%7.3f", t)
+
+			open("jlimages/rho_$iplot.txt", "w") do io
+    			writedlm(io, [xx rho EE])
+			end
+
 
             #contourf(xx[2:end-1],vv[fislice],fi[begin+1:end-1,fislice]',colormap=thecmap,title="Ions"*title,xlabel="x",ylabel="v",linewidth=0)
             contourf(xx[2:end-1],vv[2:end-1],fi[begin+1:end-1,begin+1:end-1]',colormap=thecmap,title="Ions"*title,xlabel="x",ylabel="v",linewidth=0)
@@ -437,7 +443,7 @@ end # try-catch
 
 ####################################
 # Final time choice and call to main
-T = 2.#1.#1.#0.1; # Time horizon
+T = 0.2 #1.#1.#0.1; # Time horizon
 
 #@time rho_results, fe_init, fi_init, fe, fi = main(T)
 @time main(T)
