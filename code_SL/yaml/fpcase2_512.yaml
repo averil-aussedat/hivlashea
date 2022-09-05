@@ -1,0 +1,79 @@
+# !!! Nombre d'intervalles pair pour que 0 appartienne au maillage
+
+meshx:
+  unif:
+    min: -1.
+    max: 1.
+    N: 510
+
+meshve:
+  unif:
+    min: -50. #-7.5 #-100.
+    max: 50. #7.5 #100.
+    N: 511
+
+meshvi:
+  unif:
+    min: -10. #-5.
+    max: 10. #5
+    N: 511
+
+f0e:
+  userDefined:
+    definition: (x, v) -> mask(x)*sqrt(mu) * exp(-v^2 * mu / 2.) / sqrt(2. * pi) # Maxwellian
+    parameters:
+      mu: 0.5 #0.01
+      xl: -0.1
+      xr: 0.1
+      d: 0.1
+      mask: x->0.5*(tanh((x-xl)/d)-tanh((x-xr)/d))
+
+f0i:
+  userDefined:
+    definition: (x, v) -> mask(x)*exp(-v^2 / 2.0) / sqrt(2. * pi) # TSI
+    parameters:
+      xl: -0.1
+      xr: 0.1
+      d: 0.1
+      mask: x->0.5*(tanh((x-xl)/d)-tanh((x-xr)/d))
+
+# must contain the right amount of datas (according to the meshx/meshve size)
+f0efromfile:  
+  file: data_input/fe_case2_512-512.dat
+
+# must contain the right amount of datas (according to the meshx/meshve size)
+f0ifromfile:  
+  file: data_input/fi_case2_512-512.dat
+
+
+E0:
+  userDefined:
+    definition: (x) -> 0
+
+# WARNING: our simulation forces to use Strang XVX splitting.
+time_parameters:
+  dt: 0.0001
+  num_iteration: 10000 #5000
+
+adv_x:
+  adv1d_non_periodic_lag:
+    d: 1
+    kb: 2
+  v: 1. # d_t(f_{i/e}) + v*d_x(f_{i/e}) = 0 [parameter value is 1]
+
+adv_ve:
+  adv1d_non_periodic_lag:
+    d: 1 #8
+    kb: 2
+  v: -100. #-100. # d_t(f_i) - 1/mu*E*d_v(f_i) = 0 [parameter value is -1/mu]
+
+adv_vi:
+  adv1d_non_periodic_lag:
+    d: 1 #8
+    kb: 2
+  v: 1. # d_t(f_i) + E*d_v(f_i) = 0 [parameter value is 1]
+
+simulation_parameters:
+  lambda: 0.1 #0.1
+  nu: 42.
+

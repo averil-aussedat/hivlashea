@@ -1,0 +1,233 @@
+\documentclass{beamer}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% packages 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[latin1]{inputenc} 
+\usepackage[T1]{fontenc} % hyphenation
+\usepackage{xcolor} % color.
+\usepackage{theorem}
+\usepackage{amssymb,amsmath}  % all you like in math fonts
+\usepackage{graphicx}
+\usepackage{mathtools} % coloneqq
+\usepackage{stmaryrd} % ll/rr brackets
+\usepackage[french]{babel} % indentation 
+\usepackage{mathrsfs} % \mathscr 
+\usepackage{enumitem}
+\usepackage{adjustbox}
+\usepackage[breakable]{tcolorbox}
+\usepackage[tworuled,linesnumbered,vlined,nofillcomment]{algorithm2e}
+\usepackage{hyperref} % links & cliquable toc. LAST (but cleverref)
+\usepackage[noabbrev]{cleveref} % load after hyperref
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% theorems and tcolorboxes
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\tcbuselibrary{theorems}
+\definecolor{maincolor}{RGB}{10,79,63}
+
+\newtcbtheorem{theom}{Théorème}{colback=white, sharp corners, 
+breakable, boxrule=0.3mm, separator sign dash, fonttitle=\scshape, 
+coltitle=black, detach title, before upper={\textbf{\tcbtitle}\quad}}{thm}
+
+\newtcbtheorem{prop}{Proposition}{colback=white, 
+breakable, boxrule=0.4mm, separator sign dash, 
+coltitle=black, detach title, before upper={\textbf{\tcbtitle}\quad}}{prop}
+
+\newtcbtheorem{algo}{Algorithme}{colback=white!95!red, fontupper=\ttfamily,
+breakable, boxrule=0.2mm, colframe=red!50!black, separator sign dash, fonttitle=\sffamily,
+coltitle=black, detach title, before upper={\textbf{\tcbtitle}\vspace{3pt}\\}}{algo}
+
+%\newtcbtheorem{defin}{Définition}{colback=white!85!maincolor, sharp corners, 
+%breakable, boxrule=-1mm, separator sign dash, boxsep=2mm,
+%coltitle=black, detach title, before upper={\textbf{\tcbtitle}\quad}}{def}
+
+\newtcbtheorem{defin}{}{colback=white!55!maincolor, sharp corners, 
+breakable, boxrule=-1mm, separator sign none, boxsep=2mm,
+coltitle=black, detach title, before upper={\hspace{-5pt}\textbf{\tcbtitle}\quad}}{def}
+%
+%\newtcbtheorem{demo}{Démonstration}{colback=white, sharp corners, coltitle=black,
+%breakable, boxrule=-1mm, leftrule=0.4mm, separator sign dash, fonttitle=\normalsize, 
+%detach title, before upper={\textbf{\tcbtitle}\vspace{5pt}\\}, after upper={\hfill\large$\square$},
+%fontupper=\small}{demo*}
+%
+\newtcbtheorem{lem}{Lemme}{colback=white, 
+breakable, boxrule=0.4mm, separator sign dash, 
+coltitle=black, detach title, before upper={\textbf{\tcbtitle}\quad}}{lem}
+
+\newtcbtheorem{rem}{Remarque}{
+boxrule=-1mm, shrink tight, separator sign dash, detach title, 
+colback=white, coltitle=black, before upper={\textbf{\tcbtitle}\quad}
+}{rem}
+
+\newtcbtheorem[crefname={}{}]{hyp}{}{
+boxrule=-1mm, lefthand width=0cm,
+detach title, theorem name, separator sign none, sharp corners,
+colback=white!70!yellow, coltitle=black, before upper={\hspace{-5pt}\textbf{\tcbtitle}\quad}
+}{hyp}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% misc 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\definecolor{maincolor}{rgb}{0.5,0.8,0.7}
+
+\usetheme{Copenhagen}
+\usefonttheme{professionalfonts}
+
+% numérotation
+\setbeamertemplate{page number in head/foot}[totalframenumber]
+\setbeamerfont{page number in head/foot}{size=\tiny}
+\setbeamertemplate{section in toc}{\inserttocsection} % no number nor sign
+\setbeamertemplate{subsection in toc}[circle] % idem, but for unknown reasons
+
+\beamertemplatenavigationsymbolsempty
+
+%% add toc frame
+\AtBeginSection[]
+{
+	\begin{frame}
+		\frametitle{Table of Contents}
+		\tableofcontents[currentsection]
+	\end{frame}
+}
+
+\useoutertheme[subsection=false]{miniframes}
+
+\title{Hamilton-Jacobi via les réseaux de neurones}
+\subtitle {Soutenance de stage ingénieur}
+\author[A. Prost]{\vspace*{25pt}\\ Averil PROST \\ \emph{sous la direction de } \\ Olivier BOKANOWSKI}
+\date{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% commands
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\vv}[1]{\begin{pmatrix} #1 \end{pmatrix}} % raccourci pour vecteur
+\newcommand{\rot}{\,\textbf{\mbox{rot}}\,} % rotationnel
+\newcommand{\tab}{\hspace*{10mm}} % pour le code~: tabulation
+\newcommand{\com}[1]{{\color{OliveGreen}\textit{// #1}}} % pour le code~: commentaire
+\newcommand{\mypar}[1]{\vspace{4pt}\noindent\textbf{#1}\hspace{6pt}} % my paragraph 
+\newcommand{\etape}[1]{\noindent\paragraph{Étape \theetapectr\ (\textbf{#1})\\}\refstepcounter{etapectr}} 
+\newcommand{\vs}[1]{{\left[#1\right]^n}} % vector space
+\newcommand{\imh}{0.3\textwidth} %image height, meant to be locally adapted
+\DeclareMathOperator*{\argmin}{argmin}% argument du minimum
+
+\renewcommand{\div}{\,\mbox{div}\,} % divergence
+\renewcommand{\textbf}[1]{\ifmmode{\boldsymbol{#1}}\else{\bfseries\boldmath #1}\fi} % quite dangerous~: pour mettre les maths en gras
+
+\setlist[itemize,1]{label=\color{maincolor}\textbullet}
+\setlist[itemize,2]{label=\color{maincolor}\textbullet}
+\setlist[itemize,3]{label=\color{maincolor}\textbullet}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+	\section{Algorithms for the full model}
+	
+	\begin{frame}{Finite difference discretization}
+		Explicit upwind scheme for $f_{e,i}$: 
+		\begin{align*}
+			\frac{f_{s,k,l}^{n+1} - f_{s,k,l}^{n}}{\Delta t} + \vv{v_l\\c_s E_k^n}_{+} D^-_{k,l} f_s^n + \vv{v_l\\c_s E_k^n}_{-} D^+_{k,l} f_s^n = S_{s,k,l}^n
+		\end{align*}
+		with $S_e = 0$, $S_i = \nu f_e$, and $D^{\pm}_{k,l} f \coloneqq \pm \left(\frac{f_{k\pm1,l} - f_{k,l}}{\Delta x}, \frac{f_{k,l\pm1} - f_{k,l}}{\Delta v}\right)^t$.
+		\pause
+		Integration for the electric field $E$, assuming $E(0)=0$:
+		\begin{align*}
+			E_k^{n+1} = \frac{1}{\lambda^2} \sum_{\kappa} \frac{1}{\Delta x} \left(n_{i,\kappa}^{n} - n_{e,\kappa}^{n}\right)
+		\end{align*}
+		\begin{itemize}
+		\item\pause CFL condition to ensure the stability of the explicit scheme.
+		\item\pause First-order approximation, diffusive.
+		\end{itemize}		
+	\end{frame}
+	
+	\begin{frame}{Semi-Lagrangian scheme}
+		Strang splitting:
+		\begin{align*}
+			\onslide<.-> {
+			\frac{\Delta t}{2} &&
+			\begin{cases}
+				\partial_t f_s + v \partial_x f_s = 0 & \text{Linear advection at constant speed} \\
+				\lambda^2 \partial_x E = n_i - n_e & \text{Resolution by (numerical) integration} \\
+				\partial_t f_i = \nu f_e & \text{Pointwise ODE}
+			\end{cases} \\
+			}
+			\onslide<+(1)-> {
+			\Delta t &&
+			\partial_t f_s + c_s E_s \partial_v f_s = 0 \quad \text{Again, advection at constant speed} \\
+			}
+			\onslide<+(1)-> {
+			\frac{\Delta t}{2} &&
+			\begin{cases}
+				\partial_t f_i = \nu f_e & \text{Pointwise ODE} \\
+				\lambda^2 \partial_x E = n_i - n_e & \text{Resolution by (numerical) integration}\\
+				\partial_t f_s + v \partial_x f_s = 0 & \text{Linear advection at constant speed.}
+			\end{cases} 
+			}
+		\end{align*}
+		\begin{itemize}
+		\item\pause The analytical solution to each step is known.
+		\item\pause Use of the 1D solver to enforce boundary conditions.
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}{Fixed-point algorithm}
+		Equilibrium state:
+		\begin{align*}
+			\begin{cases}
+				v \partial_x f_s - c_s \partial_x \varphi_s \partial_v f_s = S_s, \quad \frac{d}{d\tau} [f_s(x_s(\tau),v_s(\tau))] = S_s(x_s(\tau),v_s(\tau)) \\
+				-\lambda^2 \partial^2_{xx} \varphi = n_i - n_e
+			\end{cases}
+		\end{align*}
+		\pause
+		Suppose $\varphi^k$ is known. Iteration of
+		\begin{eqnarray}
+			f_e^{k+1}(x,v) &\coloneqq& f_{e,b}(x_e(-\tau),v_e(-\tau)) \nonumber \\ \pause
+			f_i^{k+1}(x,v) &\coloneqq& f_{i,b}(x_i(-\tau),v_i(-\tau)) + \int_{-\tau}^0 \nu f_e^{k+1} (x_i(s),v_i(s)) ds \nonumber \\ \pause
+			-\lambda^2 \partial^2_{xx} \varphi^{k+1} &\coloneqq& \int_v [f_i^{k+1}(\cdot,v) - f_e^{k+1}(\cdot,v)] dv \nonumber
+		\end{eqnarray}
+		
+	\end{frame}
+	
+	\begin{frame}
+		Merci.
+	\end{frame}
+	
+	
+%	    \begin{eqnarray}\label{Poisson}
+%	        \left\{
+%	        \begin{array}{rll}
+%	            -\lambda^2\partial_{xx}^2\phi(x)&=\rho(x) & \text{for $x\in[-1,1]$}, \\
+%	            \phi(0)&=0, & \\
+%	            \partial_x\phi(0)&=f\in\R. &
+%	        \end{array}
+%	        \right.
+%	    \end{eqnarray}
+%	    \pause
+%	    \begin{itemize}
+%	        \item $\blue{E(t,x):=-\partial_x\phi(t,x)}$ the electric field in \eqref{VlaPoi}.
+%	        \end{itemize}
+%	    \begin{eqnarray}\label{PoissonE}
+%	        \Rightarrow\quad\left\{
+%	        \begin{array}{rll}
+%	            \lambda^2\partial_x E(x)&=\rho(x) & \text{for $x\in[-1,1]$}, \\
+%	            -E(0)&=f\in\R. &
+%	        \end{array}
+%	        \right.
+%	    \end{eqnarray}
+%	    \begin{itemize}
+%	        \item For all $x\in[-1,1]$
+%	    \end{itemize}
+%	    \begin{eqnarray}\label{E}
+%	        \red{E(x)=\frac{1}{\lambda^2}\int_0^x\rho(y)dy}.
+%	    \end{eqnarray}
+%	\end{frame}
+	
+\end{document}

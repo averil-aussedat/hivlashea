@@ -1,0 +1,5 @@
+[deps]
+Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
+PerceptualColourMaps = "54e51dfa-9dd7-5231-aa84-a4037b83483a"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+VideoIO = "d6d074c3-1acf-5d4c-9a43-ef38773959a2"

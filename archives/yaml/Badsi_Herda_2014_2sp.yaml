@@ -1,0 +1,62 @@
+meshx:
+  unif:
+    min: 0.
+    max: 21 #12.566370614359172954
+    N: 256
+
+meshve:
+  unif:
+    min: -16.
+    max: 16.
+    N: 64
+
+meshvi:
+  unif:
+    min: -8.
+    max: 8.
+    N: 64
+
+f0e:
+  userDefined:
+    definition: (x, v) -> exp(-v^2 / 2.) / sqrt(2. * pi) # Maxwellian
+
+f0i:
+  userDefined:
+    definition: (x, v) -> v^2 * (1. + a * cos(mode * x)) * exp(-v^2 / (2.*sigma^2)) / (sqrt(2. * pi)*sigma^3) # TSI
+    parameters:
+      a: 0.01
+      mode: 0.29919930034188507033 #mode=2*Pi/L, L=21
+      sigma: 0.5
+
+E0:
+  userDefined:
+    definition: (x) -> 0
+
+# WARNING: our simulation forces to use Strang XVX splitting.
+time_parameters:
+  dt: 0.1
+  num_iteration: 1000
+
+adv_x:
+  adv1d_periodic_lag:
+    d: 5
+    kb: 1
+  v: 1. # d_t(f_{i/e}) + v*d_x(f_{i/e}) = 0 [parameter value is 1]
+
+adv_ve:
+  adv1d_periodic_lag:
+    d: 5
+    kb: 1
+  v: -1. # d_t(f_i) - 1/mu*E*d_v(f_i) = 0 [parameter value is -1/mu]
+# WARNING: no mu in Badsi Herda test case, so mu = 1.
+
+adv_vi:
+  adv1d_periodic_lag:
+    d: 5
+    kb: 1
+  v: 1. # d_t(f_i) + E*d_v(f_i) = 0 [parameter value is 1]
+
+simulation_parameters:
+  lambda: 1. # WARNING: no lambda in Badsi Herda test case, so lambda = 1.
+  nu: 0. ## WARNING: no lambda in Badsi Herda test case, so nu = 0.
+
