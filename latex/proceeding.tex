@@ -438,6 +438,52 @@ The boundaries are treated as follow:
 
 \section{Numerical results}
 \subsection{1-species validation test case}
+
+We rely on the work of \cite{malkov2020} to provide an analytical solution in a 1-species case. Consider the simplified stationary model describing the density of particles $f = f(t,x,v)$, and the potential $\varphi=\varphi(t,x)$:
+\mysubeq{eq:one_species_model}{
+	\partial_t f + v \partial_x f  - \partial_x \varphi \partial_v f &= 0 && (t,x,v) \in \R^+_* \times ]-1,1[ \times \mathbb{R}, \label{sta_1sp_f} \\
+	\partial^2_{xx} \varphi &= \int_{v\in\mathbb{R}} f dv && (t,x) \in \R^+ \times ]-1,1[. \label{sta_phi}
+}
+The initial and boundary conditions are given by 
+\mysubeq{eq:one_species_model_bc}{
+	f(0,x,v) \coloneqq f^0(x,v), \quad f(t,x=\pm1, \pm v < 0) &= 0 \\
+	\varphi(t,0) = \partial_x \varphi (t,0) &= 0 
+}
+
+This model may be seen as a particular case of the two-species Vlasov-Poisson \cref{eq:unsta_model}, upon taking the following parameters:
+\begin{align*}
+	f_i^0 \equiv 0, \quad \nu = 0, \quad \mu = -1, \quad \lambda = 1, f_e^0 = f^0.
+\end{align*}
+
+The reader may verify that \cref{eq:one_species_model} is solved in $\R^+ \times [-1,1] \times \mathbb{R}$ by the following stationary couple:
+\begin{align}\label{eq:Malkov_solution}
+	f(t,x,v) \coloneqq 
+	\begin{cases}
+		\frac{1}{\pi} \left(1 - x^2 - v^2\right)^{-1/2} & \text{if } x^2 + z^2 < 1 \\
+		0 & \text{otherwise}
+	\end{cases}, \quad \text{and} \quad
+	\varphi(t,x) \coloneqq \frac{x^2}{2}.
+\end{align}
+It is numerically relevant to extend the Malkov solution \cref{eq:Malkov_solution} to spatial domains $x \in [-1-\varepsilon, 1+\varepsilon]$ by 
+\begin{align}\label{eq:Malkov_solution_ext}
+	f(t,x,v) \coloneqq 
+	\begin{cases}
+		\frac{1}{\pi} \left(1 - x^2 - v^2\right)^{-1/2} & \text{if } x^2 + z^2 < 1 \\
+		0 & \text{otherwise}
+	\end{cases}, \quad \text{and} \quad
+	\varphi(t,x) \coloneqq \min\left(\frac{x^2}{2}, \frac{|x|}{2}\right).
+\end{align}
+
+\Cref{fig:malkov_solutions} illustrates the stationary solutions.
+
+\begin{figure}
+	\centering
+	\includegraphics[height=0.25\linewidth]{images/malkov_solution_Ee}
+	\includegraphics[height=0.25\linewidth]{images/malkov_solution_fe}
+	\caption{Malkov solutions \cref{eq:Malkov_solution_ext} on $[-1.5,1.5]$. Right: electric field $E$. Left: density $f$.}
+	\label{fig:malkov_solutions}
+\end{figure}
+
 %\subsection{2-species results}
 % Diagnostics (conservations)
 % Do we observe sheaths? 
