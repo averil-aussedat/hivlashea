@@ -4,6 +4,7 @@
 // ./compile_hivlashea.sh
 // ./hivlashea.out yaml/cemracs2022_2sp.yaml
 
+#include <time.h>                   // function  time
 #include <mpi.h>                    // constants MPI_THREAD_FUNNELED, MPI_COMM_WORLD
                                     // functions MPI_Init_thread, MPI_Comm_size, MPI_Comm_rank
 #include <math.h>                   // function  floor
@@ -132,13 +133,14 @@ int main(int argc, char *argv[]) {
     double ee=0.0; // energy
     double mm=0.0; // mass conservation evaluation (mi-me-2lambda^2*E(1))
     double diffM3 = 0.0; // int_{t=0}^tn M_3(t,1) - M_3(t,-1) dt
-    int plot_frequency=20; // 1=every loop
+    // int plot_frequency=20; // 1=every loop
     // int plot_frequency=10; // 1=every loop
     // int plot_frequency=50; // 1=every loop
-    //int plot_frequency=200; // 1=every loop
+    int plot_frequency=2000000; // 1=every loop
 
     // local variables
     int itime=0;
+    time_t previousloctime = time(NULL), loctime; double dtime=0.0; // Averil is having fun 
 
     #ifdef VERBOSE
         printf("Welcome in vp_1d1v_cart_2sp_cemracs2022_two_vmeshes.\n");
@@ -458,6 +460,18 @@ int main(int argc, char *argv[]) {
                 printf("energy : %e %e, mi - me - 2 lambda^2 * E(1) : %e\n", ee, ee-diffM3,mm);
             }
         #endif // ifdef PLOTS
+
+        if (itime % (int)ceil(num_iteration/20) == 0) {
+            loctime = time(NULL);
+            if (itime < num_iteration/20 + 5) {
+                dtime = loctime - previousloctime;
+            } else {
+                dtime = 0.5 * (dtime + (loctime - previousloctime));
+            }
+            previousloctime = loctime;
+            printf("itime = %d / %d. Estimated time left : %.0fs.\n", itime, num_iteration, \
+                dtime * (num_iteration - itime)/num_iteration * 20);
+        }
 
         // printf("End of time step after plots :\n");
         // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");

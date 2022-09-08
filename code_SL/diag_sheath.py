@@ -21,47 +21,61 @@ plt.rcParams['font.family'] = 'monospace' # fixed-case font *-*
 # Parameters                    
 #################################
 
-loadrep = "data_output/"
-saverep_img = "python_diags/"
+# loadrep = "data_output/"
+# root = "run_Malkov_1sp_d2_Nx800_Nt1000/"
+# root = "run_comp_short_time_2sp_Nx1000_Nvi2001_Nve2001_Nt6250/"
+root = "" # current directory (default)
+
+loadrep = root+"data_output/"
+saverep_img = root+"python_diags/"
 #saverep_img = "images/"
 # rep = "nu1_T25_Yann"
 # loadrep = "../%s/data/" % rep
 # saverep_img = "../%s/"  % rep
 #saverep_mp4 = "videos/"
 #saverep_diag = "diags/" # where to save stationary tests, for instance
-saverep_mp4 = "python_diags/"
-saverep_diag = "python_diags/" # where to save stationary tests, for instance
+saverep_mp4 = root+"python_diags/"
+saverep_diag = root+"python_diags/" # where to save stationary tests, for instance
+
 # yamlfilename = "test_2sp.yaml"
 # yamlfilename = "Badsi_2022.yaml"
 # yamlfilename = "Badsi_2022_apr_test.yaml"
-yamlfilename = "fpcase2_256.yaml"
+# yamlfilename = "fpcase2_256.yaml"
 # yamlfilename = "fpcase2_512.yaml"
 # yamlfilename = "fpcase2_1024.yaml"
 # yamlfilename = "compMehdi.yml"
 # yamlfilename = "badsiBerthonCrestetto2014.yml"
 
-yamlfilename = "yaml/" + yamlfilename # add path to yaml
+# yamlfilename = "Malkov_1sp.yaml"
+# yamlfilename = "comp_short_time.yaml"
+yamlfilename = "comp_long_time.yaml"
 
-informations_on_graphs = True # add parameters on graphs. Keep true please...
-fullImages = True # if True, initial + final + infos on images. Else, only final time
+if (root==""):
+    yamlfilename = "yaml/" + yamlfilename # add path to yaml
+else:
+    yamlfilename = root + yamlfilename # add path to yaml
+
+informations_on_graphs = False # add parameters on graphs. Keep true please...
+fullImages = False # if True, initial + final + infos on images. Else, only final time
 
 plot_fi  = True # density of ions 
 plot_fe  = True # density of electrons
-plot_EE  = True # electric field
-plot_rho = True # \int_v f_i - f_e dv
+plot_EE  = False # electric field
+plot_rho = False # \int_v f_i - f_e dv
 
-video_fi  = True # density of ions 
-video_fe  = True # density of electrons
-video_EE  = True # electric field
-video_rho = True # \int_v f_i - f_e dv
+video_fi  = False # density of ions 
+video_fe  = False # density of electrons
+video_EE  = False # electric field
+video_rho = False # \int_v f_i - f_e dv
 
 # compute and display stationary test. Saved in file as lines + plotted
 # norm of (E_k - E_{k-1} / dt)
-variation_EE  = True # electric field
-variation_rho = True # \int_v f_i - f_e dv
-# norm of (E_k - E_0)
-drift_EE = True
-drift_rho = True
+var_and_drifts = False
+# variation_EE  = True # electric field
+# variation_rho = True # \int_v f_i - f_e dv
+# # norm of (E_k - E_0)
+# drift_EE = True
+# drift_rho = True
 
 thefiles = listdir (loadrep)
 times = [] # strong assumption : all data are all plotted on same times
@@ -154,8 +168,8 @@ if (informations_on_graphs):
 
 Efields = []; Emin=1e6; Emax=-1e-6; E_its=[]; 
 rhos = []; rhomin=1e6; rhomax=-1e-6; rho_its=[]; 
-fes=[]; fe_its = []; mine=1.0; maxe=-1.0
-fis=[]; fi_its = []; mini=1.0; maxi=-1.0
+fes=[]; fe_its = []; minfe=1.0; maxfe=-1.0
+fis=[]; fi_its = []; minfi=1.0; maxfi=-1.0
 var_EE = []; var_rho = []; dri_EE = []; dri_rho = [] # measures of stationarity
 
 ### Electric fields E + we do it to get times and xx
@@ -163,12 +177,12 @@ var_EE = []; var_rho = []; dri_EE = []; dri_rho = [] # measures of stationarity
 # all the others : x_i E_i
 Efieldsnames = [filename for filename in thefiles if re.match("E[0-9]*\.dat", filename)] 
 Efieldsnames = np.sort(Efieldsnames)
-if (plot_EE and not (video_EE or variation_EE)):
+if (plot_EE and not (video_EE and var_and_drifts)):
     Efieldsnames = [Efieldsnames[0],Efieldsnames[-1]]
-print("Reading electric field files%s\n" % ("" if (plot_EE or video_EE) else" (just for times)"), Efieldsnames)
+print("Reading electric field files\n", Efieldsnames)
 for Efieldname in Efieldsnames:
     Efile = open(loadrep+Efieldname, "r")
-    if (plot_EE or video_EE):
+    if (plot_EE or video_EE or var_and_drifts):
         Edata = Efile.readlines ()
         times.append (float(Edata.pop(0).replace('\n','')))
         Edata = [[float(x.replace('\n','')) for x in line.split(' ')] for line in Edata]
@@ -181,12 +195,12 @@ for Efieldname in Efieldsnames:
     Efile.close ()
 
 ### rho
-if (plot_rho or video_rho or variation_rho):
+if (plot_rho or video_rho or var_and_drifts):
     # first line : simulation time
     # all the others : x_i rho_i
     rhosnames = [filename for filename in thefiles if re.match("rho[0-9]*\.dat", filename)] 
     rhosnames = np.sort(rhosnames)
-    if (plot_rho and not (video_rho or variation_rho)):
+    if (plot_rho and not (video_rho or var_and_drifts)):
         rhosnames = [rhosnames[0],rhosnames[-1]]
     print("Reading rho files\n", rhosnames)
     for rhoname in rhosnames:
@@ -215,32 +229,53 @@ for (plot,vid,tag,ffs,its) in zip([plot_fe,plot_fi],[video_fe,video_fi],["fe","f
             its.append(int(fname[-len("000000-values.h5"):-len("-values.h5")])) 
 
 # Computing the stationarity
-if variation_EE:
-    [var_EE.append(np.linalg.norm([(Efields[i+1][j] - Efields[i][j]) / (times[i+1] - times[i]) for j in range(len(Efields[i]))])) for i in range(len(Efields)-1)]
-if variation_rho:
-    [var_rho.append(np.linalg.norm([(rhos[i+1][j] - rhos[i][j]) / (times[i+1] - times[i]) for j in range(len(rhos[i]))])) for i in range(len(rhos)-1)]
-if drift_EE:
-    [dri_EE.append(np.linalg.norm([Efields[i+1][j] - Efields[0][j] for j in range(len(Efields[i]))])) for i in range(len(Efields)-1)]
-if drift_rho:
-    [dri_rho.append(np.linalg.norm([rhos[i+1][j] - rhos[0][j] for j in range(len(rhos[i]))])) for i in range(len(rhos)-1)]
+if (var_and_drifts):
+    dx = (meshx["max"]-meshx["min"])/meshx["N"]
+    var_EE_i = 0.0; var_EE_1 = 0.0; dri_EE_i = 0.0; dri_EE_1 = 0.0
+    for i in range(len(Efields)-1):
+        var_EE_i = np.max([var_EE_i,             np.max ([(Efields[i+1][j] - Efields[i][j]) / (times[i+1] - times[i]) for j in range(len(Efields[i]))])])
+        var_EE_1 = np.max([var_EE_1, dx * np.linalg.norm([(Efields[i+1][j] - Efields[i][j]) / (times[i+1] - times[i]) for j in range(len(Efields[i]))])])
+        dri_EE_i = np.max([dri_EE_i,             np.max ([ Efields[i+1][j] - Efields[0][j] for j in range(len(Efields[i]))])])
+        dri_EE_1 = np.max([dri_EE_1, dx * np.linalg.norm([ Efields[i+1][j] - Efields[0][j] for j in range(len(Efields[i]))])])
+    var_rho_i = 0.0; var_rho_1 = 0.0; dri_rho_i = 0.0; dri_rho_1 = 0.0
+    for i in range(len(rhos)-1):
+        var_rho_i = np.max([var_rho_i,             np.max ([(rhos[i+1][j] - rhos[i][j]) / (times[i+1] - times[i]) for j in range(len(rhos[i]))])])
+        var_rho_1 = np.max([var_rho_1, dx * np.linalg.norm([(rhos[i+1][j] - rhos[i][j]) / (times[i+1] - times[i]) for j in range(len(rhos[i]))])])
+        dri_rho_i = np.max([dri_rho_i,             np.max ([ rhos[i+1][j] - rhos[0][j] for j in range(len(rhos[i]))])])
+        dri_rho_1 = np.max([dri_rho_1, dx * np.linalg.norm([ rhos[i+1][j] - rhos[0][j] for j in range(len(rhos[i]))])])
+
+# if variation_EE:
+#     [var_EE.append(dx * np.linalg.norm([(Efields[i+1][j] - Efields[i][j]) / (times[i+1] - times[i]) for j in range(len(Efields[i]))])) for i in range(len(Efields)-1)]
+# if variation_rho:
+#     [var_rho.append(dx * np.linalg.norm([(rhos[i+1][j] - rhos[i][j]) / (times[i+1] - times[i]) for j in range(len(rhos[i]))])) for i in range(len(rhos)-1)]
+# if drift_EE:
+#     [dri_EE.append(dx * np.linalg.norm([Efields[i+1][j] - Efields[0][j] for j in range(len(Efields[i]))])) for i in range(len(Efields)-1)]
+# if drift_rho:
+#     [dri_rho.append(dx * np.linalg.norm([rhos[i+1][j] - rhos[0][j] for j in range(len(rhos[i]))])) for i in range(len(rhos)-1)]
 
 # print("var_EE : ", var_EE)
 # print("dri_EE : ", dri_EE)
 # print("var_rho : ", var_rho)
 # print("dri_rho : ", dri_rho)
 
-if (plot_fe or video_fe):
-    maxe = max([np.max(ff) for ff in fes[-min([20,len(fes)]):]])
-    mine = min([np.min(ff) for ff in fes[-min([20,len(fes)]):]])
-    if (maxe <= 0):
-        print("WARNING : max f_{e} <=0.0).")
-        maxe=0.5
-if (plot_fi or video_fi):
-    maxi = max([np.max(ff) for ff in fis[-min([20,len(fis)]):]])
-    mini = min([np.min(ff) for ff in fis[-min([20,len(fis)]):]])
-    if (maxi <= 0):
-        print("WARNING : max f_{i} <=0.0).")
-        maxi=0.5
+def get_minmax(dowe, datas, tag):
+    themin = 0.0; themax = 0.5
+    if dowe:
+        themax = max([np.max(dd) for dd in datas[-min([20,len(datas)]):]])
+        themin = min([np.min(dd) for dd in datas[-min([20,len(datas)]):]])
+        if (themax <= 0):
+            print("WARNING : max %s <= 0.0)." % tag)
+            themax=0.5
+    return themin, themax
+
+minfi, maxfi = get_minmax(plot_fi or video_fi, fis, "fi")
+minfe, maxfe = get_minmax(plot_fe or video_fe, fes, "fe")
+
+# print("WARNING setting manual values for min/max fi/e")
+# maxfe = 10.0 # for Malkov
+
+# maxfe = 0.04 # short time comparison
+# maxfi = 0.5  # short time comparison
 
 #################################
 # Verifications
@@ -275,7 +310,7 @@ def writeInfos (axInfos, Infos):
 
 def createAxesInfos (fig, Infos):
     ax0 = fig.add_subplot (1,3,1)
-    axT = fig.add_subplot (1,3,2,sharex=ax0,sharey=ax0)
+    axT = fig.add_subplot (1,3,2)
     axInfos = fig.add_subplot (1,3,3)
     writeInfos (axInfos, Infos)
     return [ax0, axT, axInfos]
@@ -299,7 +334,7 @@ if (fullImages):
                 fig = plt.figure (figsize=(15,4))
                 [ax0,axT,axInfos] = createAxesInfos (fig, Infos)
             else:
-                fig, (ax0, axT) = plt.subplots (1,2,sharex=True,sharey=True,figsize=(11,4))
+                fig, (ax0, axT) = plt.subplots (1,2,figsize=(11,4))
 
             for iax, ax, tt, ff in zip([0,1],[ax0,axT], [times[0],times[-1]], [ffs[0],ffs[-1]]):
                 ax.plot(xx, ff, marker=".", linestyle="none", markersize=4, color=col)
@@ -313,21 +348,22 @@ if (fullImages):
             show_andor_save (fig, tag)
 
     # functions from (t,x,v) -> IR (fe, fi)
-    for (plot,ffs,extent,species,minn,maxx) in zip([plot_fi, plot_fe],[fis,fes],[fiextent,feextent],["Ion", "Electron"],[mini,mine],[maxi,maxe]):
+    for (plot,ffs,extent,species,minn,maxx) in zip([plot_fi, plot_fe],[fis,fes],[fiextent,feextent],["Ion", "Electron"],[minfi,minfe],[maxfi,maxfe]):
         if (plot):
             if (informations_on_graphs):
                 fig = plt.figure (figsize=(15,4))
                 [ax0,axT,axInfos] = createAxesInfos (fig, Infos)
             else:
-                fig, (ax0, axT) = plt.subplots (1,2,sharex=True,sharey=True,figsize=(11,4))
+                fig, (ax0, axT) = plt.subplots (1,2,figsize=(11,4))
 
             for iax, ax, ff in zip([0,1], [ax0, axT], [ffs[0],ffs[-1]]):
                 im = ax.imshow (ff,cmap=cmap,vmin=minn,vmax=maxx,origin='lower',extent=extent,aspect="auto",interpolation='spline36')
                 ax.set_xlabel("x")
-                if (iax==0):
+                if (iax==1):
                     ax.set_ylabel("v")
+                if (iax==0):
                     # source : https://stackoverflow.com/questions/13310594/positioning-the-colorbar
-                    axins = inset_axes(ax, width="5%", height="100%", loc='center left', borderpad=-10)
+                    axins = inset_axes(ax, width="4%", height="100%", loc='center left', borderpad=-9)
                     fig.colorbar(im, cax=axins, orientation="vertical")
 
             fig.suptitle("%s density at initial and final time" % species)
@@ -343,32 +379,83 @@ else:
             ax.set_ylim([minn-0.05*(maxx-minn),maxx+0.01*(maxx-minn)])
 
             fig.suptitle("%s at final time T=%6.3f" % (name, times[-1]))
-            show_andor_save (fig, tag+"_solo")
+            show_andor_save (fig, tag)
 
     # functions from (t,x,v) -> IR (fe, fi)
-    for (plot,ffs,extent,species,minn,maxx) in zip([plot_fi, plot_fe],[fis,fes],[fiextent,feextent],["Ion", "Electron"],[mini,mine],[maxi,maxe]):
+    for (plot,ffs,extent,species,tag,minn,maxx) in zip([plot_fi, plot_fe],[fis,fes],[fiextent,feextent],["Ion", "Electron"],["fi", "fe"],[minfi,minfe],[maxfi,maxfe]):
         if (plot):
             fig, ax = plt.subplots (figsize=(7,5))
-            im = ax.imshow (ffs[-1],cmap=cmap,vmin=minn,vmax=maxx,origin='lower',extent=extent,aspect="auto",interpolation='spline36')
-            ax.set_xlabel("x"); ax.set_ylabel("v")
+            # im = ax.imshow (ffs[-1],cmap=cmap,vmin=minn,vmax=maxx,origin='lower',extent=extent,aspect="auto",interpolation='spline36')
+            im = ax.imshow (ffs[0],cmap=cmap,origin='lower',extent=extent,aspect="auto",interpolation='spline36')
+            # ax.set_xlabel("x"); ax.set_ylabel("v")
             fig.colorbar(im)
-            fig.suptitle("%s density at final time T=%6.3f" % (species, times[-1]))
-            show_andor_save (fig, species+"_solo")
+            fig.tight_layout()
+            # fig.suptitle("%s density at final time T=%6.3f" % (species, times[-1]))
+            show_andor_save (fig, tag+"_init")
 
-for (thebool, thedata, thetag, thetitle) in zip(
-    [variation_EE,variation_rho,drift_EE,drift_rho],
-    [var_EE,var_rho,dri_EE,dri_rho],
-    ["varEE","varrho","driEE","drirho"],
-    [r"$|E_{k+1}-E_{k}|$",r"$|\rho_{k+1}-\rho_{k}|$",r"$|E_{k+1}-E_{0}|$",r"$|\rho_{k+1}-\rho_{0}|$"]
-    ):
-    if thebool:
-        thefile = open(saverep_diag+thetag+".txt", "a")
-        thefile.write("\t".join(["%f" % dd for dd in thedata]) + "\n")
-        thefile.close()
+if (var_and_drifts):
+    thefilename = saverep_diag+"var_and_drifts.txt"
+    print("Saving %s..." % (thefilename))
+    thefile = open(thefilename, "w")
+    towrite = []; labels = []
+    # physics
+    towrite.append("%f" % llambda); labels.append("lambda")
+    towrite.append("%f" % nu); labels.append("nu")
+    # time mesh
+    towrite.append("%f" % dt); labels.append("dt")
+    towrite.append("%i" % num_iteration); labels.append("Nt")
+    towrite.append("%f" % (num_iteration*dt)); labels.append("T")
+    # spatial mesh
+    towrite.append("%f" % meshx["min"]); labels.append("xmin")
+    towrite.append("%f" % meshx["max"]); labels.append("xmax")
+    towrite.append("%d" % meshx["N"]); labels.append("Nx")
+    # speed mesh fi
+    towrite.append("%f" % meshvi["min"]); labels.append("vimin")
+    towrite.append("%f" % meshvi["max"]); labels.append("vimax")
+    towrite.append("%d" % meshvi["N"]); labels.append("Nvi")
+    # speed mesh fe
+    towrite.append("%f" % meshve["min"]); labels.append("vemin")
+    towrite.append("%f" % meshve["max"]); labels.append("vemax")
+    towrite.append("%d" % meshve["N"]); labels.append("Nve")
+    # advection fi
+    towrite.append("%f" % adv_vi["d"]); labels.append("di")
+    towrite.append("%f" % adv_vi["kb"]); labels.append("kbi")
+    towrite.append("%f" % adv_vi["v"]); labels.append("vi")
+    # advection fe
+    towrite.append("%f" % adv_ve["d"]); labels.append("de")
+    towrite.append("%f" % adv_ve["kb"]); labels.append("kbe")
+    towrite.append("%f" % adv_ve["v"]); labels.append("ve")
+    # variations (max over n of |g_{i+1} - g_i|/dt)
+    towrite.append("%f" % var_EE_1); labels.append("var_E_1")
+    towrite.append("%f" % var_EE_i); labels.append("var_E_i")
+    towrite.append("%f" % var_rho_1); labels.append("var_rho_1")
+    towrite.append("%f" % var_rho_i); labels.append("var_rho_i")
+    # drifts (max over n of |g_i - g_0|)
+    towrite.append("%f" % dri_EE_1); labels.append("dri_E_1")
+    towrite.append("%f" % dri_EE_i); labels.append("dri_E_i")
+    towrite.append("%f" % dri_rho_1); labels.append("dri_rho_1")
+    towrite.append("%f" % dri_rho_i); labels.append("dri_rho_i")
+    # writing everything
+    labels = [ll+"(%d)"%il for (il, ll) in enumerate(labels)]
+    thefile.write("# " + "  ".join(labels) + "\n") 
+    thefile.write("\t".join(towrite) + "\n")
+    thefile.close()
+    print("Done saving %s." % (thefilename))
 
-        fig,ax = plt.subplots()
-        ax.plot(thedata,marker=".")
-        show_andor_save(fig, thetag)
+# for (thebool, thedata, thetag, thetitle) in zip(
+#     [variation_EE,variation_rho,drift_EE,drift_rho],
+#     [var_EE,var_rho,dri_EE,dri_rho],
+#     ["varEE","varrho","driEE","drirho"],
+#     [r"$|E_{k+1}-E_{k}|$",r"$|\rho_{k+1}-\rho_{k}|$",r"$|E_{k+1}-E_{0}|$",r"$|\rho_{k+1}-\rho_{0}|$"]
+#     ):
+#     if thebool:
+#         thefile = open(saverep_diag+thetag+".txt", "a")
+#         thefile.write("\t".join(["%f" % dd for dd in thedata]) + "\n")
+#         thefile.close()
+
+#         fig,ax = plt.subplots()
+#         ax.plot(thedata,marker=".")
+#         show_andor_save(fig, thetag)
 
 #################################
 # Creating videos
@@ -405,7 +492,7 @@ for (vid,tag,its,ffs,minn,maxx,col) in zip([video_EE,video_rho],["E","rho"],[E_i
         # plt.show ()
 
 # functions from (t,x,v) -> IR (fe, fi)
-for (vid,its,ffs,meshv,extent,tag,minn,maxx) in zip([video_fe,video_fi],[fe_its,fi_its],[fes,fis],[meshve,meshvi],[feextent,fiextent],["fe","fi"],[mine,mini],[maxe,maxi]):
+for (vid,its,ffs,meshv,extent,tag,minn,maxx) in zip([video_fe,video_fi],[fe_its,fi_its],[fes,fis],[meshve,meshvi],[feextent,fiextent],["fe","fi"],[minfe,minfi],[maxfe,maxfi]):
     if (vid):
         name = saverep_mp4+tag+".mp4"
         print("Creating video %s... (please wait, it can take a few seconds)" % name)

@@ -14,9 +14,9 @@ savedata.sh		# script to copy inputs, outputs and yaml in a separate folder
 clean.sh		# script to clean output folders
 
 How to use: 
-- compile with ./compile_hivlashea.sh yaml/theyamlfile.yaml
-- execute directly in the folder by ./hivlashea
-- if needed, create images/videos with python[3] diag_sheath.py
+- compile with ./compile_hivlashea.sh 
+- execute directly in the folder by ./hivlashea yaml/theyamlfile.yaml
+- if needed, create images/videos with python[3] diag_sheath.py (!!! modify yamlfilename)
 - if needed, create a copy of the data by ./savedata yaml/theyamlfile.yaml
 - if needed, clean output folders by ./clean (!!! be sure)
 

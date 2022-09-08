@@ -205,12 +205,12 @@ void diag_f(parallel_stuff* par, int i_hdf5, mesh_1d mesh1, mesh_1d mesh2,
     	par->displs[i] *=mesh2.size;
     }    
     pos = 0;
-    if(is_periodic){
-    	printf("is_periodic\n");
-    }else{
-    	printf("is not periodic\n");
-    }
-    printf("par->size_x_par_x=%d is_periodic=%d\n",par->size_x_par_x,is_periodic);
+    // if(is_periodic){
+    // 	printf("is_periodic\n");
+    // }else{
+    // 	printf("is not periodic\n");
+    // }
+    // printf("par->size_x_par_x=%d is_periodic=%d\n",par->size_x_par_x,is_periodic);
     for (i = 0; i < par->size_x_par_x; i++) {
         for (j = 0; j < mesh2.size; j++) {
             f1d[pos++] = par->f_parallel_in_x[i][j];

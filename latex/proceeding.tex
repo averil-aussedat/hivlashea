@@ -25,6 +25,8 @@
 \usepackage[ruled,vlined]{algorithm2e}
 %\usepackage{cases} % numbered lines in cases (numcases and subnumcases)
 \usepackage[overload]{empheq} % source : https://tex.stackexchange.com/questions/31951/separate-labels-in-cases
+\usepackage{caption} % to have subfigures
+\usepackage{subcaption} % to have subfigures
 \usepackage{cleveref} % \cref. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -84,6 +86,15 @@
 		\end{align}
 	\end{subequations}	
 }
+\newcommand{\mysubcaption}[1]{
+	\vspace*{5pt}
+	\begin{minipage}{0.8\linewidth}
+		\begin{center}
+			\footnotesize\emph{#1}
+		\end{center}
+	\end{minipage}
+}
+\newcommand{\imh}{\textwidth} % meant to be redefined locally
 
 %\renewcommand\appendixpagename{Appendix}
 %\renewcommand\appendixtocname{Appendix}
@@ -157,7 +168,7 @@ In the sequel, we may use the electric field $E(t,x) \coloneqq - \partial_x \var
 \end{remarque}
 
 The densities $f_i$ and $f_e$ are subject to initial and boundary conditions, given by
-\mysubeq{eq:unsta_model}{
+\mysubeq{eq:unsta_model_bc}{
 	f_{s}(0,x,v) &\coloneqq f_{s}^0(x,v) && (x,v) \in ]-1,1[ \times \R, \label{eq:init} \\
 	f_{s}(t,x=\pm 1,\pm v < 0) &\coloneqq 0  && t \in \R^+_*. \label{eq:fie_bc}
 }
@@ -175,7 +186,7 @@ We will look for \emph{symmetric solutions} satisfying
 \begin{align}\label{eq:phi_is_pair}
 	\varphi(t,x) = \varphi (t,-x) \quad \quad (t,x) \in \R^+ \times [-1,1].
 \end{align}
-By derivation with respect to $x \in ]-1,1[$, we immediatly obtain 
+By derivation with respect to $x \in ]-1,1[$, we immediately obtain 
 \begin{align*}
 	\partial_x \varphi(t,x) = - \partial_x \varphi (t,-x), \quad \text{i.e.} \quad E(t,x) = - E(t,-x).
 \end{align*}
@@ -452,7 +463,7 @@ The initial and boundary conditions are given by
 
 This model may be seen as a particular case of the two-species Vlasov-Poisson \cref{eq:unsta_model}, upon taking the following parameters:
 \begin{align*}
-	f_i^0 \equiv 0, \quad \nu = 0, \quad \mu = -1, \quad \lambda = 1, f_e^0 = f^0.
+	f_i^0 \equiv 0, \quad \nu = 0, \quad \mu = -1, \quad \lambda = 1, \quad f_e^0 = f^0.
 \end{align*}
 
 The reader may verify that \cref{eq:one_species_model} is solved in $\R^+ \times [-1,1] \times \mathbb{R}$ by the following stationary couple:
@@ -476,11 +487,16 @@ It is numerically relevant to extend the Malkov solution \cref{eq:Malkov_solutio
 
 \Cref{fig:malkov_solutions} illustrates the stationary solutions.
 
+% Simulations to have : 
+% - both codes, same parameters 
+% - please show convergence...
+
 \begin{figure}
 	\centering
 	\includegraphics[height=0.25\linewidth]{images/malkov_solution_Ee}
 	\includegraphics[height=0.25\linewidth]{images/malkov_solution_fe}
 	\caption{Malkov solutions \cref{eq:Malkov_solution_ext} on $[-1.5,1.5]$. Right: electric field $E$. Left: density $f$.}
+	\mysubcaption{The electric field is extended outside of $[-1,1]$ by a constant. The density $f$ is represented in the domain $[-1.5,1.5]\times[-2,2]$, and truncated to 10.}
 	\label{fig:malkov_solutions}
 \end{figure}
 
@@ -488,8 +504,162 @@ It is numerically relevant to extend the Malkov solution \cref{eq:Malkov_solutio
 % Diagnostics (conservations)
 % Do we observe sheaths? 
 \subsection{Comparison between (SL) and (FD)}
-%\subsection{Comparison between (SL) and (FP)}
-%% plugging one into the other and the other way around
+
+In the sequel, we use the following physical parameters:
+\begin{align}\label{eq:param_simu}
+	\lambda = \frac{1}{2}, \quad \mu = \frac{1}{100}, \quad\text{and}\quad \nu = 20.
+\end{align}
+The initial conditions are chosen as the thermodynamic equilibrium in an infinite spatial domain, or in a domain with periodic condition. The densities are then given by
+\begin{align*}
+	f_{i}^0 (x,v) \coloneqq \frac{\exp\left(- \frac{v^2}{2}\right)}{\sqrt{2\pi}}, \quad \text{and} \quad f_{e}^0 (x,v) \coloneqq \sqrt{\mu}\frac{\exp\left(- \mu \frac{v^2}{2}\right)}{\sqrt{2\pi}}.
+\end{align*}
+In order to satisfy the boundary conditions, we multiply $f_{i,e}$ by a mask, defined as
+\begin{align*}
+	\text{mask}(x,v) \coloneqq \frac{1}{2} \left(\tanh\left(\frac{x - (-0.8)}{0.1}\right) - \tanh\left(\frac{x - 0.8}{0.1}\right)\right).
+\end{align*}
+
+\Cref{fig:init_cond} illustrates the resulting initial conditions.
+\begin{figure}
+	\centering
+	\renewcommand{\imh}{0.33\linewidth}
+	\includegraphics[height=\imh]{images/fi_init}
+	\includegraphics[height=\imh]{images/fe_init}
+	\caption{Initial conditions $f_i^0$ (left) and $f_e^0$ (right).}
+	\label{fig:init_cond}
+\end{figure}
+
+\paragraph{Short time}
+
+The simulations run over the spatial domain $x \in [-1,1]$. The semi-Lagrangian code computes the electron velocities on $v_e \in [-50, 50]$, and ion velocities on $v_i \in [-8, 8]$. The finite differences code uses the same mesh for ions and electrons, chosen as $v\in[-50,50]$. To simplify the comparison, visualisations of $f_i$ for (FD) are restricted to the coordinates $f_{i,j,k}$ such that $v_k \in [-8,8]$.
+
+\begin{figure}
+	\centering
+	\newcommand{\rootSL}{../code_SL/}
+%	\newcommand{\rootFD}{../../DynamicElectricSheath.jl/data/two_species/}
+	\newcommand{\rootFD}{../temp_res_DF/}
+	\newcommand{\dirSL}{run_comp_short_time_2sp_Nx1000_Nvi2001_Nve2001_Nt1563}
+	\newcommand{\dirFD}{run_comp_short_time_2sp_Nx1000_Nv2000_Nt1563}
+	\renewcommand{\imh}{0.33\linewidth}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{\rootFD\dirFD/comp_E_\dirSL.png}
+		\includegraphics[height=\imh]{\rootFD\dirFD/comp_rho_\dirSL.png}
+		\caption{Electric field (left) and density $\rho$ (right)}
+		\label{subfig:compT0025_E_rho}
+	\end{subfigure}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{\rootFD\dirFD/fi}
+		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fi}
+		\caption{Ion density}
+		\label{subfig:compT0025_ion}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{\rootFD\dirFD/fe}
+		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fe}
+		\caption{Electron density}
+		\label{subfig:compT0025_electron}
+	\end{subfigure}
+	\caption{Comparison between finite differences (left) and semi-Lagrangian (right) at $T=0.025$.}
+	\label{fig:compT0025}
+\end{figure}  
+
+\Cref{fig:compT0025} illustrates the very short-time behaviour of both codes. At time $t=0$, the initial conditions are chosen so that $E = \rho = 0$, corresponding to a neutral plasma. The initial velocity field is then given by $(v, 0)$, and we observe the shear of the initial conditions. The electric field conserve the same variations through both codes, with a difference in scale.
+
+\begin{figure}
+	\centering
+	\newcommand{\rootSL}{../code_SL/}
+%	\newcommand{\rootFD}{../../DynamicElectricSheath.jl/data/two_species/}
+	\newcommand{\rootFD}{../temp_res_DF/}
+	\newcommand{\dirSL}{run_comp_short_time_2sp_Nx1000_Nvi2001_Nve2001_Nt6250}
+	\newcommand{\dirFD}{run_comp_short_time_2sp_Nx1000_Nv2000_Nt6250}
+	
+	\renewcommand{\imh}{0.33\linewidth}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{\rootFD\dirFD/comp_E_\dirSL.png}
+		\includegraphics[height=\imh]{\rootFD\dirFD/comp_rho_\dirSL.png}
+		\caption{Electric field (left) and density $\rho$ (right)}
+		\label{subfig:compT01_E_rho}
+	\end{subfigure}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{\rootFD\dirFD/fi}
+		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fi}
+		\caption{Ion density}
+		\label{subfig:compT01_ion}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{\rootFD\dirFD/fe}
+		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fe}
+		\caption{Electron density}
+		\label{subfig:compT01_electron}
+	\end{subfigure}
+	\caption{Comparison between finite differences (left) and semi-Lagrangian (right) at $T=0.1$.}
+	\label{fig:compT01}
+\end{figure}  
+
+The same simulation at time $T=0.1$ shows a greater divergence between both methods. The electric field does not have the same extremal values, and the comparison of $\rho$ reveals a difference of variations. The approximations of the ion density $f_i$ seem quite similar, but the shape of the electric density $f_e$ differs: the semi-lagrangian code produces sharper approximation and a more elongated profile.
+
+\paragraph{Long time}
+
+Now, we turn to the long-term simulations, with $T=200$. Here, we free the semi-Lagrangian code from the artificial CFL condition imposed for fair comparisons. \Cref{fig:compT200} illustrates the behavior of both codes on long time, with parameters given by \cref{eq:param_simu}. 
+
+The finite difference code suffers from its diffusion, and the approximations of $f_i$ and $f_e$ are almost everywhere reduced to 0. The point $(x=0,v=0)$ stands out, since it is an equilibrium point: the value $f_e(t,0,0)$ is constant with respect to $t$ (both in the continuous model, and in the discrete model provided $(x=0,v=0)$ belongs to the mesh), and 
+\begin{align*}
+	\partial_t f_i (t,0,0) = f_e(t,0,0),  \quad \text{so that} \quad f_i(t,0,0) = f_i(0,0,0) + t f_e(0,0,0).
+\end{align*}
+This explains the results of \cref{fig:compT200}. The value $f^n_{e,j_0,k_0} \simeq f_e(T,0,0)$ is stationary, but the maximum of $f_e^n$ outside a small neighbourhood of $(x=0,v=0)$ is 0 at machine precision.
+%The numerical maximum of $f_i$ is equal to $159.97581842617524$, and the error with respect to $f_i(0,0,0) + (T=200) \times (\nu = 20) \times f_e(0,0,0)$ is of order $10^{-8}$. 
+The value $f^n_{i,j_0,k_0} \simeq f_i(T,0,0)$ is not taken into account in the colormap, since
+\begin{align*}
+	\max_{j,k} f^n_{i,j,k} = f^n_{i,j_0,k_0} = 159.97581842617524, \quad \text{and} \quad \left|f^n_{i,j_0,k_0} - (f^0_{i,j_0,k_0} + T \nu f^0_{e,j_0,k_0})\right| = 8.98 \times 10^{-9}.
+\end{align*}
+
+At the opposite, the semi-lagrangian scheme does not produce vanishing approximations. 
+
+\begin{figure}
+	\centering
+	\newcommand{\rootSL}{../code_SL/}
+%	\newcommand{\rootFD}{../../DynamicElectricSheath.jl/data/two_species/}
+	\newcommand{\rootFD}{../temp_res_DF/}
+	\newcommand{\dirSL}{run_comp_long_time_2sp_Nx1000_Nvi2001_Nve2001_Nt100000}
+	\newcommand{\dirFD}{run_comp_long_time_2sp_Nx200_Nv400_Nt2500000}
+	
+	\renewcommand{\imh}{0.33\linewidth}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{\rootFD\dirFD/comp_E_\dirSL.png}
+		\includegraphics[height=\imh]{\rootFD\dirFD/comp_rho_\dirSL.png}
+		\caption{Electric field (left) and density $\rho$ (right)}
+		\mysubcaption{The maximum of $\rho$ for the (DF) code is equal to 39.983965094090.}
+		\label{subfig:compT200_E_rho}
+	\end{subfigure}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{\rootFD\dirFD/fi}
+		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fi}
+		\caption{Ion density} 
+		\label{subfig:compT200_ion}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{\rootFD\dirFD/fe}
+		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fe}
+		\caption{Electron density}
+		\label{subfig:compT200_electron}
+	\end{subfigure}
+	\caption{Comparison between finite differences (left) and semi-Lagrangian (right) at $T=200$.}
+	\label{fig:compT200}
+\end{figure}  
 
 \bibliographystyle{alpha}
 \bibliography{CEMRACS.bib}
