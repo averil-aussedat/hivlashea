@@ -22,6 +22,15 @@
   file = {/home/averil/Zotero/storage/D2Y95P8J/Badsi et al. - 2021 - A stable fixed point method for the numerical simu.pdf}
 }
 
+@article{bourneNonUniformSplinesSemiLagrangian,
+  title = {Non-{{Uniform Splines}} for {{Semi-Lagrangian Kinetic Simulations}} of the {{Plasma Sheath}}},
+  author = {Bourne, Emily and Munschy, Yann and Grandgirard, Virginie and Mehrenberger, Michel and Ghendrih, Philippe},
+  pages = {35},
+  abstract = {Numerical methods based on non-uniform splines of varying degrees are used to run kinetic semi-Lagrangian simulations of the plasma sheath. The sheath describes a region of plasma in contact with a wall, acting as a heat, momentum, and particle bath. The latter regulates the current loss and consequently the electric field. At micro scale it then influences the development of plasma turbulence and at a larger scale plasma rotation. However this region is particularly difficult to simulate, due to its kinetic nature and the presence of steep gradients requiring fine numerical resolution. In this work, a new well-conditioned method for determining the coefficients for Schoenberg's ``best'' quadrature is presented, providing improved precision compared to a naive approach based on b-spline derivatives (4 extra significant figures of precision are obtained for coefficients of the fifth order scheme). The construction of a simulation grid from Greville abcissae of judiciously chosen non-uniform knots is shown to reduce the memory requirements by 89\% for the simulation presented. Cubic splines are found to provide a good compromise between fast convergence and controlled oscillations preserving positivity. Despite the reduction in performance associated with using non-uniform spline schemes, effective parallelisation through the use of GPUs leads to non-uniform simulations running 5.5 times faster than uniform simulations providing equivalent results.},
+  langid = {english},
+  file = {/home/averil/Zotero/storage/LVV8IW4R/Bourne et al. - Non-Uniform Splines for Semi-Lagrangian Kinetic Si.pdf}
+}
+
 @article{boutinHighOrderNumerical2021,
   title = {High Order Numerical Schemes for Transport Equations on Bounded Domains},
   author = {Boutin, B. and Nguyen, T.H.T. and Sylla, A. and {Tran-Tien}, S. and Coulombel, J.-F.},
@@ -90,6 +99,20 @@
   file = {/home/averil/Zotero/storage/GITHVJTX/Goldberg - On a Boundary Extrapolation Theorem by Kreiss.pdf}
 }
 
+@article{grandgirard5DGyrokineticFull2016,
+  title = {A {{5D}} Gyrokinetic Full- f Global Semi-{{Lagrangian}} Code for Flux-Driven Ion Turbulence Simulations},
+  author = {Grandgirard, V. and Abiteboul, J. and Bigot, J. and {Cartier-Michaud}, T. and Crouseilles, N. and {Dif-Pradalier}, G. and Ehrlacher, Ch. and Esteve, D. and Garbet, X. and Ghendrih, Ph. and Latu, G. and Mehrenberger, M. and Norscini, C. and Passeron, Ch. and Rozar, F. and Sarazin, Y. and Sonnendr{\"u}cker, E. and Strugarek, A. and Zarzoso, D.},
+  year = {2016},
+  month = oct,
+  journal = {Computer Physics Communications},
+  volume = {207},
+  pages = {35--68},
+  issn = {00104655},
+  doi = {10.1016/j.cpc.2016.05.007},
+  langid = {english},
+  file = {/home/averil/Zotero/storage/HRI8SR6X/Grandgirard et al. - 2016 - A 5D gyrokinetic full- f global semi-Lagrangian co.pdf}
+}
+
 @book{gustafssonTimeDependentProblems2013,
   title = {Time Dependent Problems and Difference Methods},
   author = {Gustafsson, Bertil and Kreiss, H. and Oliger, Joseph},
@@ -102,13 +125,20 @@
   keywords = {Differential equations; Partial,Numerical solutions}
 }
 
-@article{malkov2020,
-  title={Non-stationary Antonov self-gravitating layer: analytics and numerics},
-  author={Malkov, Evgeny A and Kudryavtsev, Alexey N},
-  journal={Monthly Notices of the Royal Astronomical Society},
-  volume={491},
-  number={3},
-  pages={3952--3966},
-  year={2020},
-  publisher={Oxford University Press}
+@article{malkovNonstationaryAntonovSelfgravitating2020,
+  title = {Non-Stationary {{Antonov}} Self-Gravitating Layer: Analytics and Numerics},
+  shorttitle = {Non-Stationary {{Antonov}} Self-Gravitating Layer},
+  author = {Malkov, Evgeny A. and Kudryavtsev, Alexey N.},
+  year = {2020},
+  month = jan,
+  journal = {Monthly Notices of the Royal Astronomical Society},
+  volume = {491},
+  pages = {3952--3966},
+  issn = {0035-8711},
+  doi = {10.1093/mnras/stz3276},
+  abstract = {Large-scale instability of gravitating systems plays a key role in collisionless relaxation and in reaching a quasi-stationary state at the early stage of evolution. Advanced high-resolution methods and permanently increasing performance of computational systems allow this phenomenon to be studied by means of computer simulations at a new level. In this paper, an approach to verification and validation of computer codes implementing high-resolution methods is proposed. The approach is based on comparisons of the simulation results with exact non-stationary solutions of the Vlasov-Poisson equations. The evolution of the gravitating layer model is considered as an example of implementation of this approach. A one-parameter family of exact models of a non-stationary gravitating layer is described, and their stability to large-scale disturbances in the linear approximation is analytically studied. Non-linear instability development is computed with the use of the fifth-order conservative semi-Lagrangian WENO scheme.},
+  keywords = {galaxies: formation,gravitation,instabilities,methods: analytical,methods: numerical},
+  annotation = {ADS Bibcode: 2020MNRAS.491.3952M}
 }
+
+

@@ -109,7 +109,9 @@
 \maketitle
 
 \begin{abstract}
-This article is a report of the project achieved during the CEMRACS 2022.
+	This article is a report of the project achieved during the CEMRACS 2022.
+	We consider Vlasov-Poisson model for a two-species plasma. Our aim is to extend an existing code from periodic boundary conditions to nonperiodic boundary conditions. In particular, we focus on the interaction of the plasma with a non-emitting wall, and wish to capture the physical phenomenon called \emph{Debye sheath}. 
+	Comparison between this numerical scheme and a finite difference scheme are presented.
 \end{abstract}
 
 %% Plan
@@ -123,12 +125,12 @@ This article is a report of the project achieved during the CEMRACS 2022.
 \section{Plasma sheaths}
 
 % What is a plasma - electrons and ions
+Plasmas are neutral at the equilibrium in a sufficiently large domain. However, near a boundary, a charge imbalance may be observed in a thin layer called \emph{sheath}.
+This phenomenon stems from the interaction of ions and electron with the boundary media (a cold metallic wall, for instance). Both species will be absorbed by the wall, but with a rate proportional to their speed. Since the electrons are moving several order of magnitude faster than the ions, a positively charged layer (the \emph{Debye sheath}) forms near the boundary. 
 
-Plasma sheaths draw interest since the observations of Irvin Langmuir in 1923. The physical phenomenon happens, for instance, when a metallic wall is in contact with a plasma. Both species will be absorbed by the wall, but with a rate proportional to their speed. Since the electrons are moving several order of magnitude faster than the ions, a positively charged layer (the \emph{Debye sheath}) forms near the boundary. 
+The difference of speed between both species is numerically challenging, since a wide range of velocities is needed to correctly model the evolution of electrons, but accuracy is required on low velocities to capture the ions. When using mesh-based approaches, it is tempting to use adapted velocity meshes for the different species. This requires the choice of an interpolation procedure: several possibilities are found in the literature, as uniform cubic splines in the GYSELA code \cite{grandgirard5DGyrokineticFull2016} and extension to non-uniform splines in \cite{bourneNonUniformSplinesSemiLagrangian}, or high-order polynomial interpolation \cite{badsiStableFixedPoint2021}. We will follow the latter method.
 
-\todo{Difficulties}
-
-The purpose of this work is to investigate numerically the formation of this sheath. \todo{Work on biblio!} It follows previous work of \todo{ref travail Michel et Yann} on a periodic case, and of \todo{ref Mehdi, Anaïs} on a collisional model. Our aim is to study an ionization model with nonperiodic boundary conditions. The first section introduces the corresponding system, and derives the boundary conditions. The second section presents the numerical methods used to simulate the evolution of the plasma, and the third section gives some results and comparisons.
+Our purpose is to investigate numerically the formation of the sheath. It follows previous work of Michel Mehrenberger and Yann Barsamian \todo{is there a reference for the existing code?} on a periodic case, and of \cite{badsiNumericalStabilityPlasma} on a collisional model. Our aim is to study an ionization model with nonperiodic boundary conditions, thus extending the work of \todo{Michel and Yann - how to say it properly?}. The first section introduces the corresponding system, and derives the boundary conditions. The second section presents the numerical methods used to simulate the evolution of the plasma, and the third section gives some results and comparisons.
 
 \paragraph{The model}
 
@@ -222,7 +224,7 @@ Let us notice that the advection equations \cref{eq:unsta_model_fi,eq:unsta_mode
  	 \end{align}
  \end{remarque}
  
- \paragraph{\todo{Another/Natural} boundary condition}
+ \paragraph{Deriving a boundary condition at $x=\pm 1$}
  
  The centered Neumann condition \cref{eq:phi_bc_neumann} enforces continuity of$\partial_x \varphi$ at $x=0$. We may avoid this constraint by deriving another Neuman condition, given on the boundary $x=\pm 1$.
  
@@ -450,7 +452,7 @@ The boundaries are treated as follow:
 \section{Numerical results}
 \subsection{1-species validation test case}
 
-We rely on the work of \cite{malkov2020} to provide an analytical solution in a 1-species case. Consider the simplified stationary model describing the density of particles $f = f(t,x,v)$, and the potential $\varphi=\varphi(t,x)$:
+We rely on the work of \cite{malkovNonstationaryAntonovSelfgravitating2020} to provide an analytical solution in a 1-species case. Consider the simplified stationary model describing the density of particles $f = f(t,x,v)$, and the potential $\varphi=\varphi(t,x)$:
 \mysubeq{eq:one_species_model}{
 	\partial_t f + v \partial_x f  - \partial_x \varphi \partial_v f &= 0 && (t,x,v) \in \R^+_* \times ]-1,1[ \times \mathbb{R}, \label{sta_1sp_f} \\
 	\partial^2_{xx} \varphi &= \int_{v\in\mathbb{R}} f dv && (t,x) \in \R^+ \times ]-1,1[. \label{sta_phi}
@@ -487,22 +489,23 @@ It is numerically relevant to extend the Malkov solution \cref{eq:Malkov_solutio
 
 \Cref{fig:malkov_solutions} illustrates the stationary solutions.
 
-% Simulations to have : 
-% - both codes, same parameters 
-% - please show convergence...
-
 \begin{figure}
 	\centering
-	\includegraphics[height=0.25\linewidth]{images/malkov_solution_Ee}
-	\includegraphics[height=0.25\linewidth]{images/malkov_solution_fe}
+	\renewcommand{\imh}{0.33\linewidth}
+	\includegraphics[trim = 50 10 55 30, clip, height=\imh]{images/malkov_solution_Ee}
+	\includegraphics[trim = 100 10 60 30, clip, height=\imh]{images/malkov_solution_fe}
 	\caption{Malkov solutions \cref{eq:Malkov_solution_ext} on $[-1.5,1.5]$. Right: electric field $E$. Left: density $f$.}
 	\mysubcaption{The electric field is extended outside of $[-1,1]$ by a constant. The density $f$ is represented in the domain $[-1.5,1.5]\times[-2,2]$, and truncated to 10.}
 	\label{fig:malkov_solutions}
 \end{figure}
 
-%\subsection{2-species results}
-% Diagnostics (conservations)
-% Do we observe sheaths? 
+\todo{For now, I don't reach order 1. Maybe bug?}
+
+%\begin{figure}[H]
+	\input{ltf_Malkov_DF}
+	\input{ltf_Malkov_SL}
+%\end{figure}
+
 \subsection{Comparison between (SL) and (FD)}
 
 In the sequel, we use the following physical parameters:
