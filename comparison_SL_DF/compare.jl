@@ -37,7 +37,7 @@ for (folder_DF, folder_SL) in zip(folders_DF, folders_SL)
     p = plot(xDF, EDF, ylims=Elims, label="E (DF)", lw=4, legend=:bottomright, legendfontsize=14)
     plot!(p, xSL, ESL, label="E (SL)", lw=4)
     png(p, "$root_DF/$folder_DF/comp_E_$folder_SL.png")
-    png(p, "$root_SL/$folder_SL/comp_E_$folder_DF.png")
+    png(p, "$root_SL/$folder_SL/python_diags/comp_E_$folder_DF.png")
     # display(p)
 
     # Density ρ
@@ -54,6 +54,6 @@ for (folder_DF, folder_SL) in zip(folders_DF, folders_SL)
     p = plot(xDF, ρDF, ylims=ρlims, label="ρ (DF)", lw=4, legend=:bottomright, legendfontsize=14)
     plot!(p, xSL, ρSL, label="ρ (SL)", lw=4)
     png(p, "$root_DF/$folder_DF/comp_rho_$folder_SL.png")
-    png(p, "$root_SL/$folder_SL/comp_rho_$folder_DF.png")
+    png(p, "$root_SL/$folder_SL/python_diags/comp_rho_$folder_DF.png")
     # display(p)
 end

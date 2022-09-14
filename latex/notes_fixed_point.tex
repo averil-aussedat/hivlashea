@@ -1,0 +1,177 @@
+\documentclass{article}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Packages
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\usepackage[utf8]{inputenc} % for overleaf/PLM
+\usepackage[latin1]{inputenc} % averil local
+\usepackage[T1]{fontenc} % hyphenation
+\usepackage{fullpage} % DO NOT USE IN BEAMER
+\usepackage[british,UKenglish,USenglish,american]{babel}
+%\usepackage{appendix}
+\usepackage{amssymb,amsmath,amsthm,enumerate}
+\usepackage{mathtools} % coloneqq
+%\usepackage{easybmat}
+\usepackage{enumitem}
+%\usepackage{tikz}
+%\usepackage{caption}
+\usepackage{float} % [H]
+%\usepackage{bbold}
+\usepackage{xcolor}
+\usepackage{stmaryrd} % ll/rr brackets
+%\usepackage[notcite, notref]{showkeys}
+%\usepackage[tworuled,vlined,nofillcomment]{algorithm2e}
+\usepackage[ruled,vlined]{algorithm2e}
+%\usepackage{cases} % numbered lines in cases (numcases and subnumcases)
+\usepackage[overload]{empheq} % source : https://tex.stackexchange.com/questions/31951/separate-labels-in-cases
+\usepackage{caption} % to have subfigures
+\usepackage{subcaption} % to have subfigures
+\usepackage{cleveref} % \cref. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Format
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Notes on fixed-point procedure}
+\author{} 
+\date{}
+
+\SetKwRepeat{Do}{do}{while} % for algorithm2e package, add do-while
+
+% set dashes instead of bullets for item lists
+\setlist[itemize,1]{label=$-$}
+\setlist[itemize,2]{label=$-$}
+\setlist[itemize,3]{label=$-$}
+
+% remove unnecessary formatting of clever references
+\crefdefaultlabelformat{(#2#1#3)}
+\crefname{equation}{}{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Theorems
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theoreme}{Theorem}[section]
+\newtheorem{remarque}{Remark}[section]
+\newtheorem{lemme}{Lemma}[section]
+\numberwithin{equation}{section}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Commands
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\lp}{\left(}
+\newcommand{\rp}{\right)}
+\newcommand{\tran}[1]{\prescript{t}{}{#1}}
+\newcommand{\vol}{\textup{Vol}}
+\newcommand{\red}{\textcolor{red}}
+\newcommand{\blue}{\textcolor{blue}}
+
+\newcommand{\todo}[1]{{\color{red}\textbf{#1}}}
+\newcommand{\vv}[1]{\begin{pmatrix} #1 \end{pmatrix}} % vector
+\newcommand{\mysubeq}[2]{ % first argument : label, second : align content
+	\begin{subequations}\label{#1}
+		\begin{align}[left = {\empheqlbrace}]
+			#2
+		\end{align}
+	\end{subequations}	
+}
+\newcommand{\mysubcaption}[1]{
+	\vspace*{5pt}
+	\begin{minipage}{0.8\linewidth}
+		\begin{center}
+			\footnotesize\emph{#1}
+		\end{center}
+	\end{minipage}
+}
+\newcommand{\imh}{\textwidth} % meant to be redefined locally
+
+%\renewcommand\appendixpagename{Appendix}
+%\renewcommand\appendixtocname{Appendix}
+\renewcommand{\qedsymbol}{$\blacksquare$}
+
+% local vocabulary
+\newcommand{\ve}{\underline{v}_e}
+\newcommand{\DomUpL}{\mathcal{D}_1}
+\newcommand{\DomUpR}{\mathcal{D}_2}
+\newcommand{\DomLow}{\mathcal{D}_3}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\maketitle
+
+Let us define for all $0 < \alpha \leqslant \beta$ the set
+\begin{align*}
+	\mathcal{K}^{\alpha,\beta} \coloneqq \left\{\varphi \in \mathcal{C}^2\left([0,1], \mathbb{R}^{-}\right) \ |\ \varphi(0) = \varphi'(0) = 0, \quad - \beta \leqslant \varphi'' \leqslant - \alpha. \right\}
+\end{align*}
+
+\paragraph{Estimates on the set $\mathcal{K}$}
+
+Since $\varphi : [0,1] \mapsto \mathbb{R}^-$ is decreasing, its inverse $\varphi^{-1} : \mathbb{R}^- \mapsto [0,1]$ is well-defined. By integration and using $\left(\varphi^{-1}\right)' = (\varphi'\circ \varphi^{-1})^{-1}$, we have
+\mysubeq{eq:convex_bounds}{
+	- \beta x &\leqslant \varphi'(x) \leqslant - \alpha x \label{eq:convex_bounds_phiprime} \\
+	- \beta \frac{x^2}{2} &\leqslant \varphi(x) \leqslant - \alpha \frac{x^2}{2} \label{eq:convex_bounds_phi} \\
+	\sqrt{-\frac{2y}{\beta}} &\leqslant \varphi^{-1}(y) \leqslant \sqrt{-\frac{2y}{\alpha}} \label{eq:convex_bounds_phiinv} \\
+	\frac{-1}{\alpha\sqrt{-\frac{2y}{\beta}}} &\leqslant (\varphi^{-1})'(y) \leqslant \frac{-1}{\beta\sqrt{-\frac{2y}{\alpha}}} \label{eq:convex_bounds_phiinv} 
+}
+
+We want to obtain estimates on $n_i - n_e$. We make the following assumptions:
+\begin{itemize}
+\item The electron density $f_e$ satisfies the boundary condition, and is bounded by a constant $c \geqslant 0$. 
+\item The potential $\varphi$ is strongly concave, i.e. there exists $\alpha>0$ such that $\varphi''(x) \leqslant - \alpha$ uniformly over $x\in[0,1]$.
+\end{itemize}
+
+Let us first focus on $n_e(x)$. The characteristics of the electron density are the level lines of
+\begin{align}\label{eq:def_Le}
+	\mathcal{L}_e(x,v) \coloneqq \frac{v^2}{2} - \frac{1}{\mu} \varphi(x).
+\end{align}
+Since $\varphi$ is strongly concave, these curves are closed. Since $f_e$ satisfies the homogeneous boundary condition, its support is embedded in $\left\{(x,v) \ |\ \frac{v^2}{2} - \frac{1}{\mu} \varphi(x) \leqslant \frac{0^2}{2} - \frac{1}{\mu} \varphi(1)\right\}$. In particular, we denote by $\ve$ the extremal speed of the support, 
+\begin{align}\label{eq:def_ve}
+	\ve \coloneqq \sqrt{-\frac{2}{\mu} \varphi(1)}.
+\end{align}
+We can roughly majorize
+\begin{align*}
+	n_e(x) = \int_{v\in\mathbb{R}} f_e(x,v) dv \leqslant \int_{v=-\ve}^{\ve} c dv = 2 c \ve \leqslant 2 c \sqrt{-\frac{2}{\mu} \varphi(1)}.
+\end{align*}
+
+The estimates on $n_i$ are slightly more technical. Let the ion Lyapunov function be defined as
+\begin{align}\label{eq:def_Li}
+	\mathcal{L}_i(x,v) \coloneqq \frac{v^2}{2} + \varphi(x).
+\end{align}
+Let $x\in[0,1]$ and $v \in \mathbb{R}_{-}$. We denote by $(x_b(x,v),v_b(x,v))$ the intersection of the boundary $\left\{x=0\right\}\cap\left\{v=0\right\}$ with the ion characteristic issued from $(x,v)$, equal to
+\begin{align*}
+	\vv{x_b(x,v) \\ v_b(x,v)} \coloneqq 
+	\begin{cases}
+		\vv{\varphi^{-1}\left(\frac{v^2}{2} + \varphi(x)\right) \\ 0} & \text{if } \mathcal{L}_i(x,v) \leqslant 0, \\
+		\vv{0 \\ - \sqrt{\frac{v^2}{2} + \varphi(x)}} & \text{if } \mathcal{L}_i(x,v) > 0.
+	\end{cases}
+\end{align*}
+In the following paragraph, we use $(x(t),v(t))_{t\leqslant0}$ to denote the characteristic reaching $(x_b(x,v),v_b(x,v))$ at $t=0$. 
+We use the symmetry of $f_i$ to write 
+\begin{align*}
+	n_i(x) = 2 \int_{v\in\mathbb{R}^{-}} f_i(x_b(x,v), v_b(x,v)) dv = 2 \int_{v\in\mathbb{R}^{-}}\int_{t=-\infty}^{0} f_e(x(t),v(t)) dt dv.
+\end{align*}
+The lower bound $t \to -\infty$ is artificial, since the characteristic exits the support of $f_e$ in finite time. We will split the double integral in three domains:
+\begin{enumerate}
+\item $\DomUpL$ will be $\left\{(v,t) \in \mathbb{R}_{-}^2 \ |\ \mathcal{L}_i(x,v) \leqslant 0 \text{ and } x(t) \geqslant x \right\}$. This is the region contained between the $x-$axis, the critical characteristic and the vertical line going through $x$.
+\item $\DomUpR$ is $\left\{(v,t) \in \mathbb{R}_{-}^2 \ |\ \mathcal{L}_i(x,v) \leqslant 0 \text{ and } x < x(t) \geqslant 1 \right\}$. It is exactly $\left\{\mathcal{L}_i \leqslant 0\right\} \setminus \DomUpL$.
+\item $\DomLow$ is defined by $\left\{(v,t) \in \mathbb{R}_{-}^2 \ |\ \mathcal{L}_i(x,v) > 0 \text{ and } \ve \geqslant v(t) \right\}$. 
+\end{enumerate}
+
+\todo{Figure de la décomposition en domaines}
+
+
+\bibliographystyle{alpha}
+\bibliography{CEMRACS.bib}
+
+\end{document}

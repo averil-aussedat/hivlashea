@@ -48,7 +48,8 @@ saverep_diag = root+"python_diags/" # where to save stationary tests, for instan
 
 # yamlfilename = "Malkov_1sp.yaml"
 # yamlfilename = "comp_short_time.yaml"
-yamlfilename = "comp_long_time.yaml"
+# yamlfilename = "comp_long_time.yaml"
+yamlfilename = "fun.yaml"
 
 if (root==""):
     yamlfilename = "yaml/" + yamlfilename # add path to yaml
@@ -60,17 +61,17 @@ fullImages = False # if True, initial + final + infos on images. Else, only fina
 
 plot_fi  = True # density of ions 
 plot_fe  = True # density of electrons
-plot_EE  = False # electric field
-plot_rho = False # \int_v f_i - f_e dv
+plot_EE  = True # electric field
+plot_rho = True # \int_v f_i - f_e dv
 
-video_fi  = False # density of ions 
-video_fe  = False # density of electrons
-video_EE  = False # electric field
-video_rho = False # \int_v f_i - f_e dv
+video_fi  = True # density of ions 
+video_fe  = True # density of electrons
+video_EE  = True # electric field
+video_rho = True # \int_v f_i - f_e dv
 
 # compute and display stationary test. Saved in file as lines + plotted
 # norm of (E_k - E_{k-1} / dt)
-var_and_drifts = False
+var_and_drifts = True
 # variation_EE  = True # electric field
 # variation_rho = True # \int_v f_i - f_e dv
 # # norm of (E_k - E_0)
@@ -385,13 +386,14 @@ else:
     for (plot,ffs,extent,species,tag,minn,maxx) in zip([plot_fi, plot_fe],[fis,fes],[fiextent,feextent],["Ion", "Electron"],["fi", "fe"],[minfi,minfe],[maxfi,maxfe]):
         if (plot):
             fig, ax = plt.subplots (figsize=(7,5))
-            # im = ax.imshow (ffs[-1],cmap=cmap,vmin=minn,vmax=maxx,origin='lower',extent=extent,aspect="auto",interpolation='spline36')
-            im = ax.imshow (ffs[0],cmap=cmap,origin='lower',extent=extent,aspect="auto",interpolation='spline36')
+            im = ax.imshow (ffs[-1],cmap=cmap,vmin=minn,vmax=maxx,origin='lower',extent=extent,aspect="auto",interpolation='spline36')
+            # im = ax.imshow (ffs[0],cmap=cmap,origin='lower',extent=extent,aspect="auto",interpolation='spline36')
             # ax.set_xlabel("x"); ax.set_ylabel("v")
             fig.colorbar(im)
             fig.tight_layout()
             # fig.suptitle("%s density at final time T=%6.3f" % (species, times[-1]))
-            show_andor_save (fig, tag+"_init")
+            show_andor_save (fig, tag)
+            # show_andor_save (fig, tag+"_init")
 
 if (var_and_drifts):
     thefilename = saverep_diag+"var_and_drifts.txt"

@@ -133,10 +133,10 @@ int main(int argc, char *argv[]) {
     double ee=0.0; // energy
     double mm=0.0; // mass conservation evaluation (mi-me-2lambda^2*E(1))
     double diffM3 = 0.0; // int_{t=0}^tn M_3(t,1) - M_3(t,-1) dt
-    // int plot_frequency=20; // 1=every loop
+    int plot_frequency=20; // 1=every loop
     // int plot_frequency=10; // 1=every loop
     // int plot_frequency=50; // 1=every loop
-    int plot_frequency=2000000; // 1=every loop
+    // int plot_frequency=2000000; // 1=every loop
 
     // local variables
     int itime=0;
