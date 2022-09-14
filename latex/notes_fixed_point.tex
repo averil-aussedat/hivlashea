@@ -97,10 +97,14 @@
 \renewcommand{\qedsymbol}{$\blacksquare$}
 
 % local vocabulary
-\newcommand{\ve}{\underline{v}_e}
-\newcommand{\DomUpL}{\mathcal{D}_1}
-\newcommand{\DomUpR}{\mathcal{D}_2}
-\newcommand{\DomLow}{\mathcal{D}_3}
+\newcommand{\ve}{{\underline{v}_e}} % bound on the speed in the support of fe
+\newcommand{\we}{{\underline{w}_e}} % transformation of \ve
+\newcommand{\DomUpL}{{\mathcal{D}_1}} % domain over the critical char, x=0 side
+\newcommand{\DomUpR}{{\mathcal{D}_2}} % domain over the critical char, x=1 side
+\newcommand{\DomLow}{{\mathcal{D}_3}} % domain under the critical char + over -\ve
+\newcommand{\IntUpL}{{\mathcal{I}_1}} % part of n_i on \DomUpL
+\newcommand{\IntUpR}{{\mathcal{I}_2}} % part of n_i on \DomUpR
+\newcommand{\IntLow}{{\mathcal{I}_3}} % part of n_i on \DomLow
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -110,26 +114,36 @@
 
 \maketitle
 
-Let us define for all $0 < \alpha \leqslant \beta$ the set
-\begin{align*}
-	\mathcal{K}^{\alpha,\beta} \coloneqq \left\{\varphi \in \mathcal{C}^2\left([0,1], \mathbb{R}^{-}\right) \ |\ \varphi(0) = \varphi'(0) = 0, \quad - \beta \leqslant \varphi'' \leqslant - \alpha. \right\}
-\end{align*}
+%Let us define for all $0 < \alpha \leqslant \beta$ the set
+%\begin{align*}
+%	\mathcal{K}^{\alpha,\beta} \coloneqq \left\{\varphi \in \mathcal{C}^2\left([0,1], \mathbb{R}^{-}\right) \ |\ \varphi(0) = \varphi'(0) = 0, \quad - \beta \leqslant \varphi'' \leqslant - \alpha. \right\}
+%\end{align*}
+%
+%\paragraph{Estimates on the set $\mathcal{K}$}
+%
+%Since $\varphi : [0,1] \mapsto \mathbb{R}^-$ is decreasing, its inverse $\varphi^{-1} : \mathbb{R}^- \mapsto [0,1]$ is well-defined. By integration and using $\left(\varphi^{-1}\right)' = (\varphi'\circ \varphi^{-1})^{-1}$, we have
+%\mysubeq{eq:convex_bounds}{
+%	- \beta x &\leqslant \varphi'(x) \leqslant - \alpha x \label{eq:convex_bounds_phiprime} \\
+%	- \beta \frac{x^2}{2} &\leqslant \varphi(x) \leqslant - \alpha \frac{x^2}{2} \label{eq:convex_bounds_phi} \\
+%	\sqrt{-\frac{2y}{\beta}} &\leqslant \varphi^{-1}(y) \leqslant \sqrt{-\frac{2y}{\alpha}} \label{eq:convex_bounds_phiinv} \\
+%	\frac{-1}{\alpha\sqrt{-\frac{2y}{\beta}}} &\leqslant (\varphi^{-1})'(y) \leqslant \frac{-1}{\beta\sqrt{-\frac{2y}{\alpha}}} \label{eq:convex_bounds_phiinv} 
+%}
 
-\paragraph{Estimates on the set $\mathcal{K}$}
-
-Since $\varphi : [0,1] \mapsto \mathbb{R}^-$ is decreasing, its inverse $\varphi^{-1} : \mathbb{R}^- \mapsto [0,1]$ is well-defined. By integration and using $\left(\varphi^{-1}\right)' = (\varphi'\circ \varphi^{-1})^{-1}$, we have
-\mysubeq{eq:convex_bounds}{
-	- \beta x &\leqslant \varphi'(x) \leqslant - \alpha x \label{eq:convex_bounds_phiprime} \\
-	- \beta \frac{x^2}{2} &\leqslant \varphi(x) \leqslant - \alpha \frac{x^2}{2} \label{eq:convex_bounds_phi} \\
-	\sqrt{-\frac{2y}{\beta}} &\leqslant \varphi^{-1}(y) \leqslant \sqrt{-\frac{2y}{\alpha}} \label{eq:convex_bounds_phiinv} \\
-	\frac{-1}{\alpha\sqrt{-\frac{2y}{\beta}}} &\leqslant (\varphi^{-1})'(y) \leqslant \frac{-1}{\beta\sqrt{-\frac{2y}{\alpha}}} \label{eq:convex_bounds_phiinv} 
-}
+% TO WRITE
+% What are the characteristics equations
+% The choice of the domain $v\leqslant0$ and $x\in[0,1]$
+% Symmetries
 
 We want to obtain estimates on $n_i - n_e$. We make the following assumptions:
 \begin{itemize}
 \item The electron density $f_e$ satisfies the boundary condition, and is bounded by a constant $c \geqslant 0$. 
 \item The potential $\varphi$ is strongly concave, i.e. there exists $\alpha>0$ such that $\varphi''(x) \leqslant - \alpha$ uniformly over $x\in[0,1]$.
+\item We have $\varphi(0) = \varphi'(0) = 0$.
 \end{itemize}
+The assumptions on $\varphi$ yield that
+\begin{align}\label{eq:phi_concave_consequences}
+	\varphi'(x) \leqslant- \alpha x, \quad \varphi(x) \leqslant - \alpha \frac{x^2}{2}.
+\end{align}
 
 Let us first focus on $n_e(x)$. The characteristics of the electron density are the level lines of
 \begin{align}\label{eq:def_Le}
@@ -148,7 +162,8 @@ The estimates on $n_i$ are slightly more technical. Let the ion Lyapunov functio
 \begin{align}\label{eq:def_Li}
 	\mathcal{L}_i(x,v) \coloneqq \frac{v^2}{2} + \varphi(x).
 \end{align}
-Let $x\in[0,1]$ and $v \in \mathbb{R}_{-}$. We denote by $(x_b(x,v),v_b(x,v))$ the intersection of the boundary $\left\{x=0\right\}\cap\left\{v=0\right\}$ with the ion characteristic issued from $(x,v)$, equal to
+In the sequel, we will heavily rely on the level lines of $\mathcal{L}_i$ to partition the space. We distinguish the \emph{critical characteristic} as the curve $\left\{\mathcal{L}_i = 0\right\}$.
+Let $x\in[0,1]$ and $v \in \mathbb{R}_{-}$. We denote by $(x_b(x,v),v_b(x,v))$ the intersection of the boundary $\left\{x=0\right\}\cap\left\{v=0\right\}$ with the characteristic issued from $(x,v)$, equal to
 \begin{align*}
 	\vv{x_b(x,v) \\ v_b(x,v)} \coloneqq 
 	\begin{cases}
@@ -170,6 +185,102 @@ The lower bound $t \to -\infty$ is artificial, since the characteristic exits th
 
 \todo{Figure de la décomposition en domaines}
 
+Since $f_e(x(t),v(t))$ vanishes outside $\DomUpL \cup \DomUpR \cup \DomLow$, we may exactly decompose $n_i$ in 
+\begin{align*}
+	\frac{n_i(x)}{2} = \underbrace{\iint_{(v,t) \in \DomUpL} f_e(x(t),v(t)) dt dv}_{\IntUpL} + \underbrace{\iint_{(v,t) \in \DomUpR} f_e(x(t),v(t)) dt dv}_{\IntUpR} + \underbrace{\iint_{(v,t) \in \DomLow} f_e(x(t),v(t)) dt dv}_{\IntLow} 
+\end{align*}
+
+Each term will be bound separately. 
+
+\paragraph{Bound on $\IntUpL$}
+
+Let $v_0(x) \coloneqq \sqrt{-2\varphi(x)}$ be the velocity such that $(x, -v_0(x))$ belongs to the critical characteristic. 
+The characteristics in the domain $\DomUpL$ are joining points $(x,v)$, with $v \in [-v_0,0]$, with points $(x_b(x,v), 0)$. Therefore, we may use the reparametrization 
+\begin{align*}
+	y = x(t) \quad dy = \dot{x}(t) dt = v(t) dt = - \left(v^2 + 2 \left(\varphi(x) - \varphi(x(t))\right)\right)^{1/2} dt = - \left(v^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/2} dt	
+\end{align*}
+The integral $\IntUpL$ becomes
+\begin{align*}
+	\IntUpL = \int_{v=-v_0(x)}^0 \int_{y=x}^{x_b(x,v)} f_e(y,- \left(v^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/2}) \frac{-1}{\left(v^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/2}} dy dv.
+\end{align*}
+By exchanging the bounds of the integrals along $y$, and using $f_e \leqslant c$, we get
+\begin{align*}
+	\IntUpL \leqslant c \int_{v=-v_0(x)}^0 \int_{y=x_b(x,v)}^{x} \frac{1}{\left(v^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/2}} dy dv.
+\end{align*}
+In order to use the explicit $v^2$, we use Fubini theorem to switch the order of integration (since everything is positive). To do this, we write
+\begin{align*}
+	\begin{cases}
+		- v_0(x) \leqslant v \leqslant 0 \\
+		x_b(x,v) \leqslant y \leqslant x 
+	\end{cases}
+	\quad \iff \quad 
+	\begin{cases}
+		0 \leqslant y \leqslant x \\
+		- v_0(x) \leqslant v \leqslant - g_x(y)
+	\end{cases}
+\end{align*}
+where $y = x_b(x,v) = \varphi^{-1}\left(\frac{v^2}{2} + \varphi(x)\right)$ is equivalent to $v = - g_x(y) \coloneqq - \left(2\left(\varphi(y) - \varphi(x)\right)\right)^{1/2}$. In the sequel, we drop the $x$ and simply write $g(y)$. The function $g : [0,x] \mapsto \mathbb{R}^{+}$ is well-defined, since $y \leqslant x \implies \varphi(y) \geqslant \varphi(x)$. By the assumption of strong concavity of $\varphi$, $g$ is positive whenever $y < x$. Finally, using that $v_0(x) = g(0)$, may now write 
+\begin{align*}
+	\IntUpL \leqslant c \int_{y=0}^{x} \int_{v=-v_0(x)}^{-g(y)}  \frac{1}{\left(v^2 - g^2(y)\right)^{1/2}} dv dy \underset{\text{with }w\coloneqq g(y)-v}{=} c \int_{y=0}^{x} \int_{w=0}^{g(0)-g(y)}  \frac{1}{\left(w^2 + 2 w g(y)\right)^{1/2}} dv dy.
+\end{align*}
+By integration with $\frac{d}{dy} \sinh^{-1}\left(\sqrt{\frac{y}{a}}\right) = \frac{1}{y^2 - 2 a y}$, we obtain
+\begin{align*}
+	\IntUpL \leqslant c \int_{y=0}^{x} \left[\sinh^{-1}\left(\sqrt{\frac{v}{g(y)}}\right)\right]^{g(0)-g(y)}_{0} dv = c \int_{y=0}^{x} \sinh^{-1}\left(\sqrt{\frac{g(0)-g(y)}{g(y)}}\right) dv.
+\end{align*}
+We use the coarse estimates $\sinh^{-1}(z) \leqslant z$ and $\sqrt{\frac{a-b}{b}} \leqslant \sqrt{\frac{a}{b}}$ to reduce the expression to
+\begin{align*}
+	\IntUpL \leqslant c \sqrt{g(0)} \int_{y=0}^{x} \frac{1}{\sqrt{g(y)}} dv = c \sqrt{g(0)} \int_{y=0}^{x} \frac{1}{\left(2\left(\varphi(y) - \varphi(x)\right)\right)^{1/4}} dv.
+\end{align*}
+Using the strong concavity of $\varphi$, and the sign $-\varphi'(y) \geqslant 0$, we get
+\begin{align*}
+	\varphi(y) - \varphi(x) \geqslant \frac{\alpha}{2} |x - y|^2 - \varphi'(y)(x-y) \geqslant \frac{\alpha}{2} (x - y)^2.
+\end{align*}
+With this, we may finally write
+\begin{align*}
+	\IntUpL \leqslant c \sqrt{g(0)} \int_{y=0}^{x} \frac{1}{\alpha^{1/4}\left(x-y\right)^{1/2}} dv = \frac{2 c}{\alpha^{1/4}} \sqrt{g(0) x} = \frac{2 c}{\alpha^{1/4}} \sqrt{\sqrt{-2\varphi(x)} x} \leqslant \frac{2 c}{\alpha^{1/4}} \left(-2\varphi(1)\right)^{1/4}.
+\end{align*}
+
+\paragraph{Bound on $\IntUpR$}
+
+We use the same reparametrization as for $\IntUpR$, but with $y \in [x,1]$, to obtain
+\begin{align*}
+	\IntUpR \leqslant c \int_{v=-v_0(x)}^{0} \int_{y=x}^{1} \frac{1}{\left(v^2 + 2(\varphi(x) - \varphi(y))\right)^{-1/2}} dy dv.
+\end{align*}
+On $y \geqslant x$, we may directly use
+\begin{align*}
+	\varphi(x) - \varphi(y) \geqslant \frac{\alpha}{2} |y - x|^2 - \varphi'(x) (y-x) \geqslant \frac{\alpha}{2} (y - x)^2
+\end{align*}
+to get
+\begin{align*}
+	\IntUpR \leqslant c \int_{v=-v_0(x)}^{0} \int_{y=x}^{1} \frac{1}{\left(v^2 + \alpha(y-x)^2\right)^{1/2)}} dy dv \leqslant c \max\left(1,\frac{1}{\sqrt{\alpha}}\right) \int_{v=0}^{v_0(x)} \int_{z=0}^{1-x} \frac{1}{\left(v^2 + z^2\right)^{1/2}} dy dv.
+\end{align*}
+By switching to polar coordinates over the (larger) domain $(\theta,r) \in [0,\frac{\pi}{2}] \times [0,\sqrt{v_0(x)^2 + (1-x)^2}]$, we conclude to 
+\begin{align*}
+	\IntUpR \leqslant c \max\left(1,\frac{1}{\sqrt{\alpha}}\right) \frac{\pi}{2} \sqrt{v_0(x)^2 + (1-x)^2} \leqslant c \max\left(1,\frac{1}{\sqrt{\alpha}}\right) \frac{\pi}{2} \sqrt{1 - 2\varphi(1)}.
+\end{align*} 
+
+\paragraph{Bound on $\IntLow$}
+
+The domain $\DomLow$ is covered by characteristics linking $x=1$ to $x=0$. We may use the same reparametrization within fixed bounds over $y$:
+\begin{align*}
+	\IntLow \leqslant c \int_{v=-\ve}^{-v_0(x)} \int_{y=0}^{1} \frac{1}{\left(v^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/2}} dy dv = c \int_{y=0}^{1} \int_{v=-\ve}^{-v_0(x)} \frac{1}{\left(v^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/2}} dy dv.
+\end{align*}
+We will use the same argument as for $\IntUpR$, but with characteristics ending on $x=0$ instead of $x=x$. Our first step is then to replace $v$ by $w$ the velocity at $x=0$, defined by $\frac{v^2}{2} + \varphi(x) = \frac{w^2}{2} + 0$. We have
+\begin{align*}
+	 w = - \left(v^2 + 2 \varphi(x)\right)^{1/2} \in [-\we, 0], \quad v = - \left(v^2 - 2 \varphi(x)\right)^{1/2}, \quad dv = \frac{-w}{\left(w^2-2\varphi(x)\right)^{1/2}} dw,
+\end{align*}
+where $\we \left(\ve^2 + 2 \varphi(x)\right)^{1/2} \leqslant \ve \leqslant \sqrt{-2\varphi(1)}$. Using the estimate $-\varphi(y) \geqslant \alpha \frac{y^2}{2}$, we conclude similarly that
+\begin{align*}
+	\IntLow 
+	\leqslant c \int_{y=0}^{1} \int_{w=-\we}^{0} \frac{1}{\left(w^2 - \varphi(y)\right)^{1/2}} dy dv 
+	= c \int_{y=0}^{1} \int_{w=0}^{\we} \frac{1}{\left(w^2 + \alpha y^2\right)^{1/2}} dy dv
+	\leqslant c \max\left(1,\frac{1}{\sqrt{\alpha}}\right) \frac{\pi}{2} \sqrt{1 - 2 \varphi(1)}.
+\end{align*}
+
+In conclusion, we obtained the uniform bound
+\begin{align*}
+	n_i(x) \leqslant \frac{4}{\alpha^{1/4}} \left(-2\varphi(1)\right)^{1/4} + 4 c \max\left(1,\frac{1}{\sqrt{\alpha}}\right) \frac{\pi}{2} \sqrt{1 - 2 \varphi(1)}.
+\end{align*}
 
 \bibliographystyle{alpha}
 \bibliography{CEMRACS.bib}
