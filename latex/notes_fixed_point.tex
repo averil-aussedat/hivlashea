@@ -18,7 +18,7 @@
 %\usepackage{caption}
 \usepackage{float} % [H]
 %\usepackage{bbold}
-\usepackage{xcolor}
+\usepackage[dvipsnames]{xcolor}
 \usepackage{stmaryrd} % ll/rr brackets
 %\usepackage[notcite, notref]{showkeys}
 %\usepackage[tworuled,vlined,nofillcomment]{algorithm2e}
@@ -47,6 +47,7 @@
 % remove unnecessary formatting of clever references
 \crefdefaultlabelformat{(#2#1#3)}
 \crefname{equation}{}{}
+\crefname{figure}{figure}{Figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Theorems
@@ -56,25 +57,17 @@
 \newtheorem{definition}{Definition}[section]
 \newtheorem{theoreme}{Theorem}[section]
 \newtheorem{remarque}{Remark}[section]
-\newtheorem{lemme}{Lemma}[section]
+\newtheorem{lem}{Lemma}[section]
 \numberwithin{equation}{section}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Commands
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\newcommand{\N}{\mathbb{N}}
-\newcommand{\Z}{\mathbb{Z}}
-\newcommand{\R}{\mathbb{R}}
-\newcommand{\lp}{\left(}
-\newcommand{\rp}{\right)}
-\newcommand{\tran}[1]{\prescript{t}{}{#1}}
-\newcommand{\vol}{\textup{Vol}}
-\newcommand{\red}{\textcolor{red}}
-\newcommand{\blue}{\textcolor{blue}}
-
 \newcommand{\todo}[1]{{\color{red}\textbf{#1}}}
 \newcommand{\vv}[1]{\begin{pmatrix} #1 \end{pmatrix}} % vector
+\newcommand{\imh}{\textwidth} % meant to be redefined locally
+
 \newcommand{\mysubeq}[2]{ % first argument : label, second : align content
 	\begin{subequations}\label{#1}
 		\begin{align}[left = {\empheqlbrace}]
@@ -90,11 +83,11 @@
 		\end{center}
 	\end{minipage}
 }
-\newcommand{\imh}{\textwidth} % meant to be redefined locally
-
-%\renewcommand\appendixpagename{Appendix}
-%\renewcommand\appendixtocname{Appendix}
-\renewcommand{\qedsymbol}{$\blacksquare$}
+\newcommand{\myproof}[1]{
+	\noindent \textbf{Demonstration}
+	{\small	#1 \hfill \qedsymbol}
+}
+\newcommand{\intern}[1]{{\color{RoyalBlue} #1}} % will eventually be removed
 
 % local vocabulary
 \newcommand{\ve}{{\overline{v}_e}} % bound on the speed in the support of fe
@@ -140,7 +133,211 @@
 % The choice of the domain $v\leqslant0$ and $x\in[0,1]$
 % Symmetries
 
+\section{Notations and assumptions}
+
+We suppose that 
+\begin{enumerate}
+\item $f_{e,b}$ satisfies the boundary condition, i.e. $f_{e,b}(v) = 0$ as soon as $\mathcal{L}_e(0,v) \leqslant \mathcal{L}_e(1,0)$.
+\item $f_{e,b}$ is continuous. \todo{Lipschitz may be required?}
+\item $f_{e,b}$ is bounded from above by a constant $\maxfe \geqslant 0$.
+\item There exists $\minfe > 0$ and $0 \leqslant \domfel < \domfeu$ such that $f_{e,b}(v) \geqslant \minfe$ for all $v\in[-\domfeu,-\domfel]$.
+\item The function $\varphi$ satisfies $\varphi(0)=\varphi'(0)=0$.
+\item The function $\varphi$ is strongly concave, i.e. there exists $\alpha>0$ such that $\varphi((1-\tau) x + \tau y) \geqslant (1-\tau) \varphi(x)+\tau \varphi(y) + \frac{\alpha}{2} (1-\tau)\tau \left|x-y\right|^2$.
+\item There exists $\beta > \alpha$ such that $\varphi(1) \geqslant - \beta$. \todo{Uniformly over the fixed-point iterations}
+\end{enumerate}
+
+We use the following notations: the Liapunov functions of the electrons and the ions are
+\begin{align}\label{eq:def_Le}
+	\mathcal{L}_e(x,v) \coloneqq \frac{v^2}{2} - \frac{1}{\mu} \varphi(x).
+\end{align}
+\begin{align}\label{eq:def_Li}
+	\mathcal{L}_i(x,v) \coloneqq \frac{v^2}{2} + \varphi(x).
+\end{align}
+
+We define an upper bound $\ve$ over the velocities in the support of $f_e$, given as
+\begin{align}\label{eq:def_ve}
+	\mathcal{L}_e(0,\ve) \coloneqq \frac{1}{\mu} \beta \geqslant -\frac{1}{\mu}\varphi(1) = \mathcal{L}_e(1,0), \quad\text{i.e.}\quad \ve \coloneqq \sqrt{\frac{2}{\mu}\beta}.
+\end{align}
+
+For a given point $(x,v) \in [0,1]\times \mathbb{R}^{-}$, we denote by $(x_b, v_b)$ the intersection of the boundary $\left\{x=0\right\} \cup \left\{v=0\right\}$ with the ion characteristic issued from $(x,v)$. The values are given by
+\begin{align}\label{eq:def_xb_vb}
+	\vv{x_b(x,v) \\ v_b(x,v)} \coloneqq 
+	\begin{cases}
+		\vv{\varphi^{-1}\left(\frac{v^2}{2} + \varphi(x)\right) \\ 0} & \text{if } \mathcal{L}_i(x,v) \leqslant 0, \\
+		\vv{0 \\ - \sqrt{v^2 + 2\varphi(x)}} & \text{if } \mathcal{L}_i(x,v) > 0.
+	\end{cases}
+\end{align}
+
+
 \section{Estimates}
+
+\subsection{Useful elementary lemmas}
+
+\begin{lem}\label{lem:int_1surR_rectangle}
+	Let $\alpha>0$, $\overline{x}\geqslant0$ and $\overline{y}\geqslant0$. Then
+	\begin{align*}
+		\mathcal{I} \coloneqq \int_{x=0}^{\overline{x}} \int_{y=0}^{\overline{y}} \frac{1}{\left(x^2+\alpha y^2\right)^{1/2}} dy dx \leqslant 2 \frac{\sqrt{2\overline{x} \overline{y}}}{\alpha^{1/4}}.
+	\end{align*}
+\end{lem}
+
+\myproof{
+	By the change of variable $z=\sqrt{\alpha} y$, with $\overline{z} \coloneqq \sqrt{\alpha} \overline{y}$, we have
+	\begin{align*}
+		\mathcal{I} = \frac{1}{\sqrt{\alpha}} \int_{x=0}^{\overline{x}} \int_{z=0}^{\overline{z}} \frac{1}{\left(x^2+ z^2\right)^{1/2}} dz dx.
+	\end{align*}
+	Notice that $x+z \leqslant \sqrt{2} \left(x^2 + y^2\right)^{1/2}$. Then, 
+	\begin{align*}
+		\mathcal{I} 
+		\leqslant \frac{1}{\sqrt{\alpha}} \int_{x=0}^{\overline{x}} \int_{z=0}^{\overline{z}} \frac{\sqrt{2}}{x+z} dz dx 
+		= \sqrt{\frac{2}{\alpha}} \int_{x=0}^{\overline{x}} \ln\left(\frac{x+\overline{z}}{x}\right) dx
+		= \sqrt{\frac{2}{\alpha}} \int_{x=0}^{\overline{x}} \ln\left(1 + \frac{\overline{z}}{x}\right) dx.
+	\end{align*}
+	Using $\ln\left(1+a\right) \leqslant \sqrt{a}$, we get
+	\begin{align*}
+		\mathcal{I} 
+		\leqslant \sqrt{\frac{2}{\alpha}} \int_{x=0}^{\overline{x}} \sqrt{\frac{\overline{z}}{x}} dx 
+		= \sqrt{\frac{2}{\alpha}} 2 \sqrt{\overline{x} \overline{z}}
+		= 2 \frac{\sqrt{2 \overline{x} \overline{y}}}{\alpha^{1/4}}.
+	\end{align*}
+}
+
+\intern{
+\begin{remarque}[Exact value]
+	Let $\overline{r} \coloneqq \sqrt{\overline{x}^2 + \overline{z}^2}$. Then 
+	\begin{align*}
+		\mathcal{I} = \overline{x} \ln\left(\frac{1 + \overline{z}/\overline{r}}{\overline{x}/\overline{r}}\right) + \overline{z} \ln\left(\frac{1 + \overline{x}/\overline{r}}{\overline{z}/\overline{r}}\right).
+	\end{align*}
+\end{remarque}
+}
+
+\subsection{Integrals along ion characteristics}
+
+The estimates will rely on two particular cases, the we treat independently as lemmas. For a given $x$, we define $g_x : [0,x] \mapsto \mathbb{R}^{+}$ by
+\begin{align*}
+	\mathcal{L}_i(x,-g_x(y)) = \mathcal{L}_i(y,0), \quad \text{i.e.} \quad g_x(y) = \left(2\left(\varphi(y) - \varphi(x)\right)\right)^{1/2}.
+\end{align*}
+
+\begin{lem}\label{lem:upperbound_ni_endchar}
+	Let $0\leqslant y < x \leqslant 1$. We have
+	\begin{align*}
+		\mathcal{I} \coloneqq \int_{v=-g_x(y)}^{0} \int_{z = x_b(x,v)}^{x} \frac{1}{\left(v^2-g_x^2(z)\right)^{1/2}} dz\,dv \leqslant 2 \sqrt{\frac{2}{\alpha}}\left(\varphi(y) - \varphi(x)\right)^{1/4} \sqrt{x-y}. 
+	\end{align*}
+\end{lem}
+
+\myproof{
+	Let us first use Fubini's theorem to switch the order of integration. The lower bound $x_b(x,v) \geqslant z$ becomes an upper bound $v \leqslant -g_x(z)$, and we have
+	\begin{align*}
+		\mathcal{I} 
+		= \int_{z=y}^{x} \int_{v = -g_x(y)}^{-g_x(z)} \frac{1}{\left(v^2-g_x^2(z)\right)^{1/2}} dv\,dz 
+		= \int_{z=y}^{x} \int_{v = g_x(z)}^{g_x(y)} \frac{1}{\left(v^2-g_x^2(z)\right)^{1/2}} dv\,dz.
+	\end{align*} 
+	With the change of variable $w = v - g_x(z)$, and using $\frac{d}{dw} \left[\sinh^{-1}\left(\sqrt{\frac{w}{a}}\right)\right] = \left(w^2 + 2aw\right)^{-1/2}$, we get
+	\begin{align*}
+		\mathcal{I} 
+		= \int_{z=y}^{x} \int_{w = 0}^{g_x(y)-g_x(z)} \frac{1}{\left(w^2 + 2 w g_x(z)\right)^{1/2}} dw\,dz
+		= \int_{z=y}^{x} \sinh^{-1}\left(\sqrt{\frac{g_x(y) -g_x(z)}{g_x(z)}}\right) dz.
+	\end{align*}
+	Using the coarse estimates $\sinh^{-1}(a) \leqslant a$ and $\sqrt{\frac{a-b}{b}} \leqslant \sqrt{\frac{a}{b}}$, we get
+	\begin{align*}
+		\mathcal{I} \leqslant \int_{z=y}^{x} \sqrt{\frac{g_x(y)}{g_x(z)}} dz = \int_{z=y}^{x} \left(\frac{\varphi(y) - \varphi(x)}{\varphi(z) - \varphi(x)}\right)^{1/4} dz.
+	\end{align*}
+	The assumption of strong convexity yields $\varphi(z) - \varphi(x) \geqslant - \varphi'(z) (x - z) + \frac{\alpha}{2} |x - z|^2 \geqslant \frac{\alpha}{2} (x - z)^2$, so that 
+	\begin{align*}
+		\mathcal{I} 
+		\leqslant \sqrt{\frac{2}{\alpha}}\left(\varphi(y) - \varphi(x)\right)^{1/4} \int_{z=y}^{x} \frac{1}{\left(x - z\right)^{1/2}} dz 
+		= 2 \sqrt{\frac{2}{\alpha}}\left(\varphi(y) - \varphi(x)\right)^{1/4} \sqrt{x-y}.
+	\end{align*}
+}
+
+\begin{lem}\label{lem:upperbound_ni_beginchar}
+	Let $0 \leqslant y \leqslant x \leqslant 1$, and $-v_0 < -g_x(y)$. We have
+	\begin{align*}
+		\mathcal{I} \coloneqq \int_{v=-v_0}^{-g_x(y)} \int_{z=y}^{1} \frac{1}{\left(v^2 + 2 \left(\varphi(x) - \varphi(z)\right)\right)^{1/2}} dz \, dv \leqslant \frac{2\sqrt{2(1-y)}}{\alpha^{1/4}} \left(v_0^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/4}.
+	\end{align*}
+\end{lem}
+
+%\myproof{
+%	We first shift the $v-$integration from the vertical line $z=x$ to $z=y$. Let $w = w(v)$ be such that
+%	\begin{align*}
+%		\mathcal{L}_i(y,w(v)) = \mathcal{L}_i(x,v), \quad \text{i.e.} \quad w(v) = -\left(v^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right), \text{ and } dv = \frac{-w}{\left(w^2 + 2 \left(\varphi(y) - \varphi(x)\right)\right)^{1/2}}  dw.
+%	\end{align*}
+%	Then, defining $w_0 \coloneqq \left(v_0^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/2}$, and noticing that $w(-g_x(y)) = 0$, we get
+%	\begin{align*}
+%		\mathcal{I} = \int_{w=-w_0}^{0} \int_{z=y}^{1} \frac{1}{\left(w^2 + 2 \left(\varphi(y) - \varphi(z)\right)\right)^{1/2}} dz \frac{-w}{\left(w^2 + 2 \left(\varphi(y) - \varphi(x)\right)\right)^{1/2}} dw.
+%	\end{align*}
+%	Since $y \leqslant x$, we have $\varphi(y) \geqslant \varphi(x)$, and $\frac{-w}{\left(w^2 + 2 \left(\varphi(y) - \varphi(x)\right)\right)^{1/2}} \leqslant \frac{-w}{|w|} = 1$. By the strong convexity assumption, we have $\varphi(y) - \varphi(z) \geqslant - \varphi'(y) (z - y) + \frac{\alpha}{2} |z - y|^2 \geqslant \frac{\alpha}{2} (z - y)^2$, so that
+%	\begin{align*}
+%		\mathcal{I} \leqslant \int_{w=-w_0}^{0} \int_{z=y}^{1} \frac{1}{\left(w^2 + \alpha (z- y)^2\right)^{1/2}} dz dw = \int_{w=0}^{w_0} \int_{z=0}^{1-y} \frac{1}{\left(w^2 + \alpha z^2\right)^{1/2}} dz dw.
+%	\end{align*}
+%	Using \cref{lem:int_1surR_rectangle}, we conclude that 
+%	\begin{align*}
+%		\mathcal{I} \leqslant 2 \frac{\sqrt{2 w_0 (1-y)}}{\alpha^{1/4}} = \frac{2\sqrt{2(1-y)}}{\alpha^{1/4}} \left(v_0^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/4}.
+%	\end{align*}
+%}
+
+\begin{proposition}
+	The density $n_i$ is bounded and continuous.
+\end{proposition}
+
+\myproof{
+	We use the symmetry of $f_i$ to write
+	\begin{align*}
+		n_i(x) = \int_{v=-\infty}^{\infty} f_i(x,v) dv = 2 \int_{v=-\infty}^{0} f_i(x_b(x,v), v_b(x,v)) dv = 2 \int_{v=-\infty}^{0} \int_{t=-\infty}^{0} f_e(x(t),v(t)) dt dv,
+	\end{align*}
+	where $(x(t),v(t))_{t\leqslant0}$ is the ion characteristic reaching $(x_b(x,v),v_b(x,v))$ at $t=0$. Notice that the lower bounds are artificial, since the characteristic enters the support of $f_e$ in finite time: we may use $v \geqslant -\ve$, and consider only times $t$ for which $x(t) \in [0,1]$. 
+	
+	We first reparametrize $(x(t),v(t))$ using the space variable. Define $z = x(t) \in[x_b,1]$, and observe that
+	\begin{align*}
+		dz = \dot{x}(t) dt = v(t) dt, \quad \text{with}\quad \mathcal{L}_i(z,v(t)) = \mathcal{L}_i(x,v) \quad\iff\quad v(t) = -\left(v^2 + 2\left(\varphi(x) - \varphi(z)\right)\right)^{1/2}.
+	\end{align*}
+	Then, the density rewrites
+	\begin{align*}
+		n_i(x) = 2 \int_{v=-\ve}^{0} \int_{z=x_b(x,v)}^{1} \frac{f_e\left(z, -\left(v^2 + 2\left(\varphi(x) - \varphi(z)\right)\right)^{1/2}\right)}{\left(v^2 + 2\left(\varphi(x) - \varphi(z)\right)\right)^{1/2}} \, dz dv.
+	\end{align*}
+	Let us show that $n_i$ is bounded. We use the coarse estimate $f_e \leqslant \maxfe$, and decompose the integral in three:
+	\begin{align*}
+		n_i(x) \leqslant 2 \maxfe \left[
+		\underbrace{\int_{v=-g_x(0)}^{0} \int_{z=x_b(x,v)}^{x}}_{\IntUpL} + 
+		\underbrace{\int_{v=-g_x(0)}^{0} \int_{z=x}^{1}}_{\IntUpR} + 
+		\underbrace{\int_{v=-\ve}^{-g_x(0)} \int_{z=x_b(x,v)}^{1}}_{\IntLow} \right] 
+		\frac{1}{\left(v^2 + 2\left(\varphi(x) - \varphi(z)\right)\right)^{1/2}} \, dz dv.
+	\end{align*}
+	The corresponding domains are represented \cref{fig:charmaps_domainmap}. 
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.5\linewidth]{images/fpcharmaps_domainmap}
+		\caption{Decomposition of the integral defining $n_i$.}
+		\mysubcaption{\todo{o boy so many things to say}}
+		\label{fig:charmaps_domainmap}
+	\end{figure}
+	
+	
+	Notice that whenever $z \leqslant x$, we have $0 \geqslant 2\left(\varphi(x) - \varphi(z)\right) = - \left(2\left(\varphi(z) - \varphi(x)\right)\right)^{2/2} = - g_x^2(z)$. Then, the integral $\IntUpL$ may be bounded using \cref{lem:upperbound_ni_endchar} with $y=0$:
+	\begin{align*}
+		\IntUpL = \int_{v=-g_x(0)}^{0} \int_{z=x_b(x,v)}^{x} \frac{1}{\left(v^2 - g_x^2(z)\right)^{1/2}} \, dz dv 
+		\leqslant 2 \sqrt{\frac{2}{\alpha}} \left(-\varphi(x)\right)^{1/4} \sqrt{x}
+		\leqslant 2 \sqrt{\frac{2}{\alpha}} \left(-\varphi(1)\right)^{1/4}.
+	\end{align*}
+	
+	We use \cref{lem:upperbound_ni_beginchar} to bound $\IntUpR$ and $\IntLow$. In the first case, we take $y=x$ and $v_0 = g_x(0)$, and notice that $-g_x(x)=0$. In the second case, we take $v_0 = \ve$ and $y=0$, and notice that on $v \leqslant -g_x(0)$, we have $x_b(x,v) = 0$ (the velocity is low enough so that the characteristic ends on $x=0$). This yields
+	\begin{align*}
+		\IntUpR \leqslant \frac{2\sqrt{2(1-x)}}{\alpha^{1/4}} \left(g_x^2(0)\right)^{1/4} \leqslant \frac{4}{\alpha^{1/4}} \left(-\varphi(1)\right)^{1/2} , \quad\text{and}\quad
+		\IntLow \leqslant \frac{2\sqrt{2}}{\alpha^{1/4}} \left(\ve^2 + 2 \varphi(x)\right)^{1/4} \leqslant \frac{4}{\alpha^{1/4}} \left(\frac{\beta}{\mu}\right)^{1/4}.
+	\end{align*}
+	
+	
+}
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\if{oldies}
 
 \subsection{Upper bounds on the densities}
 
@@ -186,17 +383,18 @@ We use the symmetry of $f_i$ to write
 \begin{align*}
 	n_i(x) = 2 \int_{v\in\mathbb{R}^{-}} f_i(x_b(x,v), v_b(x,v)) dv = 2 \int_{v\in\mathbb{R}^{-}}\int_{t=-\infty}^{0} f_e(x(t),v(t)) dt dv.
 \end{align*}
-The lower bound $t \to -\infty$ is artificial, since the characteristic exits the support of $f_e$ in finite time. We will split the double integral in three domains, represented in \cref{fig:charmaps_domainmap}:
+The lower bound $t \to -\infty$ is artificial, since the characteristic exits the support of $f_e$ in finite time. We will split the double integral in three domains:
 \begin{enumerate}
 \item $\DomUpL$ will be $\left\{(v,t) \in \mathbb{R}_{-}^2 \ |\ \mathcal{L}_i(x,v) \leqslant 0 \text{ and } x(t) \leqslant x \right\}$. This is the region contained between the $x-$axis, the critical characteristic and the vertical line going through $x$.
 \item $\DomUpR$ is $\left\{(v,t) \in \mathbb{R}_{-}^2 \ |\ \mathcal{L}_i(x,v) \leqslant 0 \text{ and } x < x(t) \leqslant 1 \right\}$. It cover the part of the domain intersecting $\left\{\mathcal{L}_i \leqslant 0\right\} \setminus \DomUpL$.
 \item $\DomLow$ is defined by $\left\{(v,t) \in \mathbb{R}_{-}^2 \ |\ \mathcal{L}_i(x,v) > 0 \text{ and } -\ve \leqslant v(t) \right\}$. 
 \end{enumerate}
+The corresponding phase space decomposition is represented in \cref{fig:charmaps_domainmap}.
 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.5\linewidth]{images/fpcharmaps_domainmap}
-	\caption{Partition of $\mathbb{R}_{-}^2$.}
+	\caption{Representation in the phase space $(x,v)$ of the decomposition of $(x,t)\in\mathbb{R}_-^2$ in $\DomUpL\cup\DomUpR \cup \DomLow$.}
 	\label{fig:charmaps_domainmap}
 \end{figure}
 
@@ -351,7 +549,7 @@ Let $v_* \in ]\domfel,\domfeu[$ be the velocity such that $v_*^2 - \domfel^2 = \
 	&\geqslant \frac{\minfe}{2} \varphi^{-1}\left(\frac{\mu}{4}\left(\domfel^2 - \domfeu^2\right)\right) \log\left(1 + \frac{\domfeu^2 - \domfel^2}{\domfel^2 - 2 \varphi(1)}\right).
 \end{align*}
 
-
+\fi
 
 %Using Fubini's theorem, we may rewrite this as
 %\begin{align*}

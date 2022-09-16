@@ -38,8 +38,8 @@ if fixed_point_char_maps:
     ax.text(lspineoffset+0.03, 1.0, "velocity", fontsize=0.6*fs, va='top', ha='left', transform=ax.transAxes)
     ax.text(1.0+0.02, bspineoffset-0.03, "space", fontsize=0.6*fs, va='top', ha='center', transform=ax.transAxes)
 
-    domain_map = False
-    lowerboundni = True
+    domain_map = True
+    lowerboundni = False
 
     if lowerboundni:
         thex = 0.8
@@ -97,6 +97,7 @@ if fixed_point_char_maps:
 
         thex = 0.7
         xx = np.linspace(0.0,1.0,200)
+        xxchar = - np.sqrt(np.maximum(0.0, 2*(phi(thex)-phi(xx))))
         critical_char = -np.sqrt(-2*phi(xx))
         minv = 1.5 * np.min(critical_char)
         v0 = -np.sqrt(-2*phi(thex))
@@ -112,12 +113,12 @@ if fixed_point_char_maps:
         ax.tick_params('y', width=2, pad=4.0, labelsize=0.6*fs)
         ax.set_ylim([minv,minv * (1 - 1.0 / bspineoffset)])
         
-        ax.fill_between(xx, minv * np.ones_like(xx), color=colordomLow)
-        ax.fill_between(xx, critical_char * (xx <= thex), color=colordomUpL)
-        ax.fill_between(xx, critical_char * (xx >= thex), color=colordomUpR)
+        ax.fill_between(xx, minv * np.ones_like(xx), critical_char, color=colordomLow)
+        ax.fill_between(xx, critical_char * (xx <= thex), xxchar * (xx <= thex), color=colordomUpL)
+        ax.fill_between(xx, critical_char * (xx >= thex), xxchar * (xx >= thex), color=colordomUpR)
 
         ax.text(0.58, minv*0.13, domUpL, fontsize=fs, ha='center', va='center')
-        ax.text(0.85, minv*0.25, domUpR, fontsize=fs, ha='center', va='center')
+        ax.text(0.78, minv*0.33, domUpR, fontsize=fs, ha='center', va='center')
         ax.text(0.30, minv*0.50, domLow, fontsize=fs, ha='center', va='center')
 
         ax.plot(xx,critical_char,color=linecolor,linewidth=2) # critical char
