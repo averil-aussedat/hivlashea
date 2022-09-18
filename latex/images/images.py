@@ -16,7 +16,7 @@ fixed_point_char_maps = True
 
 if fixed_point_char_maps:
     def phi(x):
-        return - x**2 / 2.0 - 0.9 * x**4
+        return - x**2 / 2.0 - 0.5 * x**4
 
     fig, ax = plt.subplots()
     # fig.tight_layout()
@@ -34,12 +34,13 @@ if fixed_point_char_maps:
     ax.plot(1, bspineoffset, ">k", transform=ax.transAxes, clip_on=False)
     ax.plot(lspineoffset, 1, "^k", transform=ax.transAxes, clip_on=False)
 
-    fs=30
-    ax.text(lspineoffset+0.03, 1.0, "velocity", fontsize=0.6*fs, va='top', ha='left', transform=ax.transAxes)
-    ax.text(1.0+0.02, bspineoffset-0.03, "space", fontsize=0.6*fs, va='top', ha='center', transform=ax.transAxes)
+    fs=20
+    ax.text(lspineoffset+0.03, 1.0, "velocity", fontsize=fs, va='top', ha='left', transform=ax.transAxes)
+    ax.text(1.0+0.02, bspineoffset-0.03, "space", fontsize=fs, va='top', ha='center', transform=ax.transAxes)
 
-    domain_map = True
     lowerboundni = False
+    domain_map_1 = False # oldie
+    domain_map_2 = True
 
     if lowerboundni:
         thex = 0.8
@@ -62,13 +63,13 @@ if fixed_point_char_maps:
 
         ax.set_xticks([thex, 1.0])
         ax.set_xticklabels([r"$x$", "1"])
-        ax.tick_params('x', direction='in', width=2, pad=-22.0, labelsize=0.6*fs)
+        ax.tick_params('x', direction='in', width=2, pad=-22.0, labelsize=fs)
         maxx = 1.1
         ax.set_xlim([- lspineoffset * maxx / (1.0 - lspineoffset),maxx])
 
         ax.set_yticks([-domfeu, -domfel])
         ax.set_yticklabels([r"$-\overline{v}$", r"$-\underline{v}$"])
-        ax.tick_params('y', width=2, pad=4.0, labelsize=0.6*fs)
+        ax.tick_params('y', width=2, pad=4.0, labelsize=fs)
         ax.set_ylim([minv,minv * (1 - 1.0 / bspineoffset)])
 
         ax.plot([thex,thex],[minv,0.0],linestyle="--",linewidth=2,color=linecolor) # vertical line x
@@ -79,16 +80,16 @@ if fixed_point_char_maps:
 
         ax.scatter(thex,wlow,s=50,color=charicolor)
         ax.scatter(thex,wupp,s=50,color=charicolor)
-        ax.text(thex+0.03, wlow, r"$-\underline{w}$", fontsize=0.6*fs, ha="left", va="bottom")
-        ax.text(thex-0.03, wupp, r"$-\overline{w}$", fontsize=0.6*fs, ha="right", va="top")
+        ax.text(thex+0.03, wlow, r"$-\underline{w}$", fontsize=fs, ha="left", va="bottom")
+        ax.text(thex-0.03, wupp, r"$-\overline{w}$", fontsize=fs, ha="right", va="top")
         # thetext = r"$\begin{pmatrix}\overline{y}(w) \\ w \end{pmatrix} = \begin{pmatrix} y \\ h(y) \end{pmatrix}$"
         thetext = r"$\begin{pmatrix}\overline{y}(w) \\ w \end{pmatrix}$"
         # thetext = r"$(\overline{y}(w), w ) = (y, h(y))$"
-        ax.text(0.54, -0.6*domfel, thetext, fontsize=0.6*fs, ha="left", va="center", color=charecolor)
+        ax.text(0.54, -0.6*domfel, thetext, fontsize=fs, ha="left", va="center", color=charecolor)
 
         save(fig, "fpcharmaps_lowerboundni")
 
-    if domain_map:
+    if domain_map_1:
 
         linecolor = "k"
         domUpL = r"$\mathcal{D}_1$"; colordomUpL = "gold"
@@ -104,13 +105,13 @@ if fixed_point_char_maps:
 
         ax.set_xticks([thex, 1.0])
         ax.set_xticklabels([r"$x$", "1"])
-        ax.tick_params('x', direction='in', width=2, pad=-22.0, labelsize=0.6*fs)
+        ax.tick_params('x', direction='in', width=2, pad=-22.0, labelsize=fs)
         maxx = 1.1
         ax.set_xlim([- lspineoffset * maxx / (1.0 - lspineoffset),maxx])
 
         ax.set_yticks([v0])
         ax.set_yticklabels([r"$v_0(x)$"])
-        ax.tick_params('y', width=2, pad=4.0, labelsize=0.6*fs)
+        ax.tick_params('y', width=2, pad=4.0, labelsize=fs)
         ax.set_ylim([minv,minv * (1 - 1.0 / bspineoffset)])
         
         ax.fill_between(xx, minv * np.ones_like(xx), critical_char, color=colordomLow)
@@ -125,6 +126,61 @@ if fixed_point_char_maps:
         ax.plot([0.0,thex],[v0,v0],linestyle="--",linewidth=2,color="mediumseagreen") # horiz line v0
         ax.plot([thex,thex],[minv,0.0],linestyle="--",linewidth=2,color=linecolor) # vertical line x
     
+        save(fig, "fpcharmaps_domainmap")
+
+    if domain_map_2:
+
+        linecolor = "k"
+        domUpL = r"$\mathcal{I}_1$"; colordomUpL = "gold"
+        domUpR = r"$\mathcal{I}_2$"; colordomUpR = "violet"
+        domLow = r"$\mathcal{I}_3$"; colordomLow = "palegreen"
+        charcolorupl="peru"
+        charcolorlow="mediumseagreen"
+
+        thex = 0.7
+        they = 0.6
+        xx = np.linspace(0.0,1.0,200)
+        xxchar = - np.sqrt(np.maximum(0.0, 2*(phi(thex)-phi(xx))))
+        critical_char = -np.sqrt(-2*phi(xx))
+        minv = 1.2 * np.min(critical_char)
+        v0 = -np.sqrt(-2*phi(thex))
+        vy = -np.sqrt(2*phi(they)-2*phi(thex))
+        xx_y = np.linspace(they, thex, 100)
+        chary = - np.sqrt(np.maximum(0.0, 2*(phi(they)-phi(xx_y))))
+        charlows = [-np.sqrt((multiple*minv)**2 / 2.0 - 2 * phi(xx)) for multiple in [0.5,0.85,1.15]]
+
+        ax.set_xticks([they, thex, 1.0])
+        ax.set_xticklabels([r"$y$", r"$x$", "1"])
+        ax.tick_params('x', direction='in', width=2, pad=-22.0, labelsize=fs)
+        maxx = 1.1
+        ax.set_xlim([- lspineoffset * maxx / (1.0 - lspineoffset),maxx])
+
+        ax.set_yticks([])
+        ax.set_yticklabels([])
+        ax.tick_params('y', width=2, pad=4.0, labelsize=fs)
+        ax.set_ylim([minv,minv * (1 - 1.0 / bspineoffset)])
+        
+        ax.fill_between(xx, minv * np.ones_like(xx), critical_char, color=colordomLow)
+        ax.fill_between(xx, critical_char * (xx <= thex), xxchar * (xx <= thex), color=colordomUpL)
+        ax.fill_between(xx, critical_char * (xx >= thex), xxchar * (xx >= thex), color=colordomUpR)
+
+        ax.text(0.40, minv*0.13, domUpL, fontsize=1.2*fs, ha='center', va='center')
+        ax.text(0.89, minv*0.60, domUpR, fontsize=1.2*fs, ha='center', va='center')
+        ax.text(0.12, minv*0.23, domLow, fontsize=1.2*fs, ha='center', va='center')
+
+        ax.plot(xx,critical_char,color=linecolor,linewidth=2) # critical char
+        # ax.plot([0.0,thex],[v0,v0],linestyle="--",linewidth=2,color=charcolor) # horiz line v0
+        ax.plot([thex,thex],[minv,0.0],linestyle="--",linewidth=2,color=linecolor) # vertical line x
+
+        ax.plot(xx_y,chary,linestyle="--",linewidth=2,color=charcolorupl)
+        for charlow in charlows:
+            ax.plot(xx,charlow,linestyle="--",linewidth=2,color=charcolorlow)
+
+        ax.scatter(thex,v0,s=15,color="k",zorder=10) # -g_x(0)
+        ax.scatter(thex,vy,s=15,color="k",zorder=10) # -g_x(0)
+        ax.text(thex+0.02,v0,r"$-g_x(0)$", fontsize=fs, ha="left", va="bottom") # -g_x(0)
+        ax.text(thex+0.02,vy,r"$-g_x(y)$", fontsize=fs, ha="left", va="center") # -g_x(y)
+        
         save(fig, "fpcharmaps_domainmap")
 
     plt.show()
