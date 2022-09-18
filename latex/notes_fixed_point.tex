@@ -161,11 +161,11 @@ We define an upper bound $\ve$ over the velocities in the support of $f_e$, give
 
 For a given point $(x,v) \in [0,1]\times \mathbb{R}^{-}$, we denote by $(x_b, v_b)$ the intersection of the boundary $\left\{x=0\right\} \cup \left\{v=0\right\}$ with the ion characteristic issued from $(x,v)$. The values are given by
 \begin{align}\label{eq:def_xb_vb}
-	\vv{x_b(x,v) \\ v_b(x,v)} \coloneqq 
-	\begin{cases}
-		\vv{\varphi^{-1}\left(\frac{v^2}{2} + \varphi(x)\right) \\ 0} & \text{if } \mathcal{L}_i(x,v) \leqslant 0, \\
-		\vv{0 \\ - \sqrt{v^2 + 2\varphi(x)}} & \text{if } \mathcal{L}_i(x,v) > 0.
-	\end{cases}
+	\vv{x_b(x,v) \\ v_b(x,v)} \coloneqq \vv{\varphi^{-1}\left(\min\left(0,\frac{v^2}{2} + \varphi(x)\right)\right) \\ - \sqrt{\max\left(0,v^2 + 2\varphi(x)\right)}}
+%	\begin{cases}
+%		\vv{\varphi^{-1}\left(\frac{v^2}{2} + \varphi(x)\right) \\ 0} & \text{if } \mathcal{L}_i(x,v) \leqslant 0, \\
+%		\vv{0 \\ - \sqrt{v^2 + 2\varphi(x)}} & \text{if } \mathcal{L}_i(x,v) > 0.
+%	\end{cases}
 \end{align}
 
 
@@ -256,27 +256,27 @@ The estimates will rely on two particular cases, the we treat independently as l
 	\end{align*}
 \end{lem}
 
-%\myproof{
-%	We first shift the $v-$integration from the vertical line $z=x$ to $z=y$. Let $w = w(v)$ be such that
-%	\begin{align*}
-%		\mathcal{L}_i(y,w(v)) = \mathcal{L}_i(x,v), \quad \text{i.e.} \quad w(v) = -\left(v^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right), \text{ and } dv = \frac{-w}{\left(w^2 + 2 \left(\varphi(y) - \varphi(x)\right)\right)^{1/2}}  dw.
-%	\end{align*}
-%	Then, defining $w_0 \coloneqq \left(v_0^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/2}$, and noticing that $w(-g_x(y)) = 0$, we get
-%	\begin{align*}
-%		\mathcal{I} = \int_{w=-w_0}^{0} \int_{z=y}^{1} \frac{1}{\left(w^2 + 2 \left(\varphi(y) - \varphi(z)\right)\right)^{1/2}} dz \frac{-w}{\left(w^2 + 2 \left(\varphi(y) - \varphi(x)\right)\right)^{1/2}} dw.
-%	\end{align*}
-%	Since $y \leqslant x$, we have $\varphi(y) \geqslant \varphi(x)$, and $\frac{-w}{\left(w^2 + 2 \left(\varphi(y) - \varphi(x)\right)\right)^{1/2}} \leqslant \frac{-w}{|w|} = 1$. By the strong convexity assumption, we have $\varphi(y) - \varphi(z) \geqslant - \varphi'(y) (z - y) + \frac{\alpha}{2} |z - y|^2 \geqslant \frac{\alpha}{2} (z - y)^2$, so that
-%	\begin{align*}
-%		\mathcal{I} \leqslant \int_{w=-w_0}^{0} \int_{z=y}^{1} \frac{1}{\left(w^2 + \alpha (z- y)^2\right)^{1/2}} dz dw = \int_{w=0}^{w_0} \int_{z=0}^{1-y} \frac{1}{\left(w^2 + \alpha z^2\right)^{1/2}} dz dw.
-%	\end{align*}
-%	Using \cref{lem:int_1surR_rectangle}, we conclude that 
-%	\begin{align*}
-%		\mathcal{I} \leqslant 2 \frac{\sqrt{2 w_0 (1-y)}}{\alpha^{1/4}} = \frac{2\sqrt{2(1-y)}}{\alpha^{1/4}} \left(v_0^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/4}.
-%	\end{align*}
-%}
+\myproof{
+	We first shift the $v-$integration from the vertical line $z=x$ to $z=y$. Let $w = w(v)$ be such that
+	\begin{align*}
+		\mathcal{L}_i(y,w(v)) = \mathcal{L}_i(x,v), \quad \text{i.e.} \quad w(v) = -\left(v^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right), \text{ and } dv = \frac{-w}{\left(w^2 + 2 \left(\varphi(y) - \varphi(x)\right)\right)^{1/2}}  dw.
+	\end{align*}
+	Then, defining $w_0 \coloneqq \left(v_0^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/2}$, and noticing that $w(-g_x(y)) = 0$, we get
+	\begin{align*}
+		\mathcal{I} = \int_{w=-w_0}^{0} \int_{z=y}^{1} \frac{1}{\left(w^2 + 2 \left(\varphi(y) - \varphi(z)\right)\right)^{1/2}} dz \frac{-w}{\left(w^2 + 2 \left(\varphi(y) - \varphi(x)\right)\right)^{1/2}} dw.
+	\end{align*}
+	Since $y \leqslant x$, we have $\varphi(y) \geqslant \varphi(x)$, and $\frac{-w}{\left(w^2 + 2 \left(\varphi(y) - \varphi(x)\right)\right)^{1/2}} \leqslant \frac{-w}{|w|} = 1$. By the strong convexity assumption, we have $\varphi(y) - \varphi(z) \geqslant - \varphi'(y) (z - y) + \frac{\alpha}{2} |z - y|^2 \geqslant \frac{\alpha}{2} (z - y)^2$, so that
+	\begin{align*}
+		\mathcal{I} \leqslant \int_{w=-w_0}^{0} \int_{z=y}^{1} \frac{1}{\left(w^2 + \alpha (z- y)^2\right)^{1/2}} dz dw = \int_{w=0}^{w_0} \int_{z=0}^{1-y} \frac{1}{\left(w^2 + \alpha z^2\right)^{1/2}} dz dw.
+	\end{align*}
+	Using \cref{lem:int_1surR_rectangle}, we conclude that 
+	\begin{align*}
+		\mathcal{I} \leqslant 2 \frac{\sqrt{2 w_0 (1-y)}}{\alpha^{1/4}} = \frac{2\sqrt{2(1-y)}}{\alpha^{1/4}} \left(v_0^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/4}.
+	\end{align*}
+}
 
 \begin{proposition}
-	The density $n_i$ is bounded and continuous.
+	The density $n_i$ is bounded. \todo{Be more precise}
 \end{proposition}
 
 \myproof{
@@ -319,18 +319,45 @@ The estimates will rely on two particular cases, the we treat independently as l
 		\leqslant 2 \sqrt{\frac{2}{\alpha}} \left(-\varphi(1)\right)^{1/4}.
 	\end{align*}
 	
-	We use \cref{lem:upperbound_ni_beginchar} to bound $\IntUpR$ and $\IntLow$. In the first case, we take $y=x$ and $v_0 = g_x(0)$, and notice that $-g_x(x)=0$. In the second case, we take $v_0 = \ve$ and $y=0$, and notice that on $v \leqslant -g_x(0)$, we have $x_b(x,v) = 0$ (the velocity is low enough so that the characteristic ends on $x=0$). This yields
+	We use \cref{lem:upperbound_ni_beginchar} to bound $\IntUpR$ and $\IntLow$. In the first case, we take $y=x$ and $v_0 = g_x(0)$, and notice that $-g_x(x)=0$. In the second case, we take $v_0 = \ve$ and $y=0$, and notice that on $v \leqslant -g_x(0)$, we have $x_b(x,v) = 0$ (the velocity is low enough so that the characteristic ends on $x_b=0$). This yields
 	\begin{align*}
 		\IntUpR \leqslant \frac{2\sqrt{2(1-x)}}{\alpha^{1/4}} \left(g_x^2(0)\right)^{1/4} \leqslant \frac{4}{\alpha^{1/4}} \left(-\varphi(1)\right)^{1/2} , \quad\text{and}\quad
 		\IntLow \leqslant \frac{2\sqrt{2}}{\alpha^{1/4}} \left(\ve^2 + 2 \varphi(x)\right)^{1/4} \leqslant \frac{4}{\alpha^{1/4}} \left(\frac{\beta}{\mu}\right)^{1/4}.
 	\end{align*}
-	
-	
 }
 
+\begin{proposition}
+	The density $n_i$ is continuous. 
+\end{proposition}
 
+\myproof{
+	Let $0 \leqslant y < x \leqslant 1$. For convenience, we represent $n_i(x)$ (resp. $n_i(y)$) as an integral with the artificial lower bound $-g_x(-\ve) \leqslant -\ve$ (resp. $-g_y(-\ve)$). Then
+	\begin{align*}
+		n_i(x) - n_i(y) 
+		&= 2 \int_{v=-g_x(-\ve)}^0 f_i(x_b(x,v),v_b(x,v)) dv - 2 \int_{v=-g_y(-\ve)}^0 f_i(x_b(y,v),v_b(y,v)) dv \\
+		&= 2 \underbrace{\left[\int_{v=-g_x(-\ve)}^{-g_x(y)} f_i(x_b(x,v),v_b(x,v)) dv - \int_{v=-g_y(-\ve)}^{0} f_i(x_b(y,v),v_b(y,v)) dv\right]}_{\eqqcolon\,\mathcal{I}^-}
+		+ 2 \underbrace{\int_{v=-g_x(y)}^{0} f_i(x_b(x,v),v_b(x,v)) dv}_{\eqqcolon\,\mathcal{I}^+}.
+	\end{align*}
+}
 
+Let us first focus on $\mathcal{I}^-$. On the first integral, we make the change of variable
+\begin{align*}
+	w = -\left(v^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/2} \quad v = -\left(w^2 + 2 \left(\varphi(y) - \varphi(w)\right)\right)^{1/2}.
+\end{align*}
+Since $\mathcal{L}_i(x,v) = \mathcal{L}_i(y,w)$, this yields $x_b(x,v) = x_b(y,w)$ and $v_b(x,v) = v_b(y,w)$. The bounds $v\in[-g_x(-\ve),-g_x(y)]$ are exactly transported to $w\in[-g_y(-\ve),0]$. Renaming $w$ in $v$, we get
+\begin{align*}
+	\mathcal{I}^- = \int_{v=-g_y(-\ve)}^{0} f_i(x_b(y,v),v_b(y,v)) \left(\frac{-v}{\left(v^2 + 2 \left(\varphi(y) - \varphi(v)\right)\right)^{1/2}} - 1\right) dv.
+\end{align*}
+Since $\varphi(y) \geqslant \varphi(x)$, the factor of $f_i$ is nonpositive, and so is $\mathcal{I}^-$. \todo{go on}
 
+The second term $\mathcal{I}^+$ is clearly nonnegative, and may be adressed using our lemmas. Indeed, using the integral representation of $f_i(x_b,v_b)$ and the reparametrization by a space variable $z$, we have
+\begin{align*}
+	\mathcal{I}^+ 
+	&= \int_{v=-g_x(y)}^{0} \left[\int_{z=x_b(x,v)}^{x} + \int_{z=x}^{1}\right] \frac{f_e(z,-\left(v^2+2\left(\varphi(x)-\varphi(z)\right)\right)^{1/2}))}{\left(v^2+2\left(\varphi(x)-\varphi(z)\right)\right)^{1/2}} \,dz dv \\
+	&\leqslant \maxfe \int_{v=-g_x(y)}^{0} \int_{z=x_b(x,v)}^{x} \frac{1}{\left(v^2-g_x^2(z)\right)^{1/2}} \, dz dv + \maxfe \int_{v=-g_x(y)}^{0} \int_{z=x}^{1} \frac{1}{\left(v^2+2\left(\varphi(x)-\varphi(z)\right)\right)^{1/2}} \,dz dv \\
+	&\leqslant 2\sqrt{\frac{2}{\alpha}} \left(\varphi(y)-\varphi(x)\right)^{1/4} \sqrt{x-y} + \frac{2\sqrt{2}}{\alpha^{1/4}} \left(2(\varphi(y)-\varphi(x))\right)^{1/2},
+\end{align*}
+where we used \cref{lem:upperbound_ni_endchar} for the first term, and \cref{lem:upperbound_ni_beginchar} for the second term (with $y=x$ and $v_0 = -g_x(y)$ under the notations of the lemma).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
