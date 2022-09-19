@@ -140,8 +140,9 @@
 We suppose that 
 \begin{enumerate}
 \item $f_{e,b}$ is nonnegative.
+\item $f_{e,b}(v) = f_{e,b}(-v)$ for all $v\in\mathbb{R}$.
 \item $f_{e,b}$ satisfies the boundary condition, i.e. $f_{e,b}(v) = 0$ as soon as $\mathcal{L}_e(0,v) \leqslant \mathcal{L}_e(1,0)$.
-\item $f_{e,b}$ is bounded from above by a constant $\maxfe \geqslant 0$.
+\item There exists $\maxfe \leqslant 0$ such that $f_{e,b}(v) \leqslant \maxfe$ for all $v \in \mathbb{R}$.
 \item There exists $\minfe > 0$ and $0 \leqslant \domfel < \domfeu$ such that $f_{e,b}(v) \geqslant \minfe$ for all $v\in[-\domfeu,-\domfel]$.
 \item The function $\varphi$ satisfies $\varphi(0)=\varphi'(0)=0$.
 \item The function $\varphi$ is strongly concave, i.e. there exists $\alpha>0$ such that $\varphi((1-\tau) x + \tau y) \geqslant (1-\tau) \varphi(x)+\tau \varphi(y) + \frac{\alpha}{2} (1-\tau)\tau \left|x-y\right|^2$.
@@ -424,12 +425,12 @@ The estimates will rely on two particular cases, the we treat independently as l
 
 \myproof{
 	Let $0 \leqslant y < x \leqslant 1$. For convenience, we represent $n_i(x)$ (resp. $n_i(y)$) as an integral with the artificial lower bound $-g_x(-\ve) \leqslant -\ve$ (resp. $-g_y(-\ve)$). Then
-	\begin{align*}
+	\begin{align}\label{eq:def_ni_sym}
 		n_i(x) - n_i(y) 
 		&= 2 \int_{v=-g_x(-\ve)}^0 f_i(x_b(x,v),v_b(x,v)) dv - 2 \int_{v=-g_y(-\ve)}^0 f_i(x_b(y,v),v_b(y,v)) dv \\
 		&= 2 \underbrace{\left[\int_{v=-g_x(-\ve)}^{-g_x(y)} f_i(x_b(x,v),v_b(x,v)) dv - \int_{v=-g_y(-\ve)}^{0} f_i(x_b(y,v),v_b(y,v)) dv\right]}_{\eqqcolon\,\mathcal{I}^-}
 		+ 2 \underbrace{\int_{v=-g_x(y)}^{0} f_i(x_b(x,v),v_b(x,v)) dv}_{\eqqcolon\,\mathcal{I}^+}.
-	\end{align*}
+	\end{align}
 
 	The term $\mathcal{I}^+$ is clearly nonnegative, and may be adressed using our lemmas. Indeed, using the integral representation of $f_i(x_b,v_b)$ and the reparametrization by a space variable $z$, we have
 	\begin{align*}
@@ -467,6 +468,35 @@ In the future:
 \item If the estimates with respect to $|\varphi - \psi|_{\infty}$ succeed, define numerical scheme and see what we cas say about it.
 \end{itemize}
 }
+
+\begin{lem}
+	The density $n_i$ is bounded away from 0 uniformly over $x\in[0,1]$.
+\end{lem}
+
+\myproof{
+	By assumption, there exists a constant $\minfe>0$ such that $f_{e,b} (v) \geqslant \minfe \textbf{1}_{\left\{\domfel \leqslant |v| \leqslant \domfeu\right\}}$, which implies
+	\begin{align*}
+		f_e(x,v) \geqslant \minfe \textbf{1}_{\left\{\mathcal{L}_e(0,\domfel) \leqslant \mathcal{L}_e(x,v) \leqslant \mathcal{L}_e(0,\domfeu)\right\}}.
+	\end{align*}
+	Let $g_x : \mathbb{R}^{-} \mapsto \mathbb{R}^+$ be such that $\mathcal{L}_i(0,v) = \mathcal{L}_i(x,-g_x(v))$. As in \cref{eq:def_ni_sym}, we define $n_i(x)$ by an integral over $v\in\mathbb{R}^{-} = ]-\infty,-g_x(0)] \cup ]-g_x(0),0]$. Since we want an uniform lower bound, we will sacrify the (nonnegative) integral on $]-g_x(0),0]$. Moreover, 
+	\begin{align*}
+		w \leqslant -g_x(-\domfeu) \quad\implies\quad \mathcal{L}_i(0,v_b(x,w)) = \mathcal{L}_i(x,w) \geqslant \mathcal{L}_i(x,-g_x(-\domfeu)) = \mathcal{L}_i(0,-\domfeu) = \mathcal{L}_e(0,\domfeu),
+	\end{align*}
+	and $f_e$ vanishes identically along the ion characteristic crossing $(x,w)$. Then, we may restrict the $w-$integral over the domain $[-g_x(-\domfeu),-g_x(0)]$ for all $x$, and write
+	\begin{align*}
+		n_i(x) \geqslant \int_{w=-g_x(-\domfeu)}^{-g_x(0)} f_i(0,v_b(x,w)) dw = \int_{v=-\domfeu}^{0} f_i(0,v) \frac{-v}{\left(v^2 - 2 \varphi(x)\right)^{1/2}} dv \geqslant \int_{v=-\domfeu}^{0} f_i(0,v) \frac{-v}{\left(v^2 + 2 \beta\right)^{1/2}} dv
+	\end{align*}
+	where we used the change of variable $v = v_b(x,w) = -\left(w^2 + 2 \varphi(x)\right)^{1/2}$, and the monotonicity $-\varphi(x) \leqslant -\varphi(1) \leqslant \beta$.
+}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.5\linewidth]{images/fpcharmaps_lowerboundni}
+	\caption{Notations for the lower bound on $n_i$.}
+	\mysubcaption{The coloured area corresponds to the domain $\mathcal{L}_e(0,\domfel) \leqslant \mathcal{L}_e(x,v) \leqslant \mathcal{L}_e(0,\domfeu)$, on which we know that $f_e \geqslant \minfe$. The solid black line is the critical ion characteristic.}
+	\label{fig:charmaps_lowerboundni}
+\end{figure}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
