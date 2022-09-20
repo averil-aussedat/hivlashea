@@ -162,7 +162,7 @@ We define an upper bound $\ve$ over the velocities in the support of $f_e$, give
 	\mathcal{L}_e(0,\ve) \coloneqq \frac{1}{\mu} \beta \geqslant -\frac{1}{\mu}\varphi(1) = \mathcal{L}_e(1,0), \quad\text{i.e.}\quad \ve \coloneqq \sqrt{\frac{2}{\mu}\beta}.
 \end{align}
 
-For a given point $(x,v) \in [0,1]\times \mathbb{R}^{-}$, we denote by $(x_b, v_b)$ the intersection of the boundary $\left\{x=0\right\} \cup \left\{v=0\right\}$ with the ion characteristic issued from $(x,v)$. The values are given by
+For a given point $(x,v) \in [0,1]\times \mathbb{R}^{-}$, we denote by $(x_b, v_b)$ the intersection of the boundary $\{x\geqslant0,v=0\} \cup \{x=0,v\leqslant 0\}$ with the ion characteristic issued from $(x,v)$. The values are given by
 \begin{align}\label{eq:def_xb_vb}
 	\vv{x_b(x,v) \\ v_b(x,v)} \coloneqq \vv{\varphi^{-1}\left(\min\left(0,\frac{v^2}{2} + \varphi(x)\right)\right) \\ - \sqrt{\max\left(0,v^2 + 2\varphi(x)\right)}}
 %	\begin{cases}
@@ -219,6 +219,70 @@ For a given point $(x,v) \in [0,1]\times \mathbb{R}^{-}$, we denote by $(x_b, v_
 
 \myproof{
 	If $a \geqslant b$, then $|a - b| = \sqrt{(a-b)(a-b)} \leqslant \sqrt{(a - b)(a+b)} = \sqrt{a^2 - b^2}$, else $|a-b|=|b-a|$. 
+}
+
+\begin{lem}\label{lem:maj_fi}
+	Let $\alpha>0$, $L \in \mathbb{R}$ and $0 \leqslant a \leqslant 1$. Suppose that $L + \alpha a^2 \geqslant 0$, and $a>0$ if $L=0$. Then
+	\begin{align*}
+		\mathcal{I} \coloneqq \int_{z=a}^1 \frac{1}{\left(L + \alpha z^2\right)^{1/2}} dz \leqslant 
+%		\begin{cases}
+%			\min\left(L^{-1/2},\frac{1+\left(\frac{L}{\alpha}\right)^{1/4}}{\sqrt{\alpha a}}\right) & \text{if } L > 0, \\
+%			\frac{1}{\sqrt{\alpha a}} & \text{if } L = 0, \\
+%			\min\left(|L|^{-1/2}, \sqrt{\frac{2}{\alpha a}}\right) & \text{if } L < 0.
+%		\end{cases}
+		\min\left(|L|^{-1/2}, \frac{2}{\sqrt{\alpha a}}\right).
+	\end{align*}
+%	In particular, we have the uniform bound $\mathcal{I} \leqslant \frac{2}{\sqrt{\alpha a}}$.
+\end{lem}
+
+\myproof{
+	If $L>0$, we have
+	\begin{align*}
+		\mathcal{I} = \frac{1}{\sqrt{\alpha}} \int_{z=a}^1 \frac{1}{\left(1 + \left(\sqrt{\frac{\alpha}{L}} z\right)^2\right)^{1/2}} \frac{\sqrt{\alpha} dz}{\sqrt{L}}
+		= \frac{1}{\alpha} \int_{w=a \sqrt{\frac{\alpha}{L}}}^{\sqrt{\frac{\alpha}{L}}} \frac{1}{\left(1+w^2\right)^{1/2}} dw 
+		= \frac{1}{\sqrt{\alpha}} \left(\sinh^{-1}\left(\sqrt{\frac{\alpha}{L}}\right) - \sinh^{-1}\left(a\sqrt{\frac{\alpha}{L}}\right)\right).
+	\end{align*}
+	Using the positivity of $\sinh^{-1}\left(a\sqrt{\frac{\alpha}{L}}\right)$, and the coarse estimate $\sinh^{-1}(x) \leqslant x$, we get $\mathcal{I} \leqslant L^{-1/2}$. 
+	Moreover, using that $\sinh^{-1}(x) = \log(x + \sqrt{x^2 + 1})$, we get
+	\begin{align*}
+		\mathcal{I} = \frac{1}{\sqrt{\alpha}} \log\left(\frac{\sqrt{\frac{\alpha}{L}} + \sqrt{\frac{\alpha}{L} + 1}}{a\sqrt{\frac{\alpha}{L}} + \sqrt{a^2\frac{\alpha}{L} + 1}}\right)
+		= \frac{1}{\sqrt{\alpha}} \log\left(\frac{1 + \sqrt{1 + \frac{L}{\alpha}}}{a + \sqrt{a^2 + \frac{L}{\alpha}}}\right)
+		\leqslant \frac{1}{\sqrt{\alpha}} \log\left(\frac{2 + \sqrt{\frac{L}{\alpha}}}{2 a}\right)
+		\leqslant \frac{1 + \left(\frac{L}{\alpha}\right)^{1/4}}{\sqrt{\alpha a}}.
+	\end{align*}
+	\intern{I shamelessly used $\frac{1}{2} \leqslant 1$.} Then $\mathcal{I} \leqslant \min\left(L^{-1/2},\frac{1 + \left(\frac{L}{\alpha}\right)^{1/4}}{\sqrt{\alpha a}}\right)$ on $L>0$. But whenever $L \geqslant \alpha$, the min is attained in its first argument: indeed, $L^{-1/2} \leqslant \frac{1}{\sqrt{\alpha a}} \leqslant \frac{1+\left(\frac{L}{\alpha}\right)^{1/4}}{\sqrt{\alpha a}}$. Then we obtained $\mathcal{I} \leqslant \min(L^{-1/2},\frac{2}{\sqrt{\alpha a}})$ on $L>0$.
+	If $L=0$, we have
+	\begin{align*}
+		\int_{z=a}^1 \frac{1}{\sqrt{\alpha} z} dz = \frac{\log(1/a)}{\sqrt{\alpha}} \frac{2}{\sqrt{\alpha a}}.
+	\end{align*}
+	Finally, if $L<0$, the integral becomes
+	\begin{align*}
+		\mathcal{I} = \frac{1}{\sqrt{\alpha}} \int_{a}^1 \frac{1}{\left(\left(\sqrt{\frac{\alpha}{|L|}} z\right)^2-1\right)^{1/2}} \frac{\sqrt{\alpha} dz}{\sqrt{|L|}}
+		= \frac{1}{\alpha} \int_{a \sqrt{\frac{\alpha}{|L|}}}^{\sqrt{\frac{\alpha}{|L|}}} \frac{1}{\left(w^2-1\right)^{1/2}} dw 
+		= \frac{\cosh^{-1}\left(\sqrt{\frac{\alpha}{|L|}}\right) - \cosh^{-1}\left(a\sqrt{\frac{\alpha}{|L|}}\right)}{\sqrt{\alpha}}.
+	\end{align*}
+	The expression is well-defined, since $L + \alpha a^2 \geqslant 0$ implies $a \sqrt{\frac{\alpha}{-L}} \geqslant 1$ when $-L>0$.
+	Since $\cosh^{-1}(x) \leqslant x$, we obtain the coarse estimate $\mathcal{I} \leqslant |L|^{-1/2}$.
+	Using that $\cosh^{-1}(x)=\log\left(x+\sqrt{x^2-1}\right)$, we get
+	\begin{align*}
+		\mathcal{I} 
+		= \frac{1}{\sqrt{\alpha}} \log\left(\frac{1 + \sqrt{1 - \frac{|L|}{\alpha}}}{a + \sqrt{a^2 - \frac{|L|}{\alpha}}}\right) 
+		\leqslant \frac{1}{\sqrt{\alpha}} \log\left(\frac{2}{a}\right) 
+		\leqslant \sqrt{\frac{2}{\alpha a}}
+		\leqslant \frac{2}{\sqrt{\alpha a}}.
+	\end{align*}
+	
+%	To obtain the uniform bound, we just have to show that for all $L > 0$,
+%	\begin{align*}
+%		L^{-1/2} \textbf{1}_{\{L > c\}} + \frac{1+\left(\frac{L}{\alpha}\right)^{1/4}}{\sqrt{\alpha a}} \textbf{1}_{\{L \leqslant c\}}
+%		\coloneqq \min\left(L^{-1/2},\frac{1+\left(\frac{L}{\alpha}\right)^{1/4}}{\sqrt{\alpha a}}\right) 
+%		\leqslant \frac{2}{\sqrt{\alpha a}}.
+%	\end{align*}
+%	Notice that $L \geqslant \alpha$ implies $L^{-1/2} \leqslant \frac{1}{\sqrt{\alpha a}} \leqslant \frac{1+\left(\frac{L}{\alpha}\right)^{1/4}}{\sqrt{\alpha a}}$, so that $c \leqslant \alpha$, and the restriction $\frac{1+\left(\frac{L}{\alpha}\right)^{1/4}}{\sqrt{\alpha a}} \textbf{1}_{\{L \leqslant c\}}$ is bounded by $\frac{2}{\sqrt{\alpha a}}$. On the other hand, the inequality $L^{-1/2} \leqslant \frac{2}{\sqrt{\alpha a}}$ is satisfied as soon as $\frac{\alpha a}{4} \leqslant L$, and the critical case $L=\frac{\alpha a}{4}$ yields
+%	\begin{align*}
+%		\frac{1+\left(\frac{\alpha a}{4 \alpha}\right)^{1/4}}{\sqrt{\alpha a}} < \frac{2}{\sqrt{\alpha a}} = L^{-1/2}.
+%	\end{align*}
+%	Then $c \geqslant \frac{\alpha a}{4}$, and the bound is uniform in $L$.
 }
 
 \subsection{Properties of the electron density $n_e$}
@@ -334,7 +398,7 @@ The estimates will rely on two particular cases, the we treat independently as l
 	\begin{align*}
 		\mathcal{I} \leqslant \int_{z=y}^{x} \sqrt{\frac{g_x(y)}{g_x(z)}} dz = \int_{z=y}^{x} \left(\frac{\varphi(y) - \varphi(x)}{\varphi(z) - \varphi(x)}\right)^{1/4} dz.
 	\end{align*}
-	The assumption of strong convexity yields $\varphi(z) - \varphi(x) \geqslant - \varphi'(z) (x - z) + \frac{\alpha}{2} |x - z|^2 \geqslant \frac{\alpha}{2} (x - z)^2$, so that 
+	The assumption of strong concavity yields $\varphi(z) - \varphi(x) \geqslant - \varphi'(z) (x - z) + \frac{\alpha}{2} |x - z|^2 \geqslant \frac{\alpha}{2} (x - z)^2$, so that 
 	\begin{align*}
 		\mathcal{I} 
 		\leqslant \sqrt{\frac{2}{\alpha}}\left(\varphi(y) - \varphi(x)\right)^{1/4} \int_{z=y}^{x} \frac{1}{\left(x - z\right)^{1/2}} dz 
@@ -358,7 +422,7 @@ The estimates will rely on two particular cases, the we treat independently as l
 	\begin{align*}
 		\mathcal{I} = \int_{w=-w_0}^{0} \int_{z=y}^{1} \frac{1}{\left(w^2 + 2 \left(\varphi(y) - \varphi(z)\right)\right)^{1/2}} dz \frac{-w}{\left(w^2 + 2 \left(\varphi(y) - \varphi(x)\right)\right)^{1/2}} dw.
 	\end{align*}
-	Since $y \leqslant x$, we have $\varphi(y) \geqslant \varphi(x)$, and $\frac{-w}{\left(w^2 + 2 \left(\varphi(y) - \varphi(x)\right)\right)^{1/2}} \leqslant \frac{-w}{|w|} = 1$. By the strong convexity assumption, we have $\varphi(y) - \varphi(z) \geqslant - \varphi'(y) (z - y) + \frac{\alpha}{2} |z - y|^2 \geqslant \frac{\alpha}{2} (z - y)^2$, so that
+	Since $y \leqslant x$, we have $\varphi(y) \geqslant \varphi(x)$, and $\frac{-w}{\left(w^2 + 2 \left(\varphi(y) - \varphi(x)\right)\right)^{1/2}} \leqslant \frac{-w}{|w|} = 1$. By the strong concavity assumption, we have $\varphi(y) - \varphi(z) \geqslant - \varphi'(y) (z - y) + \frac{\alpha}{2} |z - y|^2 \geqslant \frac{\alpha}{2} (z - y)^2$, so that
 	\begin{align*}
 		\mathcal{I} \leqslant \int_{w=-w_0}^{0} \int_{z=y}^{1} \frac{1}{\left(w^2 + \alpha (z- y)^2\right)^{1/2}} dz dw = \int_{w=0}^{w_0} \int_{z=0}^{1-y} \frac{1}{\left(w^2 + \alpha z^2\right)^{1/2}} dz dw.
 	\end{align*}
@@ -487,6 +551,8 @@ In the future:
 		n_i(x) \geqslant \int_{w=-g_x(-\domfeu)}^{-g_x(0)} f_i(0,v_b(x,w)) dw = \int_{v=-\domfeu}^{0} f_i(0,v) \frac{-v}{\left(v^2 - 2 \varphi(x)\right)^{1/2}} dv \geqslant \int_{v=-\domfeu}^{0} f_i(0,v) \frac{-v}{\left(v^2 + 2 \beta\right)^{1/2}} dv
 	\end{align*}
 	where we used the change of variable $v = v_b(x,w) = -\left(w^2 + 2 \varphi(x)\right)^{1/2}$, and the monotonicity $-\varphi(x) \leqslant -\varphi(1) \leqslant \beta$.
+	
+	\todo{NOT FINISHED because I am not satisfied with my lower bound.}
 }
 
 \begin{figure}
@@ -496,6 +562,64 @@ In the future:
 	\mysubcaption{The coloured area corresponds to the domain $\mathcal{L}_e(0,\domfel) \leqslant \mathcal{L}_e(x,v) \leqslant \mathcal{L}_e(0,\domfeu)$, on which we know that $f_e \geqslant \minfe$. The solid black line is the critical ion characteristic.}
 	\label{fig:charmaps_lowerboundni}
 \end{figure}
+
+\begin{lem}
+	Suppose that there exists $v_* > 0$ such that $f_{e,b}(v) = 0$ for all $|v| \leqslant v_*$. Then the density $f_i$ satisfies the uniform bound
+	\begin{align*}
+		f_i(x,v) \leqslant 2^{9/4} \maxfe \sqrt{\frac{\frac{\beta}{\alpha}(1+\frac{1}{\mu})+1}{v_*}} \quad \forall (x,v) \in [0,1] \times \mathbb{R}.
+	\end{align*}
+\end{lem}
+
+\myproof{
+	Let $(x,v) \in [0,1] \times \mathbb{R}_{-}$, and denote by $(x(t),v(t))_{t\leqslant 0}$ the ion characteristic going through $(x,v) = (x(-T),v(-T))$, with the convention $(x_b(x,v),v_b(x,v)) = (x(0),v(0))$. Owing to the positivity of $f_e$, 
+	\begin{align*}
+		f_i(x(0),v(0)) = \int_{t=-T}^{0} f_e(x(t),v(t)) dt + f_i(x,v) \geqslant f_i(x,v).
+	\end{align*}
+	On the other hand, we use $f_i(x,v) + f_i(x,-v) = 2 f_i(x(0),v(0))$ to write $f_i(x,-v) \leqslant 2 f_i(x(0),v(0))$. This shows that it is enough to bound $f_i$ on the boundary $\mathcal{B} \coloneqq \{x\geqslant0,v=0\} \cup \{x=0,v\leqslant 0\}$ to obtain an uniform bound.
+	
+	Let then $(x,v) \in \mathcal{B}$. By hypothesis, $f_e(x(t),v(t))$ vanishes whenever $\mathcal{L}_e(x(t),v(t)) \leqslant \mathcal{L}_e(0,v_*)$, and is bounded by $\maxfe$ otherwise. Then, we may use the reparametrization by space 
+	\begin{align*}
+		f_i(x,v) \leqslant \int_{z=a(x,v)}^{1} \frac{\maxfe}{\left(v^2 + 2 \varphi(x) - 2 \varphi(z)\right)^{1/2}} dz,
+		\quad \text{with} \quad
+		a(x,v) \coloneqq 
+		\begin{cases}
+			\varphi^{-1}\left(\frac{\frac{v^2}{2} + \varphi(x) - \frac{v_*^2}{2}}{1+1/\mu}\right) & \text{if } \mathcal{L}_e(x,v) \leqslant \mathcal{L}_e(0,v_*) \\
+			x & \text{otherwise.}
+		\end{cases}
+	\end{align*}
+	The function $a$ gives the smallest spatial coordinate of the characteristic $(x(t),v(t))_{t\leqslant0}$ such that $f_e > 0$. Using that $\varphi(z) \leqslant - \alpha\frac{z^2}{2}$, we have
+	\begin{align*}
+		f_i(x,v) \leqslant \maxfe \int_{z=a(x,v)}^{1} \frac{1}{\left(v^2 + 2 \varphi(x) - \alpha z^2\right)^{1/2}} dz \leqslant \maxfe \min\left(\frac{1}{\left|v^2 + 2 \varphi(x)\right|^{1/2}}, \frac{2}{\sqrt{\alpha a(x,v)}}\right)
+	\end{align*}
+	where we used \cref{lem:maj_fi} with $L\coloneqq v^2 + 2 \varphi(x)$. 
+	
+	We rely on the concavity estimate
+	\begin{align*}
+		\varphi(x) \geqslant (1 - x) \varphi(0) + x \varphi(1) + \frac{\alpha}{2} x(1-x) \geqslant - x \beta 
+		\quad \implies \quad
+		-\frac{y}{\beta} \leqslant \varphi^{-1}(y)
+	\end{align*}
+	to write that for $(x,v)$ satisfying $\mathcal{L}_e(x,v) \leqslant \mathcal{L}_e(0,v_*)$, 
+	\begin{align*}
+		a(x,v) = \varphi^{-1}\left(\frac{\frac{v^2}{2} + \varphi(x) - \frac{v_*^2}{2}}{1+1/\mu}\right)
+		\geqslant \frac{\frac{v_*^2}{2} - (\frac{v^2}{2} + \varphi(x))}{\beta(1+1/\mu)}.
+	\end{align*}
+	Then 
+	\begin{align*}
+		f_i(x,v) \leqslant \maxfe \min \left(\frac{1}{\sqrt{|X|}}, \frac{A}{\sqrt{B - X}}\right) 
+		\quad \text{with} \quad
+		X \coloneqq \frac{v^2}{2} + \varphi(x), \quad A \coloneqq \frac{2}{\sqrt{\frac{\alpha}{\beta(1+1/\mu)}}}, \quad \text{and} \quad B \coloneqq \frac{v_*^2}{2}.
+	\end{align*}
+	 The elementary study of the function $X \to \min\left(|X|^{-1/2}, A (B-X)^{-1/2}\right)$ reveals a global maximum at $X = \frac{B}{A^2 + 1} < B$, and we conclude to the result.
+	 
+ 	\begin{figure}
+ 		\centering
+ 		\includegraphics[width=0.5\linewidth]{images/global_bound_fi}
+ 		\caption{Notations for the boundedness of $f_i$.}
+ 		\mysubcaption{The coloured area corresponds to $\mathcal{L}_e(x,v) \geqslant \mathcal{L}_e(0,v_*)$. The function $a(x,v)$ gives the point of the ion characteristic (in brown) where $f_e$ vanishes.}
+ 		\label{fig:charmaps_domainmap}
+ 	\end{figure}
+}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

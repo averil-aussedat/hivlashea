@@ -16,7 +16,11 @@ fixed_point_char_maps = True
 
 if fixed_point_char_maps:
     def phi(x):
-        return - x**2 / 2.0 - 0.5 * x**4
+        # return - x**2 / 2.0 #- 0.5 * x**4
+        return - 5 * x**2 
+
+    def phim1(y):
+        return np.sqrt(- y / 5)
 
     fig, ax = plt.subplots()
     # fig.tight_layout()
@@ -38,10 +42,46 @@ if fixed_point_char_maps:
     ax.text(lspineoffset+0.03, 1.0, "velocity", fontsize=fs, va='top', ha='left', transform=ax.transAxes)
     ax.text(1.0+0.02, bspineoffset-0.03, "space", fontsize=fs, va='top', ha='center', transform=ax.transAxes)
 
-    lowerboundni_1 = False # oldie
-    domain_map_1 = False # oldie
-    lowerboundni_2 = True
-    domain_map_2 = False
+    lowerboundni_1  = False # oldie
+    domain_map_1    = False # oldie
+    lowerboundni_2  = False
+    domain_map_2    = False
+    global_bound_fi = True
+
+    if global_bound_fi:
+        xx = np.linspace(0.0,1.0,400)
+        vstar = -2.0 
+        minv = 1.5*vstar
+        mu = 1.0
+        charestar = -np.sqrt(np.maximum(0,vstar**2 + 2/mu * phi(xx)))
+        xstar = phim1(-mu/2 * vstar**2)
+        thev = 0.3 * vstar
+        chariv = -np.sqrt(thev**2 - 2*phi(xx))
+        inter_x = phim1((thev**2/2 - vstar**2/2)/(1+1/mu))
+        inter_v = -np.sqrt(thev**2 - 2*phi(inter_x))
+
+        domcolor = "palegreen"
+        linecolor = "k"
+        charicolor = "saddlebrown"
+        charecolor = "seagreen"
+
+        ax.set_xticks([inter_x, 1.0])
+        ax.set_xticklabels([r"$a(x,v)$", "1"])
+        ax.tick_params('x', direction='in', width=2, pad=-25.0, labelsize=fs)
+        maxx = 1.1
+        ax.set_xlim([- lspineoffset * maxx / (1.0 - lspineoffset),maxx])
+
+        ax.set_yticks([thev, vstar])
+        ax.set_yticklabels([r"$(x,v)$", r"$-v_*$"])
+        ax.tick_params('y', width=2, pad=4.0, labelsize=fs)
+        ax.set_ylim([minv,minv * (1 - 1.0 / bspineoffset)])
+
+        ax.fill_between(xx, -10, charestar, color=domcolor)
+        ax.plot(xx[xx <= xstar+1e-2], charestar[xx <= xstar+1e-2], linewidth=2, linestyle="--", color=charecolor)
+        ax.plot(xx, chariv, linewidth=2, linestyle="--", color=charicolor)
+        ax.plot([inter_x, inter_x],[0.0,inter_v],linewidth=2,linestyle="--",color="lightgray")
+
+        save(fig, "global_bound_fi")
 
     if lowerboundni_1:
         thex = 0.8
