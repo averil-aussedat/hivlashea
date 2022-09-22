@@ -147,8 +147,8 @@ We suppose that
 \item There exists $\maxfe \leqslant 0$ such that $f_{e,b}(v) \leqslant \maxfe$ for all $v \in \mathbb{R}$.
 \item There exists $\minfe > 0$ and $0 \leqslant \domfel < \domfeu$ such that $f_{e,b}(v) \geqslant \minfe$ for all $v\in[-\domfeu,-\domfel]$.
 \item The function $\varphi$ satisfies $\varphi(0)=\varphi'(0)=0$.
-\item The function $\varphi$ is strongly concave, i.e. there exists $\alpha>0$ such that $\varphi((1-\tau) x + \tau y) \geqslant (1-\tau) \varphi(x)+\tau \varphi(y) + \frac{\alpha}{2} (1-\tau)\tau \left|x-y\right|^2$.
-\item There exists $\beta > \alpha$ such that $\varphi(1) \geqslant - \beta$. \todo{Uniformly over the fixed-point iterations}
+\item The function $\varphi$ is strongly concave, i.e. there exists $\alpha>0$ such that $\varphi((1-\tau) x + \tau y) \geqslant (1-\tau) \varphi(x)+\tau \varphi(y) + \frac{\alpha}{2} (1-\tau)\tau \left|x-y\right|^2$ for all $(x,y,\tau)\in[0,1]^3$.
+\item There exists $\beta > \alpha$ such that $\varphi$ is $(-\beta)-$convex, i.e. $\varphi((1-\tau) x + \tau y) \leqslant (1-\tau) \varphi(x)+\tau \varphi(y) + \frac{\beta}{2} (1-\tau)\tau \left|x-y\right|^2$ for all $(x,y,\tau)\in[0,1]^3$. Notice that in this case, $\varphi(x) \geqslant - \beta \frac{x^2}{2}$, and in particular, $\varphi(1) \geqslant - \beta$. 
 \end{enumerate}
 
 We use the following notations: the Liapunov functions of the electrons and the ions are
@@ -415,7 +415,7 @@ The estimates will rely on two particular cases, the we treat independently as l
 \begin{proposition}
 	The density $n_i$ is bounded by a constant depending on $\varphi$ only through $\varphi(1)$. More precisely,
 	\begin{align*}
-		n_i(x) \leqslant 8 \left(\frac{\beta}{\alpha}\right)^{1/4} \left(\frac{1}{\alpha^{1/4}} + \beta^{1/4} + \frac{1}{\mu^{1/4}}\right) 
+		n_i(x) \leqslant 8 \nu \left(\frac{\beta}{\alpha}\right)^{1/4} \left(\frac{1}{\alpha^{1/4}} + \beta^{1/4} + \frac{1}{\mu^{1/4}}\right) 
 		\quad\quad\forall x \in[0,1].
 	\end{align*}
 \end{proposition}
@@ -423,7 +423,7 @@ The estimates will rely on two particular cases, the we treat independently as l
 \myproof{
 	We use the symmetry of $f_i$ to write
 	\begin{align*}
-		n_i(x) = \int_{v=-\infty}^{\infty} f_i(x,v) dv = 2 \int_{v=-\infty}^{0} f_i(x_b(x,v), v_b(x,v)) dv = 2 \int_{v=-\infty}^{0} \int_{t=-\infty}^{0} f_e(x(t),v(t)) dt dv,
+		n_i(x) = \int_{v=-\infty}^{\infty} f_i(x,v) dv = 2 \int_{v=-\infty}^{0} f_i(x_b(x,v), v_b(x,v)) dv = 2 \nu \int_{v=-\infty}^{0} \int_{t=-\infty}^{0} f_e(x(t),v(t)) dt dv,
 	\end{align*}
 	where $(x(t),v(t))_{t\leqslant0}$ is the ion characteristic reaching $(x_b(x,v),v_b(x,v))$ at $t=0$. Notice that the lower bounds are artificial, since the characteristic enters the support of $f_e$ in finite time: we may use $v \geqslant -\ve$, and consider only times $t$ for which $x(t) \in [0,1]$. 
 	
@@ -433,11 +433,11 @@ The estimates will rely on two particular cases, the we treat independently as l
 	\end{align*}
 	Then, the density rewrites
 	\begin{align*}
-		n_i(x) = 2 \int_{v=-\ve}^{0} \int_{z=x_b(x,v)}^{1} \frac{f_e\left(z, -\left(v^2 + 2\left(\varphi(x) - \varphi(z)\right)\right)^{1/2}\right)}{\left(v^2 + 2\left(\varphi(x) - \varphi(z)\right)\right)^{1/2}} \, dz dv.
+		n_i(x) = 2 \nu \int_{v=-\ve}^{0} \int_{z=x_b(x,v)}^{1} \frac{f_e\left(z, -\left(v^2 + 2\left(\varphi(x) - \varphi(z)\right)\right)^{1/2}\right)}{\left(v^2 + 2\left(\varphi(x) - \varphi(z)\right)\right)^{1/2}} \, dz dv.
 	\end{align*}
 	Let us show that $n_i$ is bounded. We use the coarse estimate $f_e \leqslant \maxfe$, and decompose the integral in three:
 	\begin{align*}
-		n_i(x) \leqslant 2 \maxfe \left[
+		n_i(x) \leqslant 2 \nu \maxfe \left[
 		\underbrace{\int_{v=-g_x(0)}^{0} \int_{z=x_b(x,v)}^{x}}_{\IntUpL} + 
 		\underbrace{\int_{v=-g_x(0)}^{0} \int_{z=x}^{1}}_{\IntUpR} + 
 		\underbrace{\int_{v=-\ve}^{-g_x(0)} \int_{z=x_b(x,v)}^{1}}_{\IntLow} \right] 
@@ -469,7 +469,7 @@ The estimates will rely on two particular cases, the we treat independently as l
 \begin{lem}
 	The density $n_i$ is uniformly bounded away from 0. More precisely, 
 	\begin{align*}
-		n_i(x) \geqslant \frac{\minfe (\domfeu^2 - \domfel^2)}{\domfeu \left(\domfeu^2 + 2\beta\right)^{1/2}} \frac{\domfel^2}{2\beta\left(1+\frac{1}{\mu}\right)} \quad\quad\forall x\in[0,1].
+		n_i(x) \geqslant \frac{\sqrt{2} \nu \minfe (\domfeu^2 - \domfel^2)}{\domfeu \left(\frac{\domfeu^2}{2} + \beta\right)^{1/2}} \frac{\domfel}{\sqrt{\beta\left(1+\frac{1}{\mu}\right)}} \quad\quad\forall x\in[0,1].
 	\end{align*}
 \end{lem}
 
@@ -481,7 +481,7 @@ The estimates will rely on two particular cases, the we treat independently as l
 	Notice that we may always take $\domfel > 0$ as long as $\domfeu>0$.
 	Let us denote $\underline{\ee} \coloneqq \mathcal{L}_e(0,\domfel)$ and $\overline{\ee} \coloneqq \mathcal{L}_e(0,\domfeu)$. For any $x\in[0,1]$, we have
 	\begin{align*}
-		n_i(x) = 2 \int_{w\in\mathbb{R}_-} \int_{\tau=-\infty}^{0} f_e(x(\tau),v(\tau)) d\tau dw, \quad \text{with} \quad \mathcal{L}_i(x(\tau),v(\tau)) = \mathcal{L}_i(x,w).
+		n_i(x) = 2 \nu \int_{w\in\mathbb{R}_-} \int_{\tau=-\infty}^{0} f_e(x(\tau),v(\tau)) d\tau dw, \quad \text{with} \quad \mathcal{L}_i(x(\tau),v(\tau)) = \mathcal{L}_i(x,w).
 	\end{align*}
 	Notice that for $w \in [-g_x(-\domfeu),-g_x(0)]$, the characteristic issued from $(x,w)$ enters the domain $\left\{\underline{\ee} \leqslant \mathcal{L}_e \leqslant \overline{\ee}\right\}$. We will restrict the domain of integration to 
 	\begin{align*}
@@ -490,8 +490,8 @@ The estimates will rely on two particular cases, the we treat independently as l
 	where $(a,v_a)$ is the unique point such that $\mathcal{L}_e(a,v_a) = \mathcal{L}_e(0,\domfel)$ and $\mathcal{L}_i(a,v_a) = 0$ (note that $a$ depends on $\beta$). This (somehow coarse) estimate will give us trivial bounds when applying the change of variable of \cref{lem:magic_change_variable}, namely $z=x(\tau)$ and $\ee = \mathcal{L}_e(x(\tau),v(\tau))$. Denoting by $[\underline{\tau}, \overline{\tau}] \subset ]-\infty,0]$ the time interval where $(x(\tau),v(\tau)) \in \mathcal{D}$, we have
 	\begin{align*}
 		n_i(x) 
-		\geqslant \int_{w=-g_x(-\domfeu)}^{-g_x(0)} \int_{\tau = \underline{\tau}}^{\overline{\tau}} \minfe \, d\tau dw
-		= \int_{\ee = \underline{\ee}}^{\overline{\ee}} \int_{z=0}^{a} \frac{\minfe}{2\left(\ee + \frac{1}{\mu} \varphi(z)\right)^{1/2} \left(\ee - \varphi(x) + \left(1+\frac{1}{\mu}\right) \varphi(z)\right)^{1/2}} \, dz d\ee.
+		\geqslant \int_{w=-g_x(-\domfeu)}^{-g_x(0)} \int_{\tau = \underline{\tau}}^{\overline{\tau}} 2 \nu \minfe \, d\tau dw
+		= \int_{\ee = \underline{\ee}}^{\overline{\ee}} \int_{z=0}^{a} \frac{2 \nu \minfe}{2\left(\ee + \frac{1}{\mu} \varphi(z)\right)^{1/2} \left(\ee - \varphi(x) + \left(1+\frac{1}{\mu}\right) \varphi(z)\right)^{1/2}} \, dz d\ee.
 	\end{align*}
 	Using \cref{rem:magic_change_welldef}, we are assured that the square roots are well-defined, since 
 	\begin{align*}
@@ -502,20 +502,20 @@ The estimates will rely on two particular cases, the we treat independently as l
 	Using that $\ee + \frac{1}{\mu}\varphi(z) \leqslant \overline{\ee} + 0$ and $\ee - \varphi(x) + \left(1+\frac{1}{\mu} \varphi(z)\right) \leqslant \overline{\ee} + \beta + 0$, we obtain
 	\begin{align*}
 		n_i(x) 
-		\geqslant \int_{\ee = \underline{\ee}}^{\overline{\ee}} \int_{z=0}^{a} \frac{\minfe}{2\overline{\ee}^{1/2}\left(\overline{\ee} + \beta\right)^{1/2}} \, dz d\ee
+		\geqslant 2 \nu \int_{\ee = \underline{\ee}}^{\overline{\ee}} \int_{z=0}^{a} \frac{\minfe}{2\overline{\ee}^{1/2}\left(\overline{\ee} + \beta\right)^{1/2}} \, dz d\ee
 %		= \frac{a \minfe}{\overline{\ee}^{1/2}} \left[\sqrt{\ee + \beta}\right]_{\underline{\ee}}^{\overline{\ee}}.
-		= \frac{a \minfe (\overline{\ee} - \underline{\ee})}{\overline{\ee}^{1/2} \left(\overline{\ee} + \beta\right)^{1/2}}.
+		= \frac{\nu a \minfe (\overline{\ee} - \underline{\ee})}{\overline{\ee}^{1/2} \left(\overline{\ee} + \beta\right)^{1/2}}.
 	\end{align*}
-	Let us make explicit the dependance over $\beta$ by estimating $a$ using the concavity assumption: we have
+	Let us make explicit the dependance over $\beta$ by estimating $a$ using the $(-\beta)-$convexity assumption: we have
 	\begin{align*}
-		 \varphi(x) \geqslant (1-x) \varphi(0) + x \varphi(1) 
+		 \varphi(x) \geqslant - \beta \frac{x^2}{2}
 		 \quad \implies \quad
-		 \varphi^{-1}(y) \geqslant \frac{- y}{\beta}, 
+		 \varphi^{-1}(y) \geqslant \sqrt{\frac{- 2 y}{\beta}}, 
 		 \quad\text{so that}\quad
  		 a = \varphi^{-1}\left(-\frac{\domfel^2}{2\left(1+\frac{1}{\mu}\right)}\right)
- 		 \geqslant \frac{\domfel^2}{2\beta\left(1+\frac{1}{\mu}\right)}.
+ 		 \geqslant \frac{\domfel}{\sqrt{\beta\left(1+\frac{1}{\mu}\right)}}.
 	\end{align*}
-	and the uniform lower bound behaves like $\beta^{-3/2}$ when $\beta\to\infty$.
+	and the uniform lower bound behaves like $\beta^{-1}$ when $\beta\to\infty$.
 }
 
 \begin{figure}
@@ -706,32 +706,81 @@ The estimates will rely on two particular cases, the we treat independently as l
 
 Let $0 < \alpha \leqslant \beta$, and define the following convex set:
 \begin{align*}
-	\K \coloneqq \left\{\varphi\in\mathcal{C}^1([0,1],\mathbb{R}) \quad |\quad \varphi(0)=\varphi'(0)=0, \quad \varphi\ \alpha-\text{concave,}\quad\varphi(1) \geqslant -\beta\right\}.
+	\K \coloneqq \left\{\varphi\in\mathcal{C}^1([0,1],\mathbb{R}) \quad |\quad \varphi(0)=\varphi'(0)=0, \quad \varphi\ \alpha-\text{concave et } (-\beta)-\text{convex.}\right\}.
 \end{align*}
+Both variation conditions rewrite
+\begin{align*}
+	\forall (x,y,\gamma) \in [0,1]^3, \quad 
+	\begin{cases}
+	 	\varphi((1-\gamma) x + \gamma y) \geqslant (1-\gamma) \varphi(x) + \gamma \varphi(y) + \frac{\alpha}{2} \gamma (1-\gamma) |x-y|^2, \\
+	 	\varphi((1-\gamma) x + \gamma y) \leqslant (1-\gamma) \varphi(x) + \gamma \varphi(y) + \frac{\beta}{2} \gamma (1-\gamma) |x-y|^2.
+	\end{cases}
+\end{align*}
+In the case $\varphi\in\mathcal{C}^2$, it is equivalent to $\varphi'' \in [-\beta,-\alpha]$.
 
 \begin{lem}
 	$\K$ is closed for the topology induced by the sup-norm $|\cdot|_{\infty} \coloneqq \max_{[0,1]} |\cdot|$.
 \end{lem}
 
 \myproof{
-	Since $\K \subset \mathcal{C}^{0}([0,1],\mathbb{R})$, we know that any Cauchy sequence $(\varphi^n)_n \subset \K$ admits a limit $\varphi \in \mathcal{C}([0,1],\mathbb{R})$. The pointwise conditions
+	Since $\K \subset \mathcal{C}^{0}([0,1],\mathbb{R})$, we know that any Cauchy sequence $(\varphi_n)_n \subset \K$ admits a limit $\varphi \in \mathcal{C}([0,1],\mathbb{R})$. The pointwise condition $\varphi_n(0)=0$ and the pointwise grows conditions are preserved when $n\to\infty$. Since the family of continuous fonctions $(\varphi'_n)_n$ is equilipschitz, we may use Arzelà-Ascoli to extract an uniformly converging subsequence $\varphi'_{n_k} \to \varphi'_{\infty}$. Using that for all $(x,y)\in[0,1]$,
 	\begin{align*}
-		\varphi^n(0)=0, \quad \varphi^n(1) \geqslant -\beta, \quad \varphi^n((1-\gamma) x + \gamma y) \geqslant (1-\gamma) \varphi^n(x) + \gamma \varphi^n(y) + \frac{\alpha}{2} \gamma(1-\gamma) |x-y|^2 \quad \forall (x,y,\gamma) \in [0,1]^3
-	\end{align*}
-	are preserved when $n\to\infty$ under this topology. Let us show that $\varphi'(0)=0$: first, notice that $\varphi^n(x) \leqslant 0$ implies $\varphi(x) \leqslant 0$. Since $\varphi$ is $\alpha-$concave, we have $\forall x \in [0,1]$
-	\begin{align*}
-		\varphi(x) \geqslant (1-x) \varphi(0) + x \varphi(1) + \frac{\alpha}{2} x (1-x) \geqslant - \beta x + \frac{\alpha}{2} x (1-x),
-	\end{align*}
-	and
-	\begin{align*}
-		\frac{- \beta \varepsilon + \frac{\alpha}{2} \varepsilon (1-\varepsilon)}{\varepsilon} \leqslant \frac{\varphi(\varepsilon) - \varphi(0)}{\varepsilon} \leqslant 0. 
-	\end{align*}
+		\left|\varphi(y)-\varphi(x) - \int_{x}^y \varphi'_{\infty}(z)dz\right| \leqslant |\varphi(y)-\varphi_n(y)| + |\varphi(x)-\varphi_n(x)| + \int_{x}^y |\varphi'_{\infty}(z)-\varphi'_n(z)| dz \underset{n\to\infty}{\longrightarrow} 0,
+	\end{align*} 
+	we get that $\varphi'_{\infty}$ is the (continuous) derivative of $\varphi$. Finally, the uniform convergence $\varphi'_{n_k} \to \varphi'_{\infty}$ gives $\varphi'(0)=0$.
 }
 
+We define an operator $F : \K \mapsto \mathcal{C}^2([0,1],\mathbb{R})$ by the solution of the Poisson problem 
+\begin{align*}
+	- \lambda^2 F'' = n_i[\varphi] - n_e[\varphi],
+\end{align*}
+where $n_i$ and $n_e$ are the ion and electron densities obtained with the characteristics induced by $\varphi$. 
 
-%\begin{proposition}
-%	
-%\end{proposition}
+\begin{lem}[Coarse stability]
+	Assume all the hypotheses of the above lemmas are satisfied. \todo{Be more precise.}
+	For all $(\lambda,\mu) \in (\mathbb{R}_*^+)^2$, there exists parameters $(\alpha,\beta,\nu) \in (\mathbb{R}_*^+)^3$ such that $F(\K) \subset \K$.
+\end{lem}
+
+\myproof{
+	The function $F$ is solution to a Poisson problem with bounded continuous source term, so it enjoys $\mathcal{C}^2$ regularity. The boundary condition $F_{\varphi}(0)=F_{\varphi}'(0)=0$ are satisfied by construction. We turn to the stability of the variation estimates: owing to the boundedness of $n_i$ and $n_e$ stated above, we have
+	\begin{align*}
+		\begin{cases}
+			- \lambda^2 F''(x) \leqslant 8 \nu \left(\frac{\beta}{\alpha}\right)^{1/4} \left(\frac{1}{\alpha^{1/4}} + \beta^{1/4} + \frac{1}{\mu^{1/4}}\right), \\
+			- \lambda^2 F''(x) \geqslant \nu \frac{\kappa_1}{\sqrt{\beta} \left(\kappa_2+ \beta\right)^{1/2} \sqrt{1+\frac{1}{\mu}}}  - 2 \maxfe \sqrt{\frac{2\beta}{\mu}}
+		\end{cases}
+	\end{align*}
+	where
+	\begin{align*}
+		\kappa_1 \coloneqq \frac{\minfe (\domfeu^2 - \domfel^2) \domfel}{\sqrt{2}\domfeu}, \quad 
+		\kappa_2 \coloneqq \frac{\domfeu^2}{2}
+	\end{align*}
+	A sufficient condition for the stability is to obtain $\alpha \leqslant -F'' \leqslant \beta$. We will restrict our search to $0 < \alpha \leqslant \beta$ such that $\alpha\beta=1$. Then, sufficient conditions write
+	\begin{align*}
+		\begin{cases}
+			1 \leqslant \beta \\
+			8 \frac{\nu}{\lambda^2} \beta^{1/2} \left(\beta^{-1/4} + \beta^{1/4} + \frac{1}{\mu^{1/4}}\right) \leqslant \beta \\
+			\nu \frac{\kappa_1}{\sqrt{\beta} \left(\kappa_2+ \beta\right)^{1/2} \sqrt{1+\frac{1}{\mu}}}  - 2 \maxfe \sqrt{\frac{2\beta}{\mu}} \geqslant \beta^{-1}
+		\end{cases}
+		\quad\iff\quad
+		\begin{cases}
+			1 \leqslant \beta \\
+			1 + \beta^{1/2} + \frac{\beta^{1/4}}{\mu^{1/4}} - \frac{\lambda^2}{8 \nu} \beta \leqslant 0 \\
+			\nu \frac{\kappa_1 \sqrt{\beta} }{\left(\kappa_2+ \beta\right)^{1/2} \sqrt{1+\frac{1}{\mu}}}  \geqslant 1 + 2 \maxfe \sqrt{\frac{2}{\mu}} \beta^{3/2}
+		\end{cases}
+	\end{align*}
+	Using the coarse estimate $\beta^{1/4} \leqslant \beta^{1/2}$ on $1 \leqslant \beta$ yields
+	\begin{align*}
+		1 + \beta^{1/2} + \frac{\beta^{1/4}}{\mu^{1/4}} - \frac{\lambda^2}{8 \nu} \beta 
+		\leqslant 1 + \beta^{1/2} \left(1 + \frac{1}{\mu^{1/4}}\right) - \frac{\lambda^2}{8 \nu} \beta 
+		\coloneqq 1 + X \left(1 + \frac{1}{\mu^{1/4}}\right) - \frac{\lambda^2}{8 \nu} X^2,
+	\end{align*}
+	and this concave polynomial is negative for $\beta$ large enough. \todo{Do the computation if useful}
+	
+	Moreover, since $1 \geqslant \beta$ and the function $\beta \to \frac{\sqrt{\beta}}{\sqrt{\kappa_2 + \beta}}$ is increasing, the third condition is implied by
+	\begin{align*}
+		\nu \frac{\kappa_1}{\left(\kappa_2+ 1\right)^{1/2} \sqrt{1+\frac{1}{\mu}}}  \geqslant 1 + 2 \maxfe \sqrt{\frac{2}{\mu}} \beta^{3/2}.
+	\end{align*}
+}
 
 \todo{
 In the future:
