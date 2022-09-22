@@ -16,7 +16,7 @@ fixed_point_char_maps = True
 
 if fixed_point_char_maps:
     def phi(x):
-        # return - x**2 / 2.0 #- 0.5 * x**4
+        # return - 5 * x**2 / 2.0 - 2.0 * x**4
         return - 5 * x**2 
 
     def phim1(y):
@@ -42,11 +42,12 @@ if fixed_point_char_maps:
     ax.text(lspineoffset+0.03, 1.0, "velocity", fontsize=fs, va='top', ha='left', transform=ax.transAxes)
     ax.text(1.0+0.02, bspineoffset-0.03, "space", fontsize=fs, va='top', ha='center', transform=ax.transAxes)
 
-    lowerboundni_1  = False # oldie
-    domain_map_1    = False # oldie
-    lowerboundni_2  = False
-    domain_map_2    = False
-    global_bound_fi = True
+    lowerboundni_1      = False # oldie
+    domain_map_1        = False # oldie
+    lowerboundni_2      = False # oldie
+    lowerboundni_3      = False
+    domain_map_2        = False
+    global_bound_fi     = True
 
     if global_bound_fi:
         xx = np.linspace(0.0,1.0,400)
@@ -82,6 +83,63 @@ if fixed_point_char_maps:
         ax.plot([inter_x, inter_x],[0.0,inter_v],linewidth=2,linestyle="--",color="lightgray")
 
         save(fig, "global_bound_fi")
+
+    if lowerboundni_3:
+        xx = np.linspace(0.0,1.0,400)
+        mu = 1.0
+        aa = 0.4
+        va = -np.sqrt(-2*phi(aa))
+        vlow = -np.sqrt(va**2 - 2/mu * phi(aa))
+        vupp = vlow-1.0
+        minv = vupp-1.5
+        mu = 1.0
+        charelow = -np.sqrt(np.maximum(0,vlow**2 + 2/mu * phi(xx)))
+        chareupp = -np.sqrt(np.maximum(0,vupp**2 + 2/mu * phi(xx)))
+        lower_chari = -np.sqrt(np.maximum(0.0,vupp**2 - 2 * phi(xx)))
+        critichar = -np.sqrt(- 2*phi(xx))
+        thex = 0.75
+        gx0 = -np.sqrt(-2*phi(thex))
+        gxvupp = -np.sqrt(vupp**2-2*phi(thex))
+
+        domcolor = "palegreen"
+        linecolor = "k"
+        charicolor = "saddlebrown"
+        charecolor = "seagreen"
+        hatchcolor = "royalblue"
+
+        ax.set_xticks([aa, thex, 1.0])
+        ax.set_xticklabels([r"$a$", r"$x$", "1"])
+        ax.tick_params('x', direction='in', width=2, pad=-25.0, labelsize=fs)
+        maxx = 1.1
+        ax.set_xlim([- lspineoffset * maxx / (1.0 - lspineoffset),maxx])
+
+        ax.set_yticks([vlow, vupp])
+        ax.set_yticklabels([r"$-\underline{v}$", r"$-\overline{v}$"])
+        ax.tick_params('y', width=2, pad=4.0, labelsize=fs)
+        ax.set_ylim([minv,minv * (1 - 1.0 / bspineoffset)])
+
+        # domains
+        plt.rcParams['hatch.linewidth'] = 3.5
+        ax.fill_between(xx, chareupp, charelow, color=domcolor)
+        ax.fill_between(xx[xx<=aa], chareupp[xx<=aa], charelow[xx<=aa], hatch="///", color=domcolor, fc=hatchcolor)
+
+        # lines other than char
+        ax.plot([thex,thex],[minv,0.0],linestyle="--",linewidth=2,color=linecolor) # vertical line x
+        ax.plot([aa, aa],[0.0,va],linewidth=2,linestyle="--",color="lightgray")
+
+        # chars
+        ax.plot(xx, charelow, linewidth=2, linestyle="--", color=charecolor)
+        ax.plot(xx, chareupp, linewidth=2, linestyle="--", color=charecolor)
+        ax.plot(xx, lower_chari, linewidth=2, linestyle="--", color=charicolor)
+        ax.plot(xx, critichar, linewidth=2, linestyle="-", color="k")
+
+        # annotations
+        ax.scatter(thex, gx0,    s=12, color=linecolor)
+        ax.scatter(thex, gxvupp, s=12, color=linecolor)
+        ax.text(thex+0.03, gx0, r"$-g_x(0)$", fontsize=fs, ha="left", va="bottom")
+        ax.text(thex-0.03, gxvupp, r"$-g_x(-\overline{v})$", fontsize=fs, ha="right", va="top")
+
+        save(fig, "fpcharmaps_lowerboundni")
 
     if lowerboundni_1:
         thex = 0.8

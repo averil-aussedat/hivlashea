@@ -56,7 +56,7 @@
 \newtheorem{proposition}{Proposition}[section]
 \newtheorem{definition}{Definition}[section]
 \newtheorem{theoreme}{Theorem}[section]
-\newtheorem{remarque}{Remark}[section]
+\newtheorem{remark}{Remark}[section]
 \newtheorem{lem}{Lemma}[section]
 \numberwithin{equation}{section}
 
@@ -104,6 +104,8 @@
 \newcommand{\maxfe}{{\overline{c}}} % upper bound on f_e
 \newcommand{\lipfe}{{[f_{e,b}]}} % lipschitz constant of f_{e,b}
 \newcommand{\lipfesq}{{[f_{e,b}]_{2}}} % lipschitz constant of f_{e,b}(\sqrt{})
+\newcommand{\ee}{\varepsilon} % variable used when integrating with electric energy
+\newcommand{\K}{{\mathcal{K}}} % convex set for fixed-point theorem
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -205,12 +207,12 @@ For a given point $(x,v) \in [0,1]\times \mathbb{R}^{-}$, we denote by $(x_b, v_
 }
 
 \intern{
-\begin{remarque}[Exact value]
+\begin{remark}[Exact value]
 	Let $\overline{r} \coloneqq \sqrt{\overline{x}^2 + \overline{z}^2}$. Then 
 	\begin{align*}
 		\mathcal{I} = \overline{x} \ln\left(\frac{1 + \overline{z}/\overline{r}}{\overline{x}/\overline{r}}\right) + \overline{z} \ln\left(\frac{1 + \overline{x}/\overline{r}}{\overline{z}/\overline{r}}\right).
 	\end{align*}
-\end{remarque}
+\end{remark}
 }
 
 \begin{lem}\label{lem:maj_dist_square}
@@ -285,10 +287,53 @@ For a given point $(x,v) \in [0,1]\times \mathbb{R}^{-}$, we denote by $(x_b, v_
 %	Then $c \geqslant \frac{\alpha a}{4}$, and the bound is uniform in $L$.
 }
 
-\subsection{Properties of the electron density $n_e$}
+\begin{lem}[\intern{MAGIC }Change of variable]\label{lem:magic_change_variable}
+	Let $(x(\tau),v(\tau))$ be an ion characteristic issued from $(x,w) \in [0,1] \times \mathbb{R}_-$, and define $\ee \coloneqq \mathcal{L}_e(x(\tau),v(\tau))$ and $z\coloneqq x(\tau)$. Then
+	\begin{align*}
+		d\tau \wedge dw = \frac{dz \wedge d\ee}{2\left(\ee + \frac{1}{\mu} \varphi(z)\right)^{1/2} \left(\ee - \varphi(x) + \left(1+\frac{1}{\mu}\right) \varphi(z)\right)^{1/2}}.
+	\end{align*}
+\end{lem}
+
+\myproof{
+	We have $\ee = \frac{(v(\tau))^2}{2} - \frac{1}{\mu} \varphi(z)$, so that
+	\begin{align*}
+		d\ee = v(\tau) \dot{v}(\tau) d\tau - \frac{1}{\mu} \varphi'(z) dz = - v(\tau) \varphi'(z) d\tau - \frac{1}{\mu} \varphi'(z) dz
+		\quad \implies \quad 
+		d\tau = -\frac{1}{v(\tau) \varphi'(z)} d\ee - \frac{1}{\mu v(\tau)} dz.
+	\end{align*}
+	Moreover, $\mathcal{L}_i(x(\tau),v(\tau)) = \frac{(v(\tau))^2}{2} + \varphi(z)$, so $\left(1+\frac{1}{\mu}\right) \varphi(z) = \mathcal{L}_i(x(\tau),v(\tau)) - \mathcal{L}_e(x(\tau),v(\tau)) = \mathcal{L}_i(x,w) - \ee$ and
+	\begin{align*}
+		w = -\sqrt{2}\left(\ee - \varphi(x) + \left(1+\frac{1}{\mu}\right) \varphi(z)\right)^{1/2}
+		\quad \implies \quad
+%		dw = -\frac{d\ee + \left(1+\frac{1}{\mu}\right) \varphi'(z) dz}{\sqrt{2}\left(\ee - \varphi(x) + \left(1+\frac{1}{\mu}\right) \varphi(z)\right)^{1/2}}
+		= \frac{d\ee + \left(1+\frac{1}{\mu}\right) \varphi'(z) dz}{w}.
+	\end{align*}
+	Then, using $v(\tau) = - \sqrt{2}\left(\ee + \frac{1}{\mu} \varphi(z)\right)^{1/2}$, we get
+	\begin{align*}
+		d\tau \wedge dw
+		= -\frac{1+\frac{1}{\mu}}{w v(\tau)} d\ee \wedge dz - \frac{\frac{1}{\mu}}{v(\tau) w} dz \wedge d\ee
+		= \frac{dz \wedge d\ee}{v(\tau) (-w)} 
+		= \frac{dz \wedge d\ee}{2 \left(\ee + \frac{1}{\mu} \varphi(z)\right)^{1/2} \left(\ee - \varphi(x) + \left(1+\frac{1}{\mu}\right) \varphi(z)\right)^{1/2}}.
+	\end{align*}
+}
+
+\begin{remark}\label{rem:magic_change_welldef}
+	Notice that $\mathcal{L}_i(x(\tau),v(\tau)) = \ee + \left(1+\frac{1}{\mu}\right) \varphi(z)$. Moreover, we have $-\frac{1}{\mu} \varphi(z) = \mathcal{L}_e(z,0)$, and $\varphi(x) = \mathcal{L}_i(z,0)$. Then the change of variable rewrites
+	\begin{align*}
+		d\tau \wedge dw = \frac{dz \wedge d\ee}{2\left(\mathcal{L}_e(x(\tau),v(\tau)) - \mathcal{L}_e(z,0)\right)^{1/2} \left(\mathcal{L}_i(x(\tau),v(\tau)) - \mathcal{L}_i(x,0)\right)^{1/2}},
+	\end{align*}
+	and is well-defined for $(\tau,w)$ such that both square roots are real.
+\end{remark}
+
+\subsection{Boundedness estimates}
+
+\subsubsection{Electronic density $n_e$}
 
 \begin{lem}\label{lem:ne_continuous_space}
-	The electron density $n_e$ is bounded and continuous.
+	The electron density $n_e$ is bounded. More precisely, 
+	\begin{align*}
+		n_e(x) \leqslant 2 \maxfe \sqrt{\frac{2\beta}{\mu}} \quad\quad\forall x \in[0,1].
+	\end{align*}
 \end{lem}
 
 \myproof{
@@ -300,74 +345,9 @@ For a given point $(x,v) \in [0,1]\times \mathbb{R}^{-}$, we denote by $(x_b, v_
 	\begin{align*}
 		n_e(x) = \int_{v=-v_x(1)}^{v_x(1)} f_e(x,v) dv \leqslant 2 \maxfe v_x(1) = 2 \maxfe \left(\frac{2}{\mu} (\varphi(x) - \varphi(1))\right)^{1/2} \leqslant 2 \maxfe \sqrt{\frac{2\beta}{\mu}}.
 	\end{align*}
-	
-	Moreover, using the symmetry $f_e(x,v) = f_e(x,-v)$, we may write
-	\begin{align*}
-		n_e(x) - n_e(y) = 2 \underbrace{\int_{v=0}^{v_x(y)} f_e(x,v) dv}_{\eqqcolon\,\mathcal{I}^+} + 2 \left(\underbrace{\int_{v=v_x(y)}^{v_x(1)}  f_e(x,v) dv - \int_{v=0}^{v_y(1)} f_e(y,v) dv}_{\eqqcolon\,\mathcal{I}^-}\right).
-	\end{align*}
-	The term $\mathcal{I}^+$ is bounded by $\maxfe v_x(y) = \maxfe \left(\frac{2}{\mu}\left(\varphi(x) - \varphi(y)\right)\right)^{1/2}$, and by continuity of $\varphi$, we have $\mathcal{I}^{+} \underset{y\to x}{\longrightarrow} 0$. On the first integral of $\mathcal{I}^{-}$, we apply the change of variable
-	\begin{align*}
-		w = \left(v^2 - \frac{2}{\mu} \left(\varphi(x) - \varphi(y)\right)\right)^{1/2} \quad \iff \quad dv = \frac{w}{\left(w^2 + \frac{2}{\mu}\left(\varphi(x) - \varphi(y)\right)\right)^{1/2}} \,dw, \quad w \in [0,v_y(1)]
-	\end{align*}
-	to get
-	\begin{align*}
-		\mathcal{I}^- = \int_{w=0}^{v_y(1)} f_e\left(x,\left(w^2 + \frac{2}{\mu}\left(\varphi(x) - \varphi(y)\right)\right)^{1/2}\right) \frac{w}{\left(w^2 + \frac{2}{\mu}\left(\varphi(x) - \varphi(y)\right)\right)^{1/2}} dw - \int_{v=0}^{v_y(1)} f_e(y,v) dv.
-	\end{align*}
-	Notice that
-	\begin{align*}
-		f_e\left(x,\left(w^2 + \frac{2}{\mu}\left(\varphi(x) - \varphi(y)\right)\right)^{1/2}\right)
-		= f_{e,b} \left(\frac{w^2}{2} + \frac{1}{\mu}\left(\varphi(x) - \varphi(y)\right) - \frac{1}{\mu} \varphi(x)\right)
-		= f_e(y,w).
-	\end{align*}
-	Renaming $w$ in $v$, we obtain the (clearly nonpositive) expression
-	\begin{align*}
-		\mathcal{I}^- 
-		&= \int_{v=0}^{v_y(1)} f_e(y,v) \left(\frac{v}{\left(v^2 + \frac{2}{\mu}\left(\varphi(x) - \varphi(y)\right)\right)^{1/2}} - 1\right) dv 
-		\geqslant \maxfe \int_{v=0}^{v_y(1)}\left(\frac{v}{\left(v^2 + \frac{2}{\mu}\left(\varphi(x) - \varphi(y)\right)\right)^{1/2}} - 1\right) dv \\
-		&= \maxfe \left(\left(v_y(1)^2 + \frac{2}{\mu}\left(\underbrace{\varphi(x) - \varphi(y)}_{\geqslant 0}\right)\right)^{1/2} - \left(\frac{2}{\mu}\left(\varphi(x) - \varphi(y)\right)\right)^{1/2} - v_y(1)\right) 
-		\geqslant - \maxfe \left(\frac{2}{\mu}\left(\varphi(x) - \varphi(y)\right)\right)^{1/2}
-	\end{align*}
-	and this shows that $\mathcal{I}^{-} \underset{y\to x}{\longrightarrow} 0$.
 }
 
-\begin{lem}\label{lem:ne_continuous_phi}
-	Let $n_e^{\varphi}$ and $n_e^{\psi}$ be the electron densities generated by potentials $\varphi$ and $\psi$ satisfying the assumptions. Then
-	\begin{enumerate}
-	\item If $f_{e,b}$ is Lipschitz-continuous with constant $\lipfe$, then 
-	\begin{align*}
-		|n_e^{\varphi}(x) - n_e^{\psi}(x)| \leqslant 2 \lipfe \ve \sqrt{\frac{2}{\mu}}\left|\varphi(x) -\psi(x)\right|^{1/2} \quad \forall (x,y) \in [0,1]^2.
-	\end{align*}
-	\item If there exists a constant $[f_{e,b}]$ such that $|f_{e,b}(x) - f_{e,b}(y)| \leqslant [f_{e,b}] |x^2 - y^2|$ \intern{(or equivalently, $x \to f_{e,b}(\sqrt{x})$ is a lipschitz function, as for instance $e^{-x^2}$)}, then 
-	\begin{align*}
-		|n_e^{\varphi}(x) - n_e^{\psi}(x)| \leqslant \frac{4\ve \lipfesq}{\mu} \left|\varphi(x) - \psi(x)\right| \quad \forall (x,y) \in [0,1]^2.
-	\end{align*}
-	\end{enumerate}
-\end{lem}
-
-\myproof{
-	We have
-	\begin{align*}
-		\left|n_e^{\varphi}(x) - n_e^{\psi}(x)\right| 
-		\leqslant 2 \int_{v=0}^{\ve} \left|f_e^{\varphi}(x,v) - f_e^{\psi}(x,v)\right| dv
-		= 2 \int_{v=0}^{\ve} \left|f_{e,b}\left(\left(v^2 - \frac{2}{\mu}\varphi(x)\right)^{1/2}\right) - f_{e,b}\left(\left(v^2 - \frac{2}{\mu}\psi(x)\right)^{1/2}\right)\right| dv.
-	\end{align*}
-	Then, if $f_{e,b}$ is Lipschitz with constant $\lipfe$, we obtain
-	\begin{align*}
-		\left|n_e^{\varphi}(x) - n_e^{\psi}(x)\right| \leqslant 2 \lipfe \int_{v=0}^{\ve} \left|\left(v^2 - \frac{2}{\mu}\varphi(x)\right)^{1/2} - \left(v^2 - \frac{2}{\mu}\psi(x)\right)^{1/2}\right| dv.
-	\end{align*} 
-	Using \cref{lem:maj_dist_square} yields
-	\begin{align*}
-		\left|n_e^{\varphi}(x) - n_e^{\psi}(x)\right| 
-		\leqslant 2 \lipfe \int_{v=0}^{\ve} \left|- \frac{2}{\mu}\varphi(x) + \frac{2}{\mu}\psi(x)\right|^{1/2} dv
-		= 2 \lipfe \ve \sqrt{\frac{2}{\mu}}\left|\varphi(x) -\psi(x)\right|^{1/2}.
-	\end{align*}
-	If $f_{e,b}(\sqrt{\cdot})$ is Lipschitz with constant $\lipfesq$, we may directly write
-	\begin{align*}
-		\left|n_e^{\varphi}(x) - n_e^{\psi}(x)\right| \leqslant 2 \ve \lipfesq \frac{2}{\mu} \left|\varphi(x) - \psi(x)\right|.
-	\end{align*} 
-}
-
-\subsection{Properties of the ion density $n_i$}
+\subsubsection{Ion density $n_i$}
 
 The estimates will rely on two particular cases, the we treat independently as lemmas. For a given $x$, we define $g_x : [0,x] \mapsto \mathbb{R}^{+}$ by
 \begin{align*}
@@ -433,7 +413,11 @@ The estimates will rely on two particular cases, the we treat independently as l
 }
 
 \begin{proposition}
-	The density $n_i$ is bounded by a constant depending on $\varphi$ only through $\varphi(1)$.
+	The density $n_i$ is bounded by a constant depending on $\varphi$ only through $\varphi(1)$. More precisely,
+	\begin{align*}
+		n_i(x) \leqslant 8 \left(\frac{\beta}{\alpha}\right)^{1/4} \left(\frac{1}{\alpha^{1/4}} + \beta^{1/4} + \frac{1}{\mu^{1/4}}\right) 
+		\quad\quad\forall x \in[0,1].
+	\end{align*}
 \end{proposition}
 
 \myproof{
@@ -468,7 +452,6 @@ The estimates will rely on two particular cases, the we treat independently as l
 		\label{fig:charmaps_domainmap}
 	\end{figure}
 	
-	
 	Notice that whenever $z \leqslant x$, we have $0 \geqslant 2\left(\varphi(x) - \varphi(z)\right) = - \left(2\left(\varphi(z) - \varphi(x)\right)\right)^{2/2} = - g_x^2(z)$. Then, the integral $\IntUpL$ may be bounded using \cref{lem:upperbound_ni_endchar} with $y=0$:
 	\begin{align*}
 		\IntUpL = \int_{v=-g_x(0)}^{0} \int_{z=x_b(x,v)}^{x} \frac{1}{\left(v^2 - g_x^2(z)\right)^{1/2}} \, dz dv 
@@ -483,58 +466,11 @@ The estimates will rely on two particular cases, the we treat independently as l
 	\end{align*}
 }
 
-\begin{proposition}
-	The density $n_i$ is continuous. 
-\end{proposition}
-
-\myproof{
-	Let $0 \leqslant y < x \leqslant 1$. For convenience, we represent $n_i(x)$ (resp. $n_i(y)$) as an integral with the artificial lower bound $-g_x(-\ve) \leqslant -\ve$ (resp. $-g_y(-\ve)$). Then
-	\begin{align}\label{eq:def_ni_sym}
-		n_i(x) - n_i(y) 
-		&= 2 \int_{v=-g_x(-\ve)}^0 f_i(x_b(x,v),v_b(x,v)) dv - 2 \int_{v=-g_y(-\ve)}^0 f_i(x_b(y,v),v_b(y,v)) dv \\
-		&= 2 \underbrace{\left[\int_{v=-g_x(-\ve)}^{-g_x(y)} f_i(x_b(x,v),v_b(x,v)) dv - \int_{v=-g_y(-\ve)}^{0} f_i(x_b(y,v),v_b(y,v)) dv\right]}_{\eqqcolon\,\mathcal{I}^-}
-		+ 2 \underbrace{\int_{v=-g_x(y)}^{0} f_i(x_b(x,v),v_b(x,v)) dv}_{\eqqcolon\,\mathcal{I}^+}.
-	\end{align}
-
-	The term $\mathcal{I}^+$ is clearly nonnegative, and may be adressed using our lemmas. Indeed, using the integral representation of $f_i(x_b,v_b)$ and the reparametrization by a space variable $z$, we have
-	\begin{align*}
-		\mathcal{I}^+ 
-		&= \int_{v=-g_x(y)}^{0} \left[\int_{z=x_b(x,v)}^{x} + \int_{z=x}^{1}\right] \frac{f_e(z,-\left(v^2+2\left(\varphi(x)-\varphi(z)\right)\right)^{1/2}))}{\left(v^2+2\left(\varphi(x)-\varphi(z)\right)\right)^{1/2}} \,dz dv \\
-		&\leqslant \maxfe \int_{v=-g_x(y)}^{0} \int_{z=x_b(x,v)}^{x} \frac{1}{\left(v^2-g_x^2(z)\right)^{1/2}} \, dz dv + \maxfe \int_{v=-g_x(y)}^{0} \int_{z=x}^{1} \frac{1}{\left(v^2+2\left(\varphi(x)-\varphi(z)\right)\right)^{1/2}} \,dz dv \\
-		&\leqslant \maxfe \left(2\sqrt{\frac{2}{\alpha}} \left(\varphi(y)-\varphi(x)\right)^{1/4} \sqrt{x-y} + \frac{2\sqrt{2}}{\alpha^{1/4}} \left(2(\varphi(y)-\varphi(x))\right)^{1/2}\right),
-	\end{align*}
-	where we used \cref{lem:upperbound_ni_endchar} for the first term, and \cref{lem:upperbound_ni_beginchar} for the second term (with $y=x$ and $v_0 = -g_x(y)$ under the notations of the lemma). Since $\varphi$ is continuous, we deduce that $\mathcal{I}^{+} \underset{y\to x}{\longrightarrow} 0$. Taking the extreme case $y=0$ and $x=1$, we obtain that 
-	\begin{align*}
-		\mathcal{I}^+ \leqslant \maxfe \left(2\sqrt{\frac{2}{\alpha}} \left(-\varphi(1)\right)^{1/4} + \frac{2\sqrt{2}}{\alpha^{1/4}} \left(-2\varphi(1)\right)^{1/2}\right) \eqqcolon K.
-	\end{align*}
-
-	Let us now focus on $\mathcal{I}^-$. On the first integral, we make the change of variable
-	\begin{align*}
-		w = -\left(v^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/2} \quad v = -\left(w^2 + 2 \left(\varphi(y) - \varphi(x)\right)\right)^{1/2}.
-	\end{align*}
-	Since $\mathcal{L}_i(x,v) = \mathcal{L}_i(y,w)$, this yields $x_b(x,v) = x_b(y,w)$ and $v_b(x,v) = v_b(y,w)$. The bounds $v\in[-g_x(-\ve),-g_x(y)]$ are exactly transported to $w\in[-g_y(-\ve),0]$. Renaming $w$ in $v$, we get
-	\begin{align*}
-		\mathcal{I}^- = \int_{v=-g_y(-\ve)}^{0} f_i(x_b(y,v),v_b(y,v)) \left(\frac{-v}{\left(v^2 + 2 \left(\varphi(y) - \varphi(x)\right)\right)^{1/2}} - 1\right) dv.
-	\end{align*}
-	Since $\varphi(y) \geqslant \varphi(x)$, the factor of $f_i$ is nonpositive, and so is $\mathcal{I}^-$. Moreover, 
-	\begin{align*}
-		n_i(x) - n_i(y) = 2 \mathcal{I}^- + 2\mathcal{I}^+ \leqslant 2 \mathcal{I}^{-} + 2 K \quad\iff\quad \mathcal{I}^- = - K + n_i(x) - n_i(y) \geqslant - K - |n_i|_{\infty}
-	\end{align*}
-	and $\mathcal{I}^-$ is bounded. The function $\frac{-v}{\left(v^2 + 2 \left(\varphi(y) - \varphi(x)\right)\right)^{1/2}} - 1$ converges pointwise to 0 when $x\to y$ \todo{and $f_i$ is almost everywhere finite}, and by Lebesgue's dominated convergence, $\mathcal{I}^- \underset{x\to y}{\longrightarrow} 0$. Then $n_i$ is continuous.
-}
-
-\todo{
-In the future:
-\begin{itemize}
-\item Now that we have estimates, write it in function of $\alpha$ and $\beta$, and see how to get stability of the set of strongly concave functions satisfying all the hypotheses by the Poisson problem (essentially, find tweaks of $\lambda$, $\mu$, $\nu$, $\alpha$ and/or $\beta$ such that the estimates are propagated).
-\item If $f_{e,b}$ vanishes in a neighbourhood of $(0,0)$ (or decreases fast enough, see how fast), show that $f_i$ is bounded.
-\item Under that same assumption, we should obtain stronger continuity over $n_i$, and $n_i$ may be continuous with respect to $\varphi$ (in the same sense as $n_e$ in \cref{lem:ne_continuous_phi}).
-\item If the estimates with respect to $|\varphi - \psi|_{\infty}$ succeed, define numerical scheme and see what we cas say about it.
-\end{itemize}
-}
-
 \begin{lem}
-	The density $n_i$ is bounded away from 0 uniformly over $x\in[0,1]$.
+	The density $n_i$ is uniformly bounded away from 0. More precisely, 
+	\begin{align*}
+		n_i(x) \geqslant \frac{\minfe (\domfeu^2 - \domfel^2)}{\domfeu \left(\domfeu^2 + 2\beta\right)^{1/2}} \frac{\domfel^2}{2\beta\left(1+\frac{1}{\mu}\right)} \quad\quad\forall x\in[0,1].
+	\end{align*}
 \end{lem}
 
 \myproof{
@@ -542,24 +478,51 @@ In the future:
 	\begin{align*}
 		f_e(x,v) \geqslant \minfe \textbf{1}_{\left\{\mathcal{L}_e(0,\domfel) \leqslant \mathcal{L}_e(x,v) \leqslant \mathcal{L}_e(0,\domfeu)\right\}}.
 	\end{align*}
-	Let $g_x : \mathbb{R}^{-} \mapsto \mathbb{R}^+$ be such that $\mathcal{L}_i(0,v) = \mathcal{L}_i(x,-g_x(v))$. As in \cref{eq:def_ni_sym}, we define $n_i(x)$ by an integral over $v\in\mathbb{R}^{-} = ]-\infty,-g_x(0)] \cup ]-g_x(0),0]$. Since we want an uniform lower bound, we will sacrify the (nonnegative) integral on $]-g_x(0),0]$. Moreover, 
+	Notice that we may always take $\domfel > 0$ as long as $\domfeu>0$.
+	Let us denote $\underline{\ee} \coloneqq \mathcal{L}_e(0,\domfel)$ and $\overline{\ee} \coloneqq \mathcal{L}_e(0,\domfeu)$. For any $x\in[0,1]$, we have
 	\begin{align*}
-		w \leqslant -g_x(-\domfeu) \quad\implies\quad \mathcal{L}_i(0,v_b(x,w)) = \mathcal{L}_i(x,w) \geqslant \mathcal{L}_i(x,-g_x(-\domfeu)) = \mathcal{L}_i(0,-\domfeu) = \mathcal{L}_e(0,\domfeu),
+		n_i(x) = 2 \int_{w\in\mathbb{R}_-} \int_{\tau=-\infty}^{0} f_e(x(\tau),v(\tau)) d\tau dw, \quad \text{with} \quad \mathcal{L}_i(x(\tau),v(\tau)) = \mathcal{L}_i(x,w).
 	\end{align*}
-	and $f_e$ vanishes identically along the ion characteristic crossing $(x,w)$. Then, we may restrict the $w-$integral over the domain $[-g_x(-\domfeu),-g_x(0)]$ for all $x$, and write
+	Notice that for $w \in [-g_x(-\domfeu),-g_x(0)]$, the characteristic issued from $(x,w)$ enters the domain $\left\{\underline{\ee} \leqslant \mathcal{L}_e \leqslant \overline{\ee}\right\}$. We will restrict the domain of integration to 
 	\begin{align*}
-		n_i(x) \geqslant \int_{w=-g_x(-\domfeu)}^{-g_x(0)} f_i(0,v_b(x,w)) dw = \int_{v=-\domfeu}^{0} f_i(0,v) \frac{-v}{\left(v^2 - 2 \varphi(x)\right)^{1/2}} dv \geqslant \int_{v=-\domfeu}^{0} f_i(0,v) \frac{-v}{\left(v^2 + 2 \beta\right)^{1/2}} dv
+		\mathcal{D} \coloneqq \left\{(w,\tau) \in \mathbb{R}_-^2 \ |\ \underline{\ee} \leqslant \mathcal{L}_e(x(\tau),v(\tau)) \leqslant \overline{\ee} \text{ and } 0 \leqslant x(\tau) \leqslant a\right\},
 	\end{align*}
-	where we used the change of variable $v = v_b(x,w) = -\left(w^2 + 2 \varphi(x)\right)^{1/2}$, and the monotonicity $-\varphi(x) \leqslant -\varphi(1) \leqslant \beta$.
-	
-	\todo{NOT FINISHED because I am not satisfied with my lower bound.}
+	where $(a,v_a)$ is the unique point such that $\mathcal{L}_e(a,v_a) = \mathcal{L}_e(0,\domfel)$ and $\mathcal{L}_i(a,v_a) = 0$ (note that $a$ depends on $\beta$). This (somehow coarse) estimate will give us trivial bounds when applying the change of variable of \cref{lem:magic_change_variable}, namely $z=x(\tau)$ and $\ee = \mathcal{L}_e(x(\tau),v(\tau))$. Denoting by $[\underline{\tau}, \overline{\tau}] \subset ]-\infty,0]$ the time interval where $(x(\tau),v(\tau)) \in \mathcal{D}$, we have
+	\begin{align*}
+		n_i(x) 
+		\geqslant \int_{w=-g_x(-\domfeu)}^{-g_x(0)} \int_{\tau = \underline{\tau}}^{\overline{\tau}} \minfe \, d\tau dw
+		= \int_{\ee = \underline{\ee}}^{\overline{\ee}} \int_{z=0}^{a} \frac{\minfe}{2\left(\ee + \frac{1}{\mu} \varphi(z)\right)^{1/2} \left(\ee - \varphi(x) + \left(1+\frac{1}{\mu}\right) \varphi(z)\right)^{1/2}} \, dz d\ee.
+	\end{align*}
+	Using \cref{rem:magic_change_welldef}, we are assured that the square roots are well-defined, since 
+	\begin{align*}
+		\ee \geqslant \underline{\ee} = \mathcal{L}_e(0,\underline{v}) = \mathcal{L}_e(a,v_a) \geqslant \mathcal{L}_e(a,0) \geqslant \mathcal{L}_e(z,0) = -\frac{1}{\mu} \varphi(z)
+		\quad\text{and}\quad
+		\mathcal{L}_i(x(\tau),v(\tau)) = \mathcal{L}_i(x,w) \geqslant \mathcal{L}_i(x,0).
+	\end{align*}
+	Using that $\ee + \frac{1}{\mu}\varphi(z) \leqslant \overline{\ee} + 0$ and $\ee - \varphi(x) + \left(1+\frac{1}{\mu} \varphi(z)\right) \leqslant \overline{\ee} + \beta + 0$, we obtain
+	\begin{align*}
+		n_i(x) 
+		\geqslant \int_{\ee = \underline{\ee}}^{\overline{\ee}} \int_{z=0}^{a} \frac{\minfe}{2\overline{\ee}^{1/2}\left(\overline{\ee} + \beta\right)^{1/2}} \, dz d\ee
+%		= \frac{a \minfe}{\overline{\ee}^{1/2}} \left[\sqrt{\ee + \beta}\right]_{\underline{\ee}}^{\overline{\ee}}.
+		= \frac{a \minfe (\overline{\ee} - \underline{\ee})}{\overline{\ee}^{1/2} \left(\overline{\ee} + \beta\right)^{1/2}}.
+	\end{align*}
+	Let us make explicit the dependance over $\beta$ by estimating $a$ using the concavity assumption: we have
+	\begin{align*}
+		 \varphi(x) \geqslant (1-x) \varphi(0) + x \varphi(1) 
+		 \quad \implies \quad
+		 \varphi^{-1}(y) \geqslant \frac{- y}{\beta}, 
+		 \quad\text{so that}\quad
+ 		 a = \varphi^{-1}\left(-\frac{\domfel^2}{2\left(1+\frac{1}{\mu}\right)}\right)
+ 		 \geqslant \frac{\domfel^2}{2\beta\left(1+\frac{1}{\mu}\right)}.
+	\end{align*}
+	and the uniform lower bound behaves like $\beta^{-3/2}$ when $\beta\to\infty$.
 }
 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.5\linewidth]{images/fpcharmaps_lowerboundni}
 	\caption{Notations for the lower bound on $n_i$.}
-	\mysubcaption{The coloured area corresponds to the domain $\mathcal{L}_e(0,\domfel) \leqslant \mathcal{L}_e(x,v) \leqslant \mathcal{L}_e(0,\domfeu)$, on which we know that $f_e \geqslant \minfe$. The solid black line is the critical ion characteristic.}
+	\mysubcaption{The coloured area corresponds to the domain $\underline{\ee} \leqslant \mathcal{L}_e \leqslant \overline{\ee}$, on which we know that $f_e \geqslant \minfe$. The hatched area represents the domain $\mathcal{D}$. The solid black line is the critical ion characteristic.}
 	\label{fig:charmaps_lowerboundni}
 \end{figure}
 
@@ -621,6 +584,164 @@ In the future:
  	\end{figure}
 }
 
+\subsection{Continuity estimates}
+
+\subsubsection{Electron density $n_e$}
+
+\begin{lem}\label{lem:ne_continuous_phi}
+	Let $n_e^{\varphi}$ and $n_e^{\psi}$ be the electron densities generated by potentials $\varphi$ and $\psi$ satisfying the assumptions. Then
+	\begin{enumerate}
+	\item If $f_{e,b}$ is Lipschitz-continuous with constant $\lipfe$, then 
+	\begin{align*}
+		|n_e^{\varphi}(x) - n_e^{\psi}(x)| \leqslant 2 \lipfe \ve \sqrt{\frac{2}{\mu}}\left|\varphi(x) -\psi(x)\right|^{1/2} \quad \forall (x,y) \in [0,1]^2.
+	\end{align*}
+	\item If there exists a constant $[f_{e,b}]$ such that $|f_{e,b}(x) - f_{e,b}(y)| \leqslant [f_{e,b}] |x^2 - y^2|$ \intern{(or equivalently, $x \to f_{e,b}(\sqrt{x})$ is a lipschitz function, as for instance $e^{-x^2}$)}, then 
+	\begin{align*}
+		|n_e^{\varphi}(x) - n_e^{\psi}(x)| \leqslant \frac{4\ve \lipfesq}{\mu} \left|\varphi(x) - \psi(x)\right| \quad \forall (x,y) \in [0,1]^2.
+	\end{align*}
+	\end{enumerate}
+\end{lem}
+
+\begin{lem}
+	The electronic density $n_e$ is continuous.
+\end{lem}
+
+\myproof{
+	We already know that $n_e$ is bounded. Moreover, using the symmetry $f_e(x,v) = f_e(x,-v)$, we may write
+	\begin{align*}
+		n_e(x) - n_e(y) = 2 \underbrace{\int_{v=0}^{v_x(y)} f_e(x,v) dv}_{\eqqcolon\,\mathcal{I}^+} + 2 \left(\underbrace{\int_{v=v_x(y)}^{v_x(1)}  f_e(x,v) dv - \int_{v=0}^{v_y(1)} f_e(y,v) dv}_{\eqqcolon\,\mathcal{I}^-}\right).
+	\end{align*}
+	The term $\mathcal{I}^+$ is bounded by $\maxfe v_x(y) = \maxfe \left(\frac{2}{\mu}\left(\varphi(x) - \varphi(y)\right)\right)^{1/2}$, and by continuity of $\varphi$, we have $\mathcal{I}^{+} \underset{y\to x}{\longrightarrow} 0$. On the first integral of $\mathcal{I}^{-}$, we apply the change of variable
+	\begin{align*}
+		w = \left(v^2 - \frac{2}{\mu} \left(\varphi(x) - \varphi(y)\right)\right)^{1/2} \quad \iff \quad dv = \frac{w}{\left(w^2 + \frac{2}{\mu}\left(\varphi(x) - \varphi(y)\right)\right)^{1/2}} \,dw, \quad w \in [0,v_y(1)]
+	\end{align*}
+	to get
+	\begin{align*}
+		\mathcal{I}^- = \int_{w=0}^{v_y(1)} f_e\left(x,\left(w^2 + \frac{2}{\mu}\left(\varphi(x) - \varphi(y)\right)\right)^{1/2}\right) \frac{w}{\left(w^2 + \frac{2}{\mu}\left(\varphi(x) - \varphi(y)\right)\right)^{1/2}} dw - \int_{v=0}^{v_y(1)} f_e(y,v) dv.
+	\end{align*}
+	Notice that
+	\begin{align*}
+		f_e\left(x,\left(w^2 + \frac{2}{\mu}\left(\varphi(x) - \varphi(y)\right)\right)^{1/2}\right)
+		= f_{e,b} \left(\frac{w^2}{2} + \frac{1}{\mu}\left(\varphi(x) - \varphi(y)\right) - \frac{1}{\mu} \varphi(x)\right)
+		= f_e(y,w).
+	\end{align*}
+	Renaming $w$ in $v$, we obtain the (clearly nonpositive) expression
+	\begin{align*}
+		\mathcal{I}^- 
+		&= \int_{v=0}^{v_y(1)} f_e(y,v) \left(\frac{v}{\left(v^2 + \frac{2}{\mu}\left(\varphi(x) - \varphi(y)\right)\right)^{1/2}} - 1\right) dv 
+		\geqslant \maxfe \int_{v=0}^{v_y(1)}\left(\frac{v}{\left(v^2 + \frac{2}{\mu}\left(\varphi(x) - \varphi(y)\right)\right)^{1/2}} - 1\right) dv \\
+		&= \maxfe \left(\left(v_y(1)^2 + \frac{2}{\mu}\left(\underbrace{\varphi(x) - \varphi(y)}_{\geqslant 0}\right)\right)^{1/2} - \left(\frac{2}{\mu}\left(\varphi(x) - \varphi(y)\right)\right)^{1/2} - v_y(1)\right) 
+		\geqslant - \maxfe \left(\frac{2}{\mu}\left(\varphi(x) - \varphi(y)\right)\right)^{1/2}
+	\end{align*}
+	and this shows that $\mathcal{I}^{-} \underset{y\to x}{\longrightarrow} 0$.
+}
+
+\myproof{
+	We have
+	\begin{align*}
+		\left|n_e^{\varphi}(x) - n_e^{\psi}(x)\right| 
+		\leqslant 2 \int_{v=0}^{\ve} \left|f_e^{\varphi}(x,v) - f_e^{\psi}(x,v)\right| dv
+		= 2 \int_{v=0}^{\ve} \left|f_{e,b}\left(\left(v^2 - \frac{2}{\mu}\varphi(x)\right)^{1/2}\right) - f_{e,b}\left(\left(v^2 - \frac{2}{\mu}\psi(x)\right)^{1/2}\right)\right| dv.
+	\end{align*}
+	Then, if $f_{e,b}$ is Lipschitz with constant $\lipfe$, we obtain
+	\begin{align*}
+		\left|n_e^{\varphi}(x) - n_e^{\psi}(x)\right| \leqslant 2 \lipfe \int_{v=0}^{\ve} \left|\left(v^2 - \frac{2}{\mu}\varphi(x)\right)^{1/2} - \left(v^2 - \frac{2}{\mu}\psi(x)\right)^{1/2}\right| dv.
+	\end{align*} 
+	Using \cref{lem:maj_dist_square} yields
+	\begin{align*}
+		\left|n_e^{\varphi}(x) - n_e^{\psi}(x)\right| 
+		\leqslant 2 \lipfe \int_{v=0}^{\ve} \left|- \frac{2}{\mu}\varphi(x) + \frac{2}{\mu}\psi(x)\right|^{1/2} dv
+		= 2 \lipfe \ve \sqrt{\frac{2}{\mu}}\left|\varphi(x) -\psi(x)\right|^{1/2}.
+	\end{align*}
+	If $f_{e,b}(\sqrt{\cdot})$ is Lipschitz with constant $\lipfesq$, we may directly write
+	\begin{align*}
+		\left|n_e^{\varphi}(x) - n_e^{\psi}(x)\right| \leqslant 2 \ve \lipfesq \frac{2}{\mu} \left|\varphi(x) - \psi(x)\right|.
+	\end{align*} 
+}
+
+
+\subsubsection{Ion density $n_i$}
+
+\begin{proposition}
+	The density $n_i$ is continuous. 
+\end{proposition}
+
+\myproof{
+	Let $0 \leqslant y < x \leqslant 1$. For convenience, we represent $n_i(x)$ (resp. $n_i(y)$) as an integral with the artificial lower bound $-g_x(-\ve) \leqslant -\ve$ (resp. $-g_y(-\ve)$). Then
+	\begin{align}\label{eq:def_ni_sym}
+		n_i(x) - n_i(y) 
+		&= 2 \int_{v=-g_x(-\ve)}^0 f_i(x_b(x,v),v_b(x,v)) dv - 2 \int_{v=-g_y(-\ve)}^0 f_i(x_b(y,v),v_b(y,v)) dv \notag\\
+		&= 2 \underbrace{\left[\int_{v=-g_x(-\ve)}^{-g_x(y)} f_i(x_b(x,v),v_b(x,v)) dv - \int_{v=-g_y(-\ve)}^{0} f_i(x_b(y,v),v_b(y,v)) dv\right]}_{\eqqcolon\,\mathcal{I}^-} \\
+		&\quad + 2 \underbrace{\int_{v=-g_x(y)}^{0} f_i(x_b(x,v),v_b(x,v)) dv}_{\eqqcolon\,\mathcal{I}^+}. \notag
+	\end{align}
+
+	The term $\mathcal{I}^+$ is clearly nonnegative, and may be adressed using our lemmas. Indeed, using the integral representation of $f_i(x_b,v_b)$ and the reparametrization by a space variable $z$, we have
+	\begin{align*}
+		\mathcal{I}^+ 
+		&= \int_{v=-g_x(y)}^{0} \left[\int_{z=x_b(x,v)}^{x} + \int_{z=x}^{1}\right] \frac{f_e(z,-\left(v^2+2\left(\varphi(x)-\varphi(z)\right)\right)^{1/2}))}{\left(v^2+2\left(\varphi(x)-\varphi(z)\right)\right)^{1/2}} \,dz dv \\
+		&\leqslant \maxfe \int_{v=-g_x(y)}^{0} \int_{z=x_b(x,v)}^{x} \frac{1}{\left(v^2-g_x^2(z)\right)^{1/2}} \, dz dv + \maxfe \int_{v=-g_x(y)}^{0} \int_{z=x}^{1} \frac{1}{\left(v^2+2\left(\varphi(x)-\varphi(z)\right)\right)^{1/2}} \,dz dv \\
+		&\leqslant \maxfe \left(2\sqrt{\frac{2}{\alpha}} \left(\varphi(y)-\varphi(x)\right)^{1/4} \sqrt{x-y} + \frac{2\sqrt{2}}{\alpha^{1/4}} \left(2(\varphi(y)-\varphi(x))\right)^{1/2}\right),
+	\end{align*}
+	where we used \cref{lem:upperbound_ni_endchar} for the first term, and \cref{lem:upperbound_ni_beginchar} for the second term (with $y=x$ and $v_0 = -g_x(y)$ under the notations of the lemma). Since $\varphi$ is continuous, we deduce that $\mathcal{I}^{+} \underset{y\to x}{\longrightarrow} 0$. Taking the extreme case $y=0$ and $x=1$, we obtain that 
+	\begin{align*}
+		\mathcal{I}^+ \leqslant \maxfe \left(2\sqrt{\frac{2}{\alpha}} \left(-\varphi(1)\right)^{1/4} + \frac{2\sqrt{2}}{\alpha^{1/4}} \left(-2\varphi(1)\right)^{1/2}\right) \eqqcolon K.
+	\end{align*}
+
+	Let us now focus on $\mathcal{I}^-$. On the first integral, we make the change of variable
+	\begin{align*}
+		w = -\left(v^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/2} \quad v = -\left(w^2 + 2 \left(\varphi(y) - \varphi(x)\right)\right)^{1/2}.
+	\end{align*}
+	Since $\mathcal{L}_i(x,v) = \mathcal{L}_i(y,w)$, this yields $x_b(x,v) = x_b(y,w)$ and $v_b(x,v) = v_b(y,w)$. The bounds $v\in[-g_x(-\ve),-g_x(y)]$ are exactly transported to $w\in[-g_y(-\ve),0]$. Renaming $w$ in $v$, we get
+	\begin{align*}
+		\mathcal{I}^- = \int_{v=-g_y(-\ve)}^{0} f_i(x_b(y,v),v_b(y,v)) \left(\frac{-v}{\left(v^2 + 2 \left(\varphi(y) - \varphi(x)\right)\right)^{1/2}} - 1\right) dv.
+	\end{align*}
+	Since $\varphi(y) \geqslant \varphi(x)$, the factor of $f_i$ is nonpositive, and so is $\mathcal{I}^-$. Moreover, 
+	\begin{align*}
+		n_i(x) - n_i(y) = 2 \mathcal{I}^- + 2\mathcal{I}^+ \leqslant 2 \mathcal{I}^{-} + 2 K \quad\iff\quad \mathcal{I}^- = - K + n_i(x) - n_i(y) \geqslant - K - |n_i|_{\infty}
+	\end{align*}
+	and $\mathcal{I}^-$ is bounded. The function $\frac{-v}{\left(v^2 + 2 \left(\varphi(y) - \varphi(x)\right)\right)^{1/2}} - 1$ converges pointwise to 0 when $x\to y$ \todo{and $f_i$ is almost everywhere finite}, and by Lebesgue's dominated convergence, $\mathcal{I}^- \underset{x\to y}{\longrightarrow} 0$. Then $n_i$ is continuous.
+}
+
+\section{Results}
+
+Let $0 < \alpha \leqslant \beta$, and define the following convex set:
+\begin{align*}
+	\K \coloneqq \left\{\varphi\in\mathcal{C}^1([0,1],\mathbb{R}) \quad |\quad \varphi(0)=\varphi'(0)=0, \quad \varphi\ \alpha-\text{concave,}\quad\varphi(1) \geqslant -\beta\right\}.
+\end{align*}
+
+\begin{lem}
+	$\K$ is closed for the topology induced by the sup-norm $|\cdot|_{\infty} \coloneqq \max_{[0,1]} |\cdot|$.
+\end{lem}
+
+\myproof{
+	Since $\K \subset \mathcal{C}^{0}([0,1],\mathbb{R})$, we know that any Cauchy sequence $(\varphi^n)_n \subset \K$ admits a limit $\varphi \in \mathcal{C}([0,1],\mathbb{R})$. The pointwise conditions
+	\begin{align*}
+		\varphi^n(0)=0, \quad \varphi^n(1) \geqslant -\beta, \quad \varphi^n((1-\gamma) x + \gamma y) \geqslant (1-\gamma) \varphi^n(x) + \gamma \varphi^n(y) + \frac{\alpha}{2} \gamma(1-\gamma) |x-y|^2 \quad \forall (x,y,\gamma) \in [0,1]^3
+	\end{align*}
+	are preserved when $n\to\infty$ under this topology. Let us show that $\varphi'(0)=0$: first, notice that $\varphi^n(x) \leqslant 0$ implies $\varphi(x) \leqslant 0$. Since $\varphi$ is $\alpha-$concave, we have $\forall x \in [0,1]$
+	\begin{align*}
+		\varphi(x) \geqslant (1-x) \varphi(0) + x \varphi(1) + \frac{\alpha}{2} x (1-x) \geqslant - \beta x + \frac{\alpha}{2} x (1-x),
+	\end{align*}
+	and
+	\begin{align*}
+		\frac{- \beta \varepsilon + \frac{\alpha}{2} \varepsilon (1-\varepsilon)}{\varepsilon} \leqslant \frac{\varphi(\varepsilon) - \varphi(0)}{\varepsilon} \leqslant 0. 
+	\end{align*}
+}
+
+
+%\begin{proposition}
+%	
+%\end{proposition}
+
+\todo{
+In the future:
+\begin{itemize}
+\item Now that we have estimates, write it in function of $\alpha$ and $\beta$, and see how to get stability of the set of strongly concave functions satisfying all the hypotheses by the Poisson problem (essentially, find tweaks of $\lambda$, $\mu$, $\nu$, $\alpha$ and/or $\beta$ such that the estimates are propagated).
+\item If $f_{e,b}$ vanishes in a neighbourhood of $(0,0)$ (or decreases fast enough, see how fast), show that $f_i$ is bounded.
+\item Under that same assumption, we should obtain stronger continuity over $n_i$, and $n_i$ may be continuous with respect to $\varphi$ (in the same sense as $n_e$ in \cref{lem:ne_continuous_phi}).
+\item If the estimates with respect to $|\varphi - \psi|_{\infty}$ succeed, define numerical scheme and see what we can say about it.
+\end{itemize}
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
