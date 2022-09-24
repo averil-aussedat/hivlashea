@@ -90,17 +90,18 @@
 \newcommand{\intern}[1]{{\color{RoyalBlue} #1}} % will eventually be removed
 
 % local vocabulary
-\newcommand{\ve}{{\overline{v}_e}} % bound on the speed in the support of fe
-\newcommand{\we}{{\underline{w}_e}} % transformation of \ve
+\newcommand{\we}{{\underline{w}_e}} % transformation of \maxdome
 \newcommand{\DomUpL}{{\mathcal{D}_1}} % domain over the critical char, x=0 side
 \newcommand{\DomUpR}{{\mathcal{D}_2}} % domain over the critical char, x=1 side
-\newcommand{\DomLow}{{\mathcal{D}_3}} % domain under the critical char + over -\ve
+\newcommand{\DomLow}{{\mathcal{D}_3}} % domain under the critical char + over -\maxdome
 \newcommand{\IntUpL}{{\mathcal{I}_1}} % part of n_i on \DomUpL
 \newcommand{\IntUpR}{{\mathcal{I}_2}} % part of n_i on \DomUpR
 \newcommand{\IntLow}{{\mathcal{I}_3}} % part of n_i on \DomLow
-\newcommand{\domfel}{{\underline{v}}} % lower bound on a segment on which fe >=  \minfe
-\newcommand{\domfeu}{{\overline{v}}} % upper bound on a segment on which fe >=  \minfe
-\newcommand{\minfe}{{\underline{c}}} % lower bound on f_e on a segment [-\domfeu, -\domfel]
+\newcommand{\mindome}{{v_*}} % lower bound on a segment on which fe >=  \minfe
+\newcommand{\maxdome}{{v^*}} % upper bound on a segment on which fe >=  \minfe
+\newcommand{\minsuppe}{{\underline{v}}} % lower bound on a segment on which fe >=  \minfe
+\newcommand{\maxsuppe}{{\overline{v}}} % upper bound on a segment on which fe >=  \minfe
+\newcommand{\minfe}{{\underline{c}}} % lower bound on f_e on a segment [-\maxsuppe, -\minsuppe]
 \newcommand{\maxfe}{{\overline{c}}} % upper bound on f_e
 \newcommand{\lipfe}{{[f_{e,b}]}} % lipschitz constant of f_{e,b}
 \newcommand{\lipfesq}{{[f_{e,b}]_{2}}} % lipschitz constant of f_{e,b}(\sqrt{})
@@ -143,13 +144,15 @@ We suppose that
 \begin{enumerate}
 \item $f_{e,b}$ is nonnegative.
 \item $f_{e,b}(v) = f_{e,b}(-v)$ for all $v\in\mathbb{R}$.
-\item $f_{e,b}$ satisfies the boundary condition, i.e. $f_{e,b}(v) = 0$ as soon as $\mathcal{L}_e(0,v) \leqslant \mathcal{L}_e(1,0)$.
+\item $f_{e,b}$ is compactly supported, i.e. there exists $v^* \geqslant 0$ such that $f_{e,b}(v) = 0$ for all $|v| \geqslant v^*$.
 \item There exists $\maxfe \leqslant 0$ such that $f_{e,b}(v) \leqslant \maxfe$ for all $v \in \mathbb{R}$.
-\item There exists $\minfe > 0$ and $0 \leqslant \domfel < \domfeu$ such that $f_{e,b}(v) \geqslant \minfe$ for all $v\in[-\domfeu,-\domfel]$.
+\item There exists $\minfe > 0$ and $0 \leqslant \minsuppe < \maxsuppe$ such that $f_{e,b}(v) \geqslant \minfe$ for all $v\in[-\maxsuppe,-\minsuppe]$.
 \item The function $\varphi$ satisfies $\varphi(0)=\varphi'(0)=0$.
 \item The function $\varphi$ is strongly concave, i.e. there exists $\alpha>0$ such that $\varphi((1-\tau) x + \tau y) \geqslant (1-\tau) \varphi(x)+\tau \varphi(y) + \frac{\alpha}{2} (1-\tau)\tau \left|x-y\right|^2$ for all $(x,y,\tau)\in[0,1]^3$.
 \item There exists $\beta > \alpha$ such that $\varphi$ is $(-\beta)-$convex, i.e. $\varphi((1-\tau) x + \tau y) \leqslant (1-\tau) \varphi(x)+\tau \varphi(y) + \frac{\beta}{2} (1-\tau)\tau \left|x-y\right|^2$ for all $(x,y,\tau)\in[0,1]^3$. Notice that in this case, $\varphi(x) \geqslant - \beta \frac{x^2}{2}$, and in particular, $\varphi(1) \geqslant - \beta$. 
 \end{enumerate}
+
+\intern{For the reader: notations $\minsuppe,\maxsuppe$ indicates a domain on which $f_{e,b}$ is \emph{lower bounded}, while $\mindome, v^*$ denote a domain on which $f_{e,b}$ is \emph{upper bounded by 0} (with a global bound by $\maxfe$ anyway).}
 
 We use the following notations: the Liapunov functions of the electrons and the ions are
 \begin{align}\label{eq:def_Le}
@@ -159,10 +162,10 @@ We use the following notations: the Liapunov functions of the electrons and the 
 	\mathcal{L}_i(x,v) \coloneqq \frac{v^2}{2} + \varphi(x).
 \end{align}
 
-We define an upper bound $\ve$ over the velocities in the support of $f_e$, given as
-\begin{align}\label{eq:def_ve}
-	\mathcal{L}_e(0,\ve) \coloneqq \frac{1}{\mu} \beta \geqslant -\frac{1}{\mu}\varphi(1) = \mathcal{L}_e(1,0), \quad\text{i.e.}\quad \ve \coloneqq \sqrt{\frac{2}{\mu}\beta}.
-\end{align}
+%We define an upper bound $\maxdome$ over the velocities in the support of $f_e$, given as
+%\begin{align}\label{eq:def_ve}
+%	\mathcal{L}_e(0,\maxdome) \coloneqq \frac{1}{\mu} \beta \geqslant -\frac{1}{\mu}\varphi(1) = \mathcal{L}_e(1,0), \quad\text{i.e.}\quad \maxdome \coloneqq \sqrt{\frac{2}{\mu}\beta}.
+%\end{align}
 
 For a given point $(x,v) \in [0,1]\times \mathbb{R}^{-}$, we denote by $(x_b, v_b)$ the intersection of the boundary $\{x\geqslant0,v=0\} \cup \{x=0,v\leqslant 0\}$ with the ion characteristic issued from $(x,v)$. The values are given by
 \begin{align}\label{eq:def_xb_vb}
@@ -173,6 +176,7 @@ For a given point $(x,v) \in [0,1]\times \mathbb{R}^{-}$, we denote by $(x_b, v_
 %	\end{cases}
 \end{align}
 
+The satisfaction of the non-emitting boundary condition in $(x=1,v\in\mathbb{R}_-)$ may interfere with the value on the line $(x=0,v\in\mathbb{R})$. \textbf{In the following notes, we consider that the non-emitting boundary condition has the precedence}, i.e. $f_e(x,v) = 0$ if $\mathcal{L}_e(x,v) \geqslant \mathcal{L}_e(1,0)$, regardless of the prescribed value of $f_{e,b}$ along this line.
 
 \section{Estimates}
 
@@ -330,20 +334,22 @@ For a given point $(x,v) \in [0,1]\times \mathbb{R}^{-}$, we denote by $(x_b, v_
 \subsubsection{Electronic density $n_e$}
 
 \begin{lem}\label{lem:ne_continuous_space}
-	The electron density $n_e$ is bounded. More precisely, 
+	The electron density $n_e$ is bounded independently of $\varphi$. More precisely, 
 	\begin{align*}
-		n_e(x) \leqslant 2 \maxfe \sqrt{\frac{2\beta}{\mu}} \quad\quad\forall x \in[0,1].
+		n_e(x) \leqslant 2 \maxfe \maxdome \quad\quad\forall x \in[0,1].
 	\end{align*}
 \end{lem}
 
 \myproof{
-	For each $0\leqslant x \leqslant y \leqslant 1$, we define the velocity $v_x(y) \geqslant 0$ such that 
+	Let $v\in\mathbb{R}$ such that $|v| > \mindome$, with $f_{e,b}\left(\mathbb{R}\setminus[-\maxdome,\maxdome]\right) = 0$. Then 
 	\begin{align*}
-		\mathcal{L}_e(x,v_x(y)) = \mathcal{L}_e(y,0) \quad \iff \quad v_x(y) = \left(\frac{2}{\mu}\left(\varphi(x) - \varphi(y)\right)\right)^{1/2}.
-	\end{align*} 
-	In particular, owing to the boundary conditions, the function $v \to f_e(x,v)$ vanishes for $|v| \geqslant v_x(1)$. Then
+		\mathcal{L}_e(x,v) = \frac{v^2}{2} - \frac{1}{\mu} \varphi(x) \geqslant \frac{v^2}{2} = \mathcal{L}_e(v,0)
+		\quad\implies\quad
+		f_e(x,v) = 0.
+	\end{align*}
+	Then we may write for all $x\in[0,1]$ that
 	\begin{align*}
-		n_e(x) = \int_{v=-v_x(1)}^{v_x(1)} f_e(x,v) dv \leqslant 2 \maxfe v_x(1) = 2 \maxfe \left(\frac{2}{\mu} (\varphi(x) - \varphi(1))\right)^{1/2} \leqslant 2 \maxfe \sqrt{\frac{2\beta}{\mu}}.
+		n_e(x) = \int_{v=-\maxdome}^{\maxdome} f_e(x,v) dv \leqslant 2 \maxfe \maxdome.
 	\end{align*}
 }
 
@@ -354,10 +360,12 @@ The estimates will rely on two particular cases, the we treat independently as l
 	\mathcal{L}_i(x,-g_x(y)) = \mathcal{L}_i(y,0), \quad \text{i.e.} \quad g_x(y) = \left(2\left(\varphi(y) - \varphi(x)\right)\right)^{1/2}.
 \end{align*}
 
+\intern{For the reader: draw $y$ to the left of $x$. Then $-g_x(y)$ is the intersection of the ion characteristic ending on $(y,0)$ with the vertical line going through $x$.}
+
 \begin{lem}\label{lem:upperbound_ni_endchar}
 	Let $0\leqslant y < x \leqslant 1$. We have
 	\begin{align*}
-		\mathcal{I} \coloneqq \int_{v=-g_x(y)}^{0} \int_{z = x_b(x,v)}^{x} \frac{1}{\left(v^2-g_x^2(z)\right)^{1/2}} dz\,dv \leqslant 2 \sqrt{\frac{2}{\alpha}}\left(\varphi(y) - \varphi(x)\right)^{1/4} \sqrt{x-y}. 
+		\mathcal{I} \coloneqq \int_{v=-g_x(y)}^{0} \int_{z = x_b(x,v)}^{x} \frac{1}{\left(v^2-g_x^2(z)\right)^{1/2}} dz\,dv \leqslant 2 \left(\frac{\beta}{\alpha}\right)^{1/4} (x-y). 
 	\end{align*}
 \end{lem}
 
@@ -374,6 +382,25 @@ The estimates will rely on two particular cases, the we treat independently as l
 		= \int_{z=y}^{x} \int_{w = 0}^{g_x(y)-g_x(z)} \frac{1}{\left(w^2 + 2 w g_x(z)\right)^{1/2}} dw\,dz
 		= \int_{z=y}^{x} \sinh^{-1}\left(\sqrt{\frac{g_x(y) -g_x(z)}{g_x(z)}}\right) dz.
 	\end{align*}
+	\intern{
+	Using the elementary estimate $\sinh^{-1}(a) \leqslant p\,a^{1/p}$ for all $p\in\mathbb{N}^*$, and the coarse estimate $\sqrt{\frac{a-b}{b}} \leqslant \sqrt{\frac{a}{b}}$, we get
+	\begin{align*}
+		\mathcal{I} 
+		\leqslant \int_{z=y}^x p \left(\frac{g_x(y)}{g_x(z)}\right)^{1/2p} dz 
+		= \int_{z=y}^x p \left(\frac{\varphi(y) - \varphi(x)}{\varphi(z) - \varphi(x)}\right)^{1/4p} dz
+		 \quad\forall\,p\in\mathbb{N}^*.
+	\end{align*}
+	The assumption of strong concavity yields $\varphi(z) - \varphi(x) \geqslant - \varphi'(z) (x - z) + \frac{\alpha}{2} |x - z|^2 \geqslant \frac{\alpha}{2} (x - z)^2$, so that 
+	\begin{align*}
+		\mathcal{I} 
+		\leqslant \left(\frac{2}{\alpha}\right)^{1/4p} (\varphi(y) - \varphi(x))^{1/4p} \int_{z=y}^x p \frac{1}{(x-z)^{1/2p}} dz
+		= \left(\frac{2}{\alpha}\right)^{1/4p} (\varphi(y) - \varphi(x))^{1/4p} \frac{p^2}{p-1/2)} (x-y)^{1-1/2p}.
+	\end{align*}
+	By the strong $(-\beta)-$convexity, we may write $\varphi(y) - \varphi(x) \leqslant \beta \frac{(x-y)^2}{2}$, so that
+	\begin{align*}
+		\mathcal{I} \leqslant \left(\frac{\beta}{\alpha}\right)^{1/4p} \frac{p^2}{p-1/2} (x-y) \quad \forall p \in \mathbb{N}^*.
+	\end{align*}
+	}
 	Using the coarse estimates $\sinh^{-1}(a) \leqslant a$ and $\sqrt{\frac{a-b}{b}} \leqslant \sqrt{\frac{a}{b}}$, we get
 	\begin{align*}
 		\mathcal{I} \leqslant \int_{z=y}^{x} \sqrt{\frac{g_x(y)}{g_x(z)}} dz = \int_{z=y}^{x} \left(\frac{\varphi(y) - \varphi(x)}{\varphi(z) - \varphi(x)}\right)^{1/4} dz.
@@ -381,15 +408,22 @@ The estimates will rely on two particular cases, the we treat independently as l
 	The assumption of strong concavity yields $\varphi(z) - \varphi(x) \geqslant - \varphi'(z) (x - z) + \frac{\alpha}{2} |x - z|^2 \geqslant \frac{\alpha}{2} (x - z)^2$, so that 
 	\begin{align*}
 		\mathcal{I} 
-		\leqslant \sqrt{\frac{2}{\alpha}}\left(\varphi(y) - \varphi(x)\right)^{1/4} \int_{z=y}^{x} \frac{1}{\left(x - z\right)^{1/2}} dz 
-		= 2 \sqrt{\frac{2}{\alpha}}\left(\varphi(y) - \varphi(x)\right)^{1/4} \sqrt{x-y}.
+		\leqslant \left(\frac{2}{\alpha}\right)^{1/4} \left(\varphi(y) - \varphi(x)\right)^{1/4} \int_{z=y}^{x} \frac{1}{\left(x - z\right)^{1/2}} dz 
+		= 2 \left(\frac{2}{\alpha}\right)^{1/4} \left(\varphi(y) - \varphi(x)\right)^{1/4} \sqrt{x-y}.
+	\end{align*}
+	By the strong $(-\beta)-$convexity, we may write $\varphi(y) - \varphi(x) \leqslant \beta \frac{(x-y)^2}{2}$, so that
+	\begin{align*}
+		\mathcal{I} \leqslant 2 \left(\frac{\beta}{\alpha}\right)^{1/4} (x-y).
 	\end{align*}
 }
 
 \begin{lem}\label{lem:upperbound_ni_beginchar}
 	Let $0 \leqslant y \leqslant x \leqslant 1$, and $-v_0 < -g_x(y)$. We have
 	\begin{align*}
-		\mathcal{I} \coloneqq \int_{v=-v_0}^{-g_x(y)} \int_{z=y}^{1} \frac{1}{\left(v^2 + 2 \left(\varphi(x) - \varphi(z)\right)\right)^{1/2}} dz \, dv \leqslant \frac{2\sqrt{2(1-y)}}{\alpha^{1/4}} \left(v_0^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/4}.
+		\mathcal{I} 
+		\coloneqq \int_{v=-v_0}^{-g_x(y)} \int_{z=y}^{1} \frac{1}{\left(v^2 + 2 \left(\varphi(x) - \varphi(z)\right)\right)^{1/2}} dz \, dv 
+%		\leqslant \frac{2\sqrt{2(1-y)}}{\alpha^{1/4}} \left(v_0^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/4}.
+		\leqslant \frac{2\sqrt{2}}{\alpha^{1/4}} \left(v_0^2 + \beta \left(x - y\right)^2\right)^{1/4}.
 	\end{align*}
 \end{lem}
 
@@ -406,16 +440,21 @@ The estimates will rely on two particular cases, the we treat independently as l
 	\begin{align*}
 		\mathcal{I} \leqslant \int_{w=-w_0}^{0} \int_{z=y}^{1} \frac{1}{\left(w^2 + \alpha (z- y)^2\right)^{1/2}} dz dw = \int_{w=0}^{w_0} \int_{z=0}^{1-y} \frac{1}{\left(w^2 + \alpha z^2\right)^{1/2}} dz dw.
 	\end{align*}
-	Using \cref{lem:int_1surR_rectangle}, we conclude that 
+	Using \cref{lem:int_1surR_rectangle}, and the $(-\beta)-$convexity, we conclude that 
 	\begin{align*}
-		\mathcal{I} \leqslant 2 \frac{\sqrt{2 w_0 (1-y)}}{\alpha^{1/4}} = \frac{2\sqrt{2(1-y)}}{\alpha^{1/4}} \left(v_0^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/4}.
+		\mathcal{I} 
+		\leqslant 2 \frac{\sqrt{2 w_0 (1-y)}}{\alpha^{1/4}} 
+		= \frac{2\sqrt{2(1-y)}}{\alpha^{1/4}} \left(v_0^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/4}
+		\leqslant \frac{2\sqrt{2}}{\alpha^{1/4}} \left(v_0^2 + \beta \left(x - y\right)^2\right)^{1/4}.
 	\end{align*}
 }
 
 \begin{proposition}
-	The density $n_i$ is bounded by a constant depending on $\varphi$ only through $\varphi(1)$. More precisely,
+	The density $n_i$ is bounded. More precisely,
 	\begin{align*}
-		n_i(x) \leqslant 8 \nu \left(\frac{\beta}{\alpha}\right)^{1/4} \left(\frac{1}{\alpha^{1/4}} + \beta^{1/4} + \frac{1}{\mu^{1/4}}\right) 
+		n_i(x) 
+%		\leqslant 8 \nu \left(\frac{\beta}{\alpha}\right)^{1/4} \left(\frac{1}{\alpha^{1/4}} + \beta^{1/4} + \frac{1}{\mu^{1/4}}\right) 
+		\leqslant 2\nu \left(2 \left(\frac{\beta}{\alpha}\right)^{1/4} + 2\sqrt{2} \left(\frac{\beta}{\alpha}\right)^{1/4} + \frac{2\sqrt{2}}{\alpha^{1/4}} \sqrt{\maxdome}\right)
 		\quad\quad\forall x \in[0,1].
 	\end{align*}
 \end{proposition}
@@ -425,7 +464,7 @@ The estimates will rely on two particular cases, the we treat independently as l
 	\begin{align*}
 		n_i(x) = \int_{v=-\infty}^{\infty} f_i(x,v) dv = 2 \int_{v=-\infty}^{0} f_i(x_b(x,v), v_b(x,v)) dv = 2 \nu \int_{v=-\infty}^{0} \int_{t=-\infty}^{0} f_e(x(t),v(t)) dt dv,
 	\end{align*}
-	where $(x(t),v(t))_{t\leqslant0}$ is the ion characteristic reaching $(x_b(x,v),v_b(x,v))$ at $t=0$. Notice that the lower bounds are artificial, since the characteristic enters the support of $f_e$ in finite time: we may use $v \geqslant -\ve$, and consider only times $t$ for which $x(t) \in [0,1]$. 
+	where $(x(t),v(t))_{t\leqslant0}$ is the ion characteristic reaching $(x_b(x,v),v_b(x,v))$ at $t=0$. Notice that the lower bounds are artificial, since the characteristic enters the support of $f_e$ in finite time: we may use $v \geqslant -\maxdome$, and consider only times $t$ for which $x(t) \in [0,1]$. 
 	
 	We first reparametrize $(x(t),v(t))$ using the space variable. Define $z = x(t) \in[x_b,1]$, and observe that
 	\begin{align*}
@@ -433,14 +472,14 @@ The estimates will rely on two particular cases, the we treat independently as l
 	\end{align*}
 	Then, the density rewrites
 	\begin{align*}
-		n_i(x) = 2 \nu \int_{v=-\ve}^{0} \int_{z=x_b(x,v)}^{1} \frac{f_e\left(z, -\left(v^2 + 2\left(\varphi(x) - \varphi(z)\right)\right)^{1/2}\right)}{\left(v^2 + 2\left(\varphi(x) - \varphi(z)\right)\right)^{1/2}} \, dz dv.
+		n_i(x) = 2 \nu \int_{v=-\maxdome}^{0} \int_{z=x_b(x,v)}^{1} \frac{f_e\left(z, -\left(v^2 + 2\left(\varphi(x) - \varphi(z)\right)\right)^{1/2}\right)}{\left(v^2 + 2\left(\varphi(x) - \varphi(z)\right)\right)^{1/2}} \, dz dv.
 	\end{align*}
 	Let us show that $n_i$ is bounded. We use the coarse estimate $f_e \leqslant \maxfe$, and decompose the integral in three:
 	\begin{align*}
 		n_i(x) \leqslant 2 \nu \maxfe \left[
 		\underbrace{\int_{v=-g_x(0)}^{0} \int_{z=x_b(x,v)}^{x}}_{\IntUpL} + 
 		\underbrace{\int_{v=-g_x(0)}^{0} \int_{z=x}^{1}}_{\IntUpR} + 
-		\underbrace{\int_{v=-\ve}^{-g_x(0)} \int_{z=x_b(x,v)}^{1}}_{\IntLow} \right] 
+		\underbrace{\int_{v=-\maxdome}^{-g_x(0)} \int_{z=x_b(x,v)}^{1}}_{\IntLow} \right] 
 		\frac{1}{\left(v^2 + 2\left(\varphi(x) - \varphi(z)\right)\right)^{1/2}} \, dz dv.
 	\end{align*}
 	The corresponding domains are represented \cref{fig:charmaps_domainmap}. 
@@ -455,42 +494,44 @@ The estimates will rely on two particular cases, the we treat independently as l
 	Notice that whenever $z \leqslant x$, we have $0 \geqslant 2\left(\varphi(x) - \varphi(z)\right) = - \left(2\left(\varphi(z) - \varphi(x)\right)\right)^{2/2} = - g_x^2(z)$. Then, the integral $\IntUpL$ may be bounded using \cref{lem:upperbound_ni_endchar} with $y=0$:
 	\begin{align*}
 		\IntUpL = \int_{v=-g_x(0)}^{0} \int_{z=x_b(x,v)}^{x} \frac{1}{\left(v^2 - g_x^2(z)\right)^{1/2}} \, dz dv 
-		\leqslant 2 \sqrt{\frac{2}{\alpha}} \left(-\varphi(x)\right)^{1/4} \sqrt{x}
-		\leqslant 2 \sqrt{\frac{2}{\alpha}} \left(-\varphi(1)\right)^{1/4}.
+		\leqslant 2 \left(\frac{\beta}{\alpha}\right)^{1/4} x
+		\leqslant 2 \left(\frac{\beta}{\alpha}\right)^{1/4}.
 	\end{align*}
 	
-	We use \cref{lem:upperbound_ni_beginchar} to bound $\IntUpR$ and $\IntLow$. In the first case, we take $y=x$ and $v_0 = g_x(0)$, and notice that $-g_x(x)=0$. In the second case, we take $v_0 = \ve$ and $y=0$, and notice that on $v \leqslant -g_x(0)$, we have $x_b(x,v) = 0$ (the velocity is low enough so that the characteristic ends on $x_b=0$). This yields
+	We use \cref{lem:upperbound_ni_beginchar} to bound $\IntUpR$ and $\IntLow$. In the first case, we take $y=x$ and $v_0 = g_x(0)$, and notice that $-g_x(x)=0$. In the second case, we take $v_0 = \maxdome$ and $y=0$, and notice that on $v \leqslant -g_x(0)$, we have $x_b(x,v) = 0$ \intern{(the velocity is low enough so that the characteristic ends on $x_b=0$)}. Finally, we use that $g_x^2(0) = -2\varphi(1) \leqslant \beta$ to write
 	\begin{align*}
-		\IntUpR \leqslant \frac{2\sqrt{2(1-x)}}{\alpha^{1/4}} \left(g_x^2(0)\right)^{1/4} \leqslant \frac{4}{\alpha^{1/4}} \left(-\varphi(1)\right)^{1/2} , \quad\text{and}\quad
-		\IntLow \leqslant \frac{2\sqrt{2}}{\alpha^{1/4}} \left(\ve^2 + 2 \varphi(x)\right)^{1/4} \leqslant \frac{4}{\alpha^{1/4}} \left(\frac{\beta}{\mu}\right)^{1/4}.
+%		\IntUpR \leqslant \frac{2\sqrt{2(1-x)}}{\alpha^{1/4}} \left(g_x^2(0)\right)^{1/4} \leqslant \frac{4}{\alpha^{1/4}} \left(-\varphi(1)\right)^{1/2} , \quad\text{and}\quad
+%		\IntLow \leqslant \frac{2\sqrt{2}}{\alpha^{1/4}} \left(\maxdome^2 + 2 \varphi(x)\right)^{1/4} \leqslant \frac{4}{\alpha^{1/4}} \left(\frac{\beta}{\mu}\right)^{1/4}.
+		\IntUpR \leqslant \frac{2\sqrt{2}}{\alpha^{1/4}} \left(g_x^2(0)\right)^{1/4} \leqslant 2\sqrt{2} \left(\frac{\beta}{\alpha}\right)^{1/4}, \quad\text{and}\quad
+		\IntLow \leqslant \frac{2\sqrt{2}}{\alpha^{1/4}} \left((\maxdome)^2 + 2 \varphi(x)\right)^{1/4} \leqslant \frac{2\sqrt{2}}{\alpha^{1/4}} \sqrt{\maxdome}.
 	\end{align*}
 }
 
 \begin{lem}
 	The density $n_i$ is uniformly bounded away from 0. More precisely, 
 	\begin{align*}
-		n_i(x) \geqslant \frac{\sqrt{2} \nu \minfe (\domfeu^2 - \domfel^2)}{\domfeu \left(\frac{\domfeu^2}{2} + \beta\right)^{1/2}} \frac{\domfel}{\sqrt{\beta\left(1+\frac{1}{\mu}\right)}} \quad\quad\forall x\in[0,1].
+		n_i(x) \geqslant \frac{\sqrt{2} \nu \minfe (\maxsuppe^2 - \minsuppe^2)}{\maxsuppe \left(\frac{\maxsuppe^2}{2} + \beta\right)^{1/2}} \frac{\minsuppe}{\sqrt{\beta\left(1+\frac{1}{\mu}\right)}} \quad\quad\forall x\in[0,1].
 	\end{align*}
 \end{lem}
 
 \myproof{
-	By assumption, there exists a constant $\minfe>0$ such that $f_{e,b} (v) \geqslant \minfe \textbf{1}_{\left\{\domfel \leqslant |v| \leqslant \domfeu\right\}}$, which implies
+	By assumption, there exists a constant $\minfe>0$ such that $f_{e,b} (v) \geqslant \minfe \textbf{1}_{\left\{\minsuppe \leqslant |v| \leqslant \maxsuppe\right\}}$, which implies
 	\begin{align*}
-		f_e(x,v) \geqslant \minfe \textbf{1}_{\left\{\mathcal{L}_e(0,\domfel) \leqslant \mathcal{L}_e(x,v) \leqslant \mathcal{L}_e(0,\domfeu)\right\}}.
+		f_e(x,v) \geqslant \minfe \textbf{1}_{\left\{\mathcal{L}_e(0,\minsuppe) \leqslant \mathcal{L}_e(x,v) \leqslant \mathcal{L}_e(0,\maxsuppe)\right\}}.
 	\end{align*}
-	Notice that we may always take $\domfel > 0$ as long as $\domfeu>0$.
-	Let us denote $\underline{\ee} \coloneqq \mathcal{L}_e(0,\domfel)$ and $\overline{\ee} \coloneqq \mathcal{L}_e(0,\domfeu)$. For any $x\in[0,1]$, we have
+	Notice that we may always take $\minsuppe > 0$ as long as $\maxsuppe>0$.
+	Let us denote $\underline{\ee} \coloneqq \mathcal{L}_e(0,\minsuppe)$ and $\overline{\ee} \coloneqq \mathcal{L}_e(0,\maxsuppe)$. For any $x\in[0,1]$, we have
 	\begin{align*}
 		n_i(x) = 2 \nu \int_{w\in\mathbb{R}_-} \int_{\tau=-\infty}^{0} f_e(x(\tau),v(\tau)) d\tau dw, \quad \text{with} \quad \mathcal{L}_i(x(\tau),v(\tau)) = \mathcal{L}_i(x,w).
 	\end{align*}
-	Notice that for $w \in [-g_x(-\domfeu),-g_x(0)]$, the characteristic issued from $(x,w)$ enters the domain $\left\{\underline{\ee} \leqslant \mathcal{L}_e \leqslant \overline{\ee}\right\}$. We will restrict the domain of integration to 
+	Notice that for $w \in [-g_x(-\maxsuppe),-g_x(0)]$, the characteristic issued from $(x,w)$ enters the domain $\left\{\underline{\ee} \leqslant \mathcal{L}_e \leqslant \overline{\ee}\right\}$. We will restrict the domain of integration to 
 	\begin{align*}
 		\mathcal{D} \coloneqq \left\{(w,\tau) \in \mathbb{R}_-^2 \ |\ \underline{\ee} \leqslant \mathcal{L}_e(x(\tau),v(\tau)) \leqslant \overline{\ee} \text{ and } 0 \leqslant x(\tau) \leqslant a\right\},
 	\end{align*}
-	where $(a,v_a)$ is the unique point such that $\mathcal{L}_e(a,v_a) = \mathcal{L}_e(0,\domfel)$ and $\mathcal{L}_i(a,v_a) = 0$ (note that $a$ depends on $\beta$). This (somehow coarse) estimate will give us trivial bounds when applying the change of variable of \cref{lem:magic_change_variable}, namely $z=x(\tau)$ and $\ee = \mathcal{L}_e(x(\tau),v(\tau))$. Denoting by $[\underline{\tau}, \overline{\tau}] \subset ]-\infty,0]$ the time interval where $(x(\tau),v(\tau)) \in \mathcal{D}$, we have
+	where $(a,v_a)$ is the unique point such that $\mathcal{L}_e(a,v_a) = \mathcal{L}_e(0,\minsuppe)$ and $\mathcal{L}_i(a,v_a) = 0$ (note that $a$ depends on $\beta$). This (somehow coarse) estimate will give us trivial bounds when applying the change of variable of \cref{lem:magic_change_variable}, namely $z=x(\tau)$ and $\ee = \mathcal{L}_e(x(\tau),v(\tau))$. Denoting by $[\underline{\tau}, \overline{\tau}] \subset ]-\infty,0]$ the time interval where $(x(\tau),v(\tau)) \in \mathcal{D}$, we have
 	\begin{align*}
 		n_i(x) 
-		\geqslant \int_{w=-g_x(-\domfeu)}^{-g_x(0)} \int_{\tau = \underline{\tau}}^{\overline{\tau}} 2 \nu \minfe \, d\tau dw
+		\geqslant \int_{w=-g_x(-\maxsuppe)}^{-g_x(0)} \int_{\tau = \underline{\tau}}^{\overline{\tau}} 2 \nu \minfe \, d\tau dw
 		= \int_{\ee = \underline{\ee}}^{\overline{\ee}} \int_{z=0}^{a} \frac{2 \nu \minfe}{2\left(\ee + \frac{1}{\mu} \varphi(z)\right)^{1/2} \left(\ee - \varphi(x) + \left(1+\frac{1}{\mu}\right) \varphi(z)\right)^{1/2}} \, dz d\ee.
 	\end{align*}
 	Using \cref{rem:magic_change_welldef}, we are assured that the square roots are well-defined, since 
@@ -512,8 +553,8 @@ The estimates will rely on two particular cases, the we treat independently as l
 		 \quad \implies \quad
 		 \varphi^{-1}(y) \geqslant \sqrt{\frac{- 2 y}{\beta}}, 
 		 \quad\text{so that}\quad
- 		 a = \varphi^{-1}\left(-\frac{\domfel^2}{2\left(1+\frac{1}{\mu}\right)}\right)
- 		 \geqslant \frac{\domfel}{\sqrt{\beta\left(1+\frac{1}{\mu}\right)}}.
+ 		 a = \varphi^{-1}\left(-\frac{\minsuppe^2}{2\left(1+\frac{1}{\mu}\right)}\right)
+ 		 \geqslant \frac{\minsuppe}{\sqrt{\beta\left(1+\frac{1}{\mu}\right)}}.
 	\end{align*}
 	and the uniform lower bound behaves like $\beta^{-1}$ when $\beta\to\infty$.
 }
@@ -527,9 +568,10 @@ The estimates will rely on two particular cases, the we treat independently as l
 \end{figure}
 
 \begin{lem}
-	Suppose that there exists $v_* > 0$ such that $f_{e,b}(v) = 0$ for all $|v| \leqslant v_*$. Then the density $f_i$ satisfies the uniform bound
+	\todo{We probably can do better, but maybe not win any exponent.}
+	Suppose that there exists $\mindome > 0$ such that $f_{e,b}(v) = 0$ for all $|v| \leqslant \mindome$. Then the density $f_i$ satisfies the uniform bound
 	\begin{align*}
-		f_i(x,v) \leqslant 2^{9/4} \maxfe \sqrt{\frac{\frac{\beta}{\alpha}(1+\frac{1}{\mu})+1}{v_*}} \quad \forall (x,v) \in [0,1] \times \mathbb{R}.
+		f_i(x,v) \leqslant 2^{9/4} \maxfe \sqrt{\frac{\frac{\beta}{\alpha}(1+\frac{1}{\mu})+1}{\mindome}} \quad \forall (x,v) \in [0,1] \times \mathbb{R}.
 	\end{align*}
 \end{lem}
 
@@ -540,13 +582,13 @@ The estimates will rely on two particular cases, the we treat independently as l
 	\end{align*}
 	On the other hand, we use $f_i(x,v) + f_i(x,-v) = 2 f_i(x(0),v(0))$ to write $f_i(x,-v) \leqslant 2 f_i(x(0),v(0))$. This shows that it is enough to bound $f_i$ on the boundary $\mathcal{B} \coloneqq \{x\geqslant0,v=0\} \cup \{x=0,v\leqslant 0\}$ to obtain an uniform bound.
 	
-	Let then $(x,v) \in \mathcal{B}$. By hypothesis, $f_e(x(t),v(t))$ vanishes whenever $\mathcal{L}_e(x(t),v(t)) \leqslant \mathcal{L}_e(0,v_*)$, and is bounded by $\maxfe$ otherwise. Then, we may use the reparametrization by space 
+	Let then $(x,v) \in \mathcal{B}$. By hypothesis, $f_e(x(t),v(t))$ vanishes whenever $\mathcal{L}_e(x(t),v(t)) \notin [\mathcal{L}_e(0,\mindome), \mathcal{L}_e(0,\maxdome)]$, and is bounded by $\maxfe$ otherwise. Then, we may use the reparametrization by space 
 	\begin{align*}
 		f_i(x,v) \leqslant \int_{z=a(x,v)}^{1} \frac{\maxfe}{\left(v^2 + 2 \varphi(x) - 2 \varphi(z)\right)^{1/2}} dz,
 		\quad \text{with} \quad
 		a(x,v) \coloneqq 
 		\begin{cases}
-			\varphi^{-1}\left(\frac{\frac{v^2}{2} + \varphi(x) - \frac{v_*^2}{2}}{1+1/\mu}\right) & \text{if } \mathcal{L}_e(x,v) \leqslant \mathcal{L}_e(0,v_*) \\
+			\varphi^{-1}\left(\frac{\frac{v^2}{2} + \varphi(x) - \frac{\mindome^2}{2}}{1+1/\mu}\right) & \text{if } \mathcal{L}_e(x,v) \leqslant \mathcal{L}_e(0,\mindome) \\
 			x & \text{otherwise.}
 		\end{cases}
 	\end{align*}
@@ -562,16 +604,16 @@ The estimates will rely on two particular cases, the we treat independently as l
 		\quad \implies \quad
 		-\frac{y}{\beta} \leqslant \varphi^{-1}(y)
 	\end{align*}
-	to write that for $(x,v)$ satisfying $\mathcal{L}_e(x,v) \leqslant \mathcal{L}_e(0,v_*)$, 
+	to write that for $(x,v)$ satisfying $\mathcal{L}_e(x,v) \leqslant \mathcal{L}_e(0,\mindome)$, 
 	\begin{align*}
-		a(x,v) = \varphi^{-1}\left(\frac{\frac{v^2}{2} + \varphi(x) - \frac{v_*^2}{2}}{1+1/\mu}\right)
-		\geqslant \frac{\frac{v_*^2}{2} - (\frac{v^2}{2} + \varphi(x))}{\beta(1+1/\mu)}.
+		a(x,v) = \varphi^{-1}\left(\frac{\frac{v^2}{2} + \varphi(x) - \frac{\mindome^2}{2}}{1+1/\mu}\right)
+		\geqslant \frac{\frac{\mindome^2}{2} - (\frac{v^2}{2} + \varphi(x))}{\beta(1+1/\mu)}.
 	\end{align*}
 	Then 
 	\begin{align*}
 		f_i(x,v) \leqslant \maxfe \min \left(\frac{1}{\sqrt{|X|}}, \frac{A}{\sqrt{B - X}}\right) 
 		\quad \text{with} \quad
-		X \coloneqq \frac{v^2}{2} + \varphi(x), \quad A \coloneqq \frac{2}{\sqrt{\frac{\alpha}{\beta(1+1/\mu)}}}, \quad \text{and} \quad B \coloneqq \frac{v_*^2}{2}.
+		X \coloneqq \frac{v^2}{2} + \varphi(x), \quad A \coloneqq \frac{2}{\sqrt{\frac{\alpha}{\beta(1+1/\mu)}}}, \quad \text{and} \quad B \coloneqq \frac{\mindome^2}{2}.
 	\end{align*}
 	 The elementary study of the function $X \to \min\left(|X|^{-1/2}, A (B-X)^{-1/2}\right)$ reveals a global maximum at $X = \frac{B}{A^2 + 1} < B$, and we conclude to the result.
 	 
@@ -579,7 +621,7 @@ The estimates will rely on two particular cases, the we treat independently as l
  		\centering
  		\includegraphics[width=0.5\linewidth]{images/global_bound_fi}
  		\caption{Notations for the boundedness of $f_i$.}
- 		\mysubcaption{The coloured area corresponds to $\mathcal{L}_e(x,v) \geqslant \mathcal{L}_e(0,v_*)$. The function $a(x,v)$ gives the point of the ion characteristic (in brown) where $f_e$ vanishes.}
+ 		\mysubcaption{The coloured area corresponds to $\mathcal{L}_e(x,v) \geqslant \mathcal{L}_e(0,\mindome)$. The function $a(x,v)$ gives the point of the ion characteristic (in brown) where $f_e$ vanishes.}
  		\label{fig:charmaps_domainmap}
  	\end{figure}
 }
@@ -587,20 +629,6 @@ The estimates will rely on two particular cases, the we treat independently as l
 \subsection{Continuity estimates}
 
 \subsubsection{Electron density $n_e$}
-
-\begin{lem}\label{lem:ne_continuous_phi}
-	Let $n_e^{\varphi}$ and $n_e^{\psi}$ be the electron densities generated by potentials $\varphi$ and $\psi$ satisfying the assumptions. Then
-	\begin{enumerate}
-	\item If $f_{e,b}$ is Lipschitz-continuous with constant $\lipfe$, then 
-	\begin{align*}
-		|n_e^{\varphi}(x) - n_e^{\psi}(x)| \leqslant 2 \lipfe \ve \sqrt{\frac{2}{\mu}}\left|\varphi(x) -\psi(x)\right|^{1/2} \quad \forall (x,y) \in [0,1]^2.
-	\end{align*}
-	\item If there exists a constant $[f_{e,b}]$ such that $|f_{e,b}(x) - f_{e,b}(y)| \leqslant [f_{e,b}] |x^2 - y^2|$ \intern{(or equivalently, $x \to f_{e,b}(\sqrt{x})$ is a lipschitz function, as for instance $e^{-x^2}$)}, then 
-	\begin{align*}
-		|n_e^{\varphi}(x) - n_e^{\psi}(x)| \leqslant \frac{4\ve \lipfesq}{\mu} \left|\varphi(x) - \psi(x)\right| \quad \forall (x,y) \in [0,1]^2.
-	\end{align*}
-	\end{enumerate}
-\end{lem}
 
 \begin{lem}
 	The electronic density $n_e$ is continuous.
@@ -636,26 +664,40 @@ The estimates will rely on two particular cases, the we treat independently as l
 	and this shows that $\mathcal{I}^{-} \underset{y\to x}{\longrightarrow} 0$.
 }
 
+\begin{lem}\label{lem:ne_continuous_phi}
+	Let $n_e^{\varphi}$ and $n_e^{\psi}$ be the electron densities generated by potentials $\varphi$ and $\psi$ satisfying the assumptions. Then
+	\begin{enumerate}
+	\item If $f_{e,b}$ is Lipschitz-continuous with constant $\lipfe$, then 
+	\begin{align*}
+		|n_e^{\varphi}(x) - n_e^{\psi}(x)| \leqslant 2 \lipfe \maxdome \sqrt{\frac{2}{\mu}}\left|\varphi(x) -\psi(x)\right|^{1/2} \quad \forall (x,y) \in [0,1]^2.
+	\end{align*}
+	\item If there exists a constant $[f_{e,b}]$ such that $|f_{e,b}(x) - f_{e,b}(y)| \leqslant [f_{e,b}] |x^2 - y^2|$ \intern{(or equivalently, $x \to f_{e,b}(\sqrt{x})$ is a lipschitz function, as for instance $e^{-x^2}$)}, then 
+	\begin{align*}
+		|n_e^{\varphi}(x) - n_e^{\psi}(x)| \leqslant \frac{4\maxdome \lipfesq}{\mu} \left|\varphi(x) - \psi(x)\right| \quad \forall (x,y) \in [0,1]^2.
+	\end{align*}
+	\end{enumerate}
+\end{lem}
+
 \myproof{
 	We have
 	\begin{align*}
 		\left|n_e^{\varphi}(x) - n_e^{\psi}(x)\right| 
-		\leqslant 2 \int_{v=0}^{\ve} \left|f_e^{\varphi}(x,v) - f_e^{\psi}(x,v)\right| dv
-		= 2 \int_{v=0}^{\ve} \left|f_{e,b}\left(\left(v^2 - \frac{2}{\mu}\varphi(x)\right)^{1/2}\right) - f_{e,b}\left(\left(v^2 - \frac{2}{\mu}\psi(x)\right)^{1/2}\right)\right| dv.
+		\leqslant 2 \int_{v=0}^{\maxdome} \left|f_e^{\varphi}(x,v) - f_e^{\psi}(x,v)\right| dv
+		= 2 \int_{v=0}^{\maxdome} \left|f_{e,b}\left(\left(v^2 - \frac{2}{\mu}\varphi(x)\right)^{1/2}\right) - f_{e,b}\left(\left(v^2 - \frac{2}{\mu}\psi(x)\right)^{1/2}\right)\right| dv.
 	\end{align*}
 	Then, if $f_{e,b}$ is Lipschitz with constant $\lipfe$, we obtain
 	\begin{align*}
-		\left|n_e^{\varphi}(x) - n_e^{\psi}(x)\right| \leqslant 2 \lipfe \int_{v=0}^{\ve} \left|\left(v^2 - \frac{2}{\mu}\varphi(x)\right)^{1/2} - \left(v^2 - \frac{2}{\mu}\psi(x)\right)^{1/2}\right| dv.
+		\left|n_e^{\varphi}(x) - n_e^{\psi}(x)\right| \leqslant 2 \lipfe \int_{v=0}^{\maxdome} \left|\left(v^2 - \frac{2}{\mu}\varphi(x)\right)^{1/2} - \left(v^2 - \frac{2}{\mu}\psi(x)\right)^{1/2}\right| dv.
 	\end{align*} 
 	Using \cref{lem:maj_dist_square} yields
 	\begin{align*}
 		\left|n_e^{\varphi}(x) - n_e^{\psi}(x)\right| 
-		\leqslant 2 \lipfe \int_{v=0}^{\ve} \left|- \frac{2}{\mu}\varphi(x) + \frac{2}{\mu}\psi(x)\right|^{1/2} dv
-		= 2 \lipfe \ve \sqrt{\frac{2}{\mu}}\left|\varphi(x) -\psi(x)\right|^{1/2}.
+		\leqslant 2 \lipfe \int_{v=0}^{\maxdome} \left|- \frac{2}{\mu}\varphi(x) + \frac{2}{\mu}\psi(x)\right|^{1/2} dv
+		= 2 \lipfe \maxdome \sqrt{\frac{2}{\mu}}\left|\varphi(x) -\psi(x)\right|^{1/2}.
 	\end{align*}
 	If $f_{e,b}(\sqrt{\cdot})$ is Lipschitz with constant $\lipfesq$, we may directly write
 	\begin{align*}
-		\left|n_e^{\varphi}(x) - n_e^{\psi}(x)\right| \leqslant 2 \ve \lipfesq \frac{2}{\mu} \left|\varphi(x) - \psi(x)\right|.
+		\left|n_e^{\varphi}(x) - n_e^{\psi}(x)\right| \leqslant 2 \maxdome \lipfesq \frac{2}{\mu} \left|\varphi(x) - \psi(x)\right|.
 	\end{align*} 
 }
 
@@ -667,11 +709,11 @@ The estimates will rely on two particular cases, the we treat independently as l
 \end{proposition}
 
 \myproof{
-	Let $0 \leqslant y < x \leqslant 1$. For convenience, we represent $n_i(x)$ (resp. $n_i(y)$) as an integral with the artificial lower bound $-g_x(-\ve) \leqslant -\ve$ (resp. $-g_y(-\ve)$). Then
+	Let $0 \leqslant y < x \leqslant 1$. For convenience, we represent $n_i(x)$ (resp. $n_i(y)$) as an integral with the artificial lower bound $-g_x(-\maxdome) \leqslant -\maxdome$ (resp. $-g_y(-\maxdome)$). Then
 	\begin{align}\label{eq:def_ni_sym}
 		n_i(x) - n_i(y) 
-		&= 2 \int_{v=-g_x(-\ve)}^0 f_i(x_b(x,v),v_b(x,v)) dv - 2 \int_{v=-g_y(-\ve)}^0 f_i(x_b(y,v),v_b(y,v)) dv \notag\\
-		&= 2 \underbrace{\left[\int_{v=-g_x(-\ve)}^{-g_x(y)} f_i(x_b(x,v),v_b(x,v)) dv - \int_{v=-g_y(-\ve)}^{0} f_i(x_b(y,v),v_b(y,v)) dv\right]}_{\eqqcolon\,\mathcal{I}^-} \\
+		&= 2 \int_{v=-g_x(-\maxdome)}^0 f_i(x_b(x,v),v_b(x,v)) dv - 2 \int_{v=-g_y(-\maxdome)}^0 f_i(x_b(y,v),v_b(y,v)) dv \notag\\
+		&= 2 \underbrace{\left[\int_{v=-g_x(-\maxdome)}^{-g_x(y)} f_i(x_b(x,v),v_b(x,v)) dv - \int_{v=-g_y(-\maxdome)}^{0} f_i(x_b(y,v),v_b(y,v)) dv\right]}_{\eqqcolon\,\mathcal{I}^-} \\
 		&\quad + 2 \underbrace{\int_{v=-g_x(y)}^{0} f_i(x_b(x,v),v_b(x,v)) dv}_{\eqqcolon\,\mathcal{I}^+}. \notag
 	\end{align}
 
@@ -691,9 +733,9 @@ The estimates will rely on two particular cases, the we treat independently as l
 	\begin{align*}
 		w = -\left(v^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/2} \quad v = -\left(w^2 + 2 \left(\varphi(y) - \varphi(x)\right)\right)^{1/2}.
 	\end{align*}
-	Since $\mathcal{L}_i(x,v) = \mathcal{L}_i(y,w)$, this yields $x_b(x,v) = x_b(y,w)$ and $v_b(x,v) = v_b(y,w)$. The bounds $v\in[-g_x(-\ve),-g_x(y)]$ are exactly transported to $w\in[-g_y(-\ve),0]$. Renaming $w$ in $v$, we get
+	Since $\mathcal{L}_i(x,v) = \mathcal{L}_i(y,w)$, this yields $x_b(x,v) = x_b(y,w)$ and $v_b(x,v) = v_b(y,w)$. The bounds $v\in[-g_x(-\maxdome),-g_x(y)]$ are exactly transported to $w\in[-g_y(-\maxdome),0]$. Renaming $w$ in $v$, we get
 	\begin{align*}
-		\mathcal{I}^- = \int_{v=-g_y(-\ve)}^{0} f_i(x_b(y,v),v_b(y,v)) \left(\frac{-v}{\left(v^2 + 2 \left(\varphi(y) - \varphi(x)\right)\right)^{1/2}} - 1\right) dv.
+		\mathcal{I}^- = \int_{v=-g_y(-\maxdome)}^{0} f_i(x_b(y,v),v_b(y,v)) \left(\frac{-v}{\left(v^2 + 2 \left(\varphi(y) - \varphi(x)\right)\right)^{1/2}} - 1\right) dv.
 	\end{align*}
 	Since $\varphi(y) \geqslant \varphi(x)$, the factor of $f_i$ is nonpositive, and so is $\mathcal{I}^-$. Moreover, 
 	\begin{align*}
@@ -736,277 +778,23 @@ We define an operator $F : \K \mapsto \mathcal{C}^2([0,1],\mathbb{R})$ by the so
 \end{align*}
 where $n_i$ and $n_e$ are the ion and electron densities obtained with the characteristics induced by $\varphi$. 
 
-\begin{lem}[Coarse stability]
-	Assume all the hypotheses of the above lemmas are satisfied. \todo{Be more precise.}
-	For all $(\lambda,\mu) \in (\mathbb{R}_*^+)^2$, there exists parameters $(\alpha,\beta,\nu) \in (\mathbb{R}_*^+)^3$ such that $F(\K) \subset \K$.
-\end{lem}
-
-\myproof{
-	The function $F$ is solution to a Poisson problem with bounded continuous source term, so it enjoys $\mathcal{C}^2$ regularity. The boundary condition $F_{\varphi}(0)=F_{\varphi}'(0)=0$ are satisfied by construction. We turn to the stability of the variation estimates: owing to the boundedness of $n_i$ and $n_e$ stated above, we have
-	\begin{align*}
-		\begin{cases}
-			- \lambda^2 F''(x) \leqslant 8 \nu \left(\frac{\beta}{\alpha}\right)^{1/4} \left(\frac{1}{\alpha^{1/4}} + \beta^{1/4} + \frac{1}{\mu^{1/4}}\right), \\
-			- \lambda^2 F''(x) \geqslant \nu \frac{\kappa_1}{\sqrt{\beta} \left(\kappa_2+ \beta\right)^{1/2} \sqrt{1+\frac{1}{\mu}}}  - 2 \maxfe \sqrt{\frac{2\beta}{\mu}}
-		\end{cases}
-	\end{align*}
-	where
-	\begin{align*}
-		\kappa_1 \coloneqq \frac{\minfe (\domfeu^2 - \domfel^2) \domfel}{\sqrt{2}\domfeu}, \quad 
-		\kappa_2 \coloneqq \frac{\domfeu^2}{2}
-	\end{align*}
-	A sufficient condition for the stability is to obtain $\alpha \leqslant -F'' \leqslant \beta$. We will restrict our search to $0 < \alpha \leqslant \beta$ such that $\alpha\beta=1$. Then, sufficient conditions write
-	\begin{align*}
-		\begin{cases}
-			1 \leqslant \beta \\
-			8 \frac{\nu}{\lambda^2} \beta^{1/2} \left(\beta^{-1/4} + \beta^{1/4} + \frac{1}{\mu^{1/4}}\right) \leqslant \beta \\
-			\nu \frac{\kappa_1}{\sqrt{\beta} \left(\kappa_2+ \beta\right)^{1/2} \sqrt{1+\frac{1}{\mu}}}  - 2 \maxfe \sqrt{\frac{2\beta}{\mu}} \geqslant \beta^{-1}
-		\end{cases}
-		\quad\iff\quad
-		\begin{cases}
-			1 \leqslant \beta \\
-			1 + \beta^{1/2} + \frac{\beta^{1/4}}{\mu^{1/4}} - \frac{\lambda^2}{8 \nu} \beta \leqslant 0 \\
-			\nu \frac{\kappa_1 \sqrt{\beta} }{\left(\kappa_2+ \beta\right)^{1/2} \sqrt{1+\frac{1}{\mu}}}  \geqslant 1 + 2 \maxfe \sqrt{\frac{2}{\mu}} \beta^{3/2}
-		\end{cases}
-	\end{align*}
-	Using the coarse estimate $\beta^{1/4} \leqslant \beta^{1/2}$ on $1 \leqslant \beta$ yields
-	\begin{align*}
-		1 + \beta^{1/2} + \frac{\beta^{1/4}}{\mu^{1/4}} - \frac{\lambda^2}{8 \nu} \beta 
-		\leqslant 1 + \beta^{1/2} \left(1 + \frac{1}{\mu^{1/4}}\right) - \frac{\lambda^2}{8 \nu} \beta 
-		\coloneqq 1 + X \left(1 + \frac{1}{\mu^{1/4}}\right) - \frac{\lambda^2}{8 \nu} X^2,
-	\end{align*}
-	and this concave polynomial is negative for $\beta$ large enough. \todo{Do the computation if useful}
-	
-	Moreover, since $1 \geqslant \beta$ and the function $\beta \to \frac{\sqrt{\beta}}{\sqrt{\kappa_2 + \beta}}$ is increasing, the third condition is implied by
-	\begin{align*}
-		\nu \frac{\kappa_1}{\left(\kappa_2+ 1\right)^{1/2} \sqrt{1+\frac{1}{\mu}}}  \geqslant 1 + 2 \maxfe \sqrt{\frac{2}{\mu}} \beta^{3/2}.
-	\end{align*}
-}
-
-\todo{
-In the future:
-\begin{itemize}
-\item Now that we have estimates, write it in function of $\alpha$ and $\beta$, and see how to get stability of the set of strongly concave functions satisfying all the hypotheses by the Poisson problem (essentially, find tweaks of $\lambda$, $\mu$, $\nu$, $\alpha$ and/or $\beta$ such that the estimates are propagated).
-\item If $f_{e,b}$ vanishes in a neighbourhood of $(0,0)$ (or decreases fast enough, see how fast), show that $f_i$ is bounded.
-\item Under that same assumption, we should obtain stronger continuity over $n_i$, and $n_i$ may be continuous with respect to $\varphi$ (in the same sense as $n_e$ in \cref{lem:ne_continuous_phi}).
-\item If the estimates with respect to $|\varphi - \psi|_{\infty}$ succeed, define numerical scheme and see what we can say about it.
-\end{itemize}
-}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%% archives
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%\subsection{Upper bounds on the densities}
-%
-%We want to obtain estimates on $n_i - n_e$. We make the following assumptions:
-%\begin{itemize}
-%\item The electron density $f_e$ satisfies the boundary condition, and is bounded by a constant $\maxfe \geqslant 0$. 
-%\item The potential $\varphi$ is strongly concave, i.e. there exists $\alpha>0$ such that $\varphi''(x) \leqslant - \alpha$ uniformly over $x\in[0,1]$.
-%\item We have $\varphi(0) = \varphi'(0) = 0$.
-%\end{itemize}
-%The assumptions on $\varphi$ yield that
-%\begin{align}\label{eq:phi_concave_consequences}
-%	\varphi'(x) \leqslant- \alpha x, \quad \varphi(x) \leqslant - \alpha \frac{x^2}{2}.
-%\end{align}
-%
-%Let us first focus on $n_e(x)$. The characteristics of the electron density are the level lines of
-%\begin{align}\label{eq:def_Le}
-%	\mathcal{L}_e(x,v) \coloneqq \frac{v^2}{2} - \frac{1}{\mu} \varphi(x).
-%\end{align}
-%Since $\varphi$ is strongly concave, these curves are closed. Since $f_e$ satisfies the homogeneous boundary condition, its support is embedded in $\left\{(x,v) \ |\ \frac{v^2}{2} - \frac{1}{\mu} \varphi(x) \leqslant \frac{0^2}{2} - \frac{1}{\mu} \varphi(1)\right\}$. In particular, we denote by $\ve$ the extremal speed of the support, given by
-%\begin{align}\label{eq:def_ve}
-%	\ve \coloneqq \sqrt{-\frac{2}{\mu} \varphi(1)}.
-%\end{align}
-%We can roughly majorize
-%\begin{align*}
-%	n_e(x) = \int_{v\in\mathbb{R}} f_e(x,v) dv \leqslant \int_{v=-\ve}^{\ve} \maxfe dv = 2 \maxfe \ve \leqslant 2 \maxfe \sqrt{-\frac{2}{\mu} \varphi(1)}.
-%\end{align*}
-%
-%The estimates on $n_i$ are slightly more technical. Let the ion Lyapunov function be defined as
-%\begin{align}\label{eq:def_Li}
-%	\mathcal{L}_i(x,v) \coloneqq \frac{v^2}{2} + \varphi(x).
-%\end{align}
-%In the sequel, we will heavily rely on the level lines of $\mathcal{L}_i$ to partition the space. We distinguish the \emph{critical characteristic} as the curve $\left\{\mathcal{L}_i = 0\right\}$.
-%Let $x\in[0,1]$ and $v \in \mathbb{R}_{-}$. We denote by $(x_b(x,v),v_b(x,v))$ the intersection of the boundary $\left\{x=0\right\}\cap\left\{v=0\right\}$ with the characteristic issued from $(x,v)$, equal to
-%\begin{align*}
-%	\vv{x_b(x,v) \\ v_b(x,v)} \coloneqq 
-%	\begin{cases}
-%		\vv{\varphi^{-1}\left(\frac{v^2}{2} + \varphi(x)\right) \\ 0} & \text{if } \mathcal{L}_i(x,v) \leqslant 0, \\
-%		\vv{0 \\ - \sqrt{\frac{v^2}{2} + \varphi(x)}} & \text{if } \mathcal{L}_i(x,v) > 0.
-%	\end{cases}
-%\end{align*}
-%In the following paragraph, we use $(x(t),v(t))_{t\leqslant0}$ to denote the characteristic reaching $(x_b(x,v),v_b(x,v))$ at $t=0$. 
-%We use the symmetry of $f_i$ to write 
-%\begin{align*}
-%	n_i(x) = 2 \int_{v\in\mathbb{R}^{-}} f_i(x_b(x,v), v_b(x,v)) dv = 2 \int_{v\in\mathbb{R}^{-}}\int_{t=-\infty}^{0} f_e(x(t),v(t)) dt dv.
-%\end{align*}
-%The lower bound $t \to -\infty$ is artificial, since the characteristic exits the support of $f_e$ in finite time. We will split the double integral in three domains:
-%\begin{enumerate}
-%\item $\DomUpL$ will be $\left\{(v,t) \in \mathbb{R}_{-}^2 \ |\ \mathcal{L}_i(x,v) \leqslant 0 \text{ and } x(t) \leqslant x \right\}$. This is the region contained between the $x-$axis, the critical characteristic and the vertical line going through $x$.
-%\item $\DomUpR$ is $\left\{(v,t) \in \mathbb{R}_{-}^2 \ |\ \mathcal{L}_i(x,v) \leqslant 0 \text{ and } x < x(t) \leqslant 1 \right\}$. It cover the part of the domain intersecting $\left\{\mathcal{L}_i \leqslant 0\right\} \setminus \DomUpL$.
-%\item $\DomLow$ is defined by $\left\{(v,t) \in \mathbb{R}_{-}^2 \ |\ \mathcal{L}_i(x,v) > 0 \text{ and } -\ve \leqslant v(t) \right\}$. 
-%\end{enumerate}
-%The corresponding phase space decomposition is represented in \cref{fig:charmaps_domainmap}.
-%
-%\begin{figure}
-%	\centering
-%	\includegraphics[width=0.5\linewidth]{images/fpcharmaps_domainmap}
-%	\caption{Representation in the phase space $(x,v)$ of the decomposition of $(x,t)\in\mathbb{R}_-^2$ in $\DomUpL\cup\DomUpR \cup \DomLow$.}
-%	\label{fig:charmaps_domainmap}
-%\end{figure}
-%
-%Since $f_e(x(t),v(t))$ vanishes outside $\DomUpL \cup \DomUpR \cup \DomLow$, we may exactly decompose $n_i$ in 
-%\begin{align*}
-%	\frac{n_i(x)}{2} = \underbrace{\iint_{(v,t) \in \DomUpL} f_e(x(t),v(t)) dt dv}_{\IntUpL} + \underbrace{\iint_{(v,t) \in \DomUpR} f_e(x(t),v(t)) dt dv}_{\IntUpR} + \underbrace{\iint_{(v,t) \in \DomLow} f_e(x(t),v(t)) dt dv}_{\IntLow} 
-%\end{align*}
-%
-%Each term will be bound separately. 
-%
-%\paragraph{Bound on $\IntUpL$}
-%
-%Let $v_0(x) \coloneqq \sqrt{-2\varphi(x)}$ be the velocity such that $(x, -v_0(x))$ belongs to the critical characteristic. 
-%The characteristics in the domain $\DomUpL$ are joining points $(x,v)$, with $v \in [-v_0(x),0]$, with points $(x_b(x,v), 0)$. Therefore, we may use the reparametrization 
-%\begin{align*}
-%	y = x(t), \quad dy = \dot{x}(t) dt = v(t) dt = - \left(v^2 + 2 \left(\varphi(x) - \varphi(x(t))\right)\right)^{1/2} dt = - \left(v^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/2} dt	
-%\end{align*}
-%The integral $\IntUpL$ becomes
-%\begin{align*}
-%	\IntUpL = \int_{v=-v_0(x)}^0 \int_{y=x}^{x_b(x,v)} f_e(y,- \left(v^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/2}) \frac{-1}{\left(v^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/2}} dy dv.
-%\end{align*}
-%By exchanging the bounds of the integrals along $y$, and using $f_e \leqslant \maxfe$, we get
-%\begin{align*}
-%	\IntUpL \leqslant \maxfe \int_{v=-v_0(x)}^0 \int_{y=x_b(x,v)}^{x} \frac{1}{\left(v^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/2}} dy dv.
-%\end{align*}
-%In order to use the explicit $v^2$, we use Fubini theorem to switch the order of integration (since everything is positive). To do this, we write
-%\begin{align*}
-%	\begin{cases}
-%		- v_0(x) \leqslant v \leqslant 0 \\
-%		x_b(x,v) \leqslant y \leqslant x 
-%	\end{cases}
-%	\quad \iff \quad 
-%	\begin{cases}
-%		0 \leqslant y \leqslant x \\
-%		- v_0(x) \leqslant v \leqslant - g_x(y)
-%	\end{cases}
-%\end{align*}
-%where $y = x_b(x,v) = \varphi^{-1}\left(\frac{v^2}{2} + \varphi(x)\right)$ is equivalent to $v = - g_x(y) \coloneqq - \left(2\left(\varphi(y) - \varphi(x)\right)\right)^{1/2}$. In the sequel, we drop the $x$ and simply write $g(y)$. The function $g : [0,x] \mapsto \mathbb{R}^{+}$ is well-defined, since $y \leqslant x \implies \varphi(y) \geqslant \varphi(x)$. By the assumption of strong concavity of $\varphi$, $g$ is positive whenever $y < x$. Finally, using that $v_0(x) = g(0)$, may now write 
-%\begin{align*}
-%	\IntUpL \leqslant \maxfe \int_{y=0}^{x} \int_{v=-v_0(x)}^{-g(y)}  \frac{1}{\left(v^2 - g^2(y)\right)^{1/2}} dv dy \underset{\text{with }w\coloneqq g(y)-v}{=} \maxfe \int_{y=0}^{x} \int_{w=0}^{g(0)-g(y)}  \frac{1}{\left(w^2 + 2 w g(y)\right)^{1/2}} dv dy.
-%\end{align*}
-%By integration with $\frac{d}{dy} [\sinh^{-1}\left(\sqrt{\frac{y}{a}}\right)] = \frac{1}{(y^2 + 2 a y)^{1/2}}$, we obtain
-%\begin{align*}
-%	\IntUpL \leqslant \maxfe \int_{y=0}^{x} \left[\sinh^{-1}\left(\sqrt{\frac{v}{g(y)}}\right)\right]^{g(0)-g(y)}_{0} dv = \maxfe \int_{y=0}^{x} \sinh^{-1}\left(\sqrt{\frac{g(0)-g(y)}{g(y)}}\right) dv.
-%\end{align*}
-%We use the coarse estimates $\sinh^{-1}(z) \leqslant z$ and $\sqrt{\frac{a-b}{b}} \leqslant \sqrt{\frac{a}{b}}$ to reduce the expression to
-%\begin{align*}
-%	\IntUpL \leqslant \maxfe \sqrt{g(0)} \int_{y=0}^{x} \frac{1}{\sqrt{g(y)}} dv = \maxfe \sqrt{g(0)} \int_{y=0}^{x} \frac{1}{\left(2\left(\varphi(y) - \varphi(x)\right)\right)^{1/4}} dv.
-%\end{align*}
-%Using the strong concavity of $\varphi$, and the sign $-\varphi'(y) \geqslant 0$, we get
-%\begin{align*}
-%	\varphi(y) - \varphi(x) \geqslant \frac{\alpha}{2} |x - y|^2 - \varphi'(y)(x-y) \geqslant \frac{\alpha}{2} (x - y)^2.
-%\end{align*}
-%With this, we may finally write
-%\begin{align*}
-%	\IntUpL \leqslant \maxfe \sqrt{g(0)} \int_{y=0}^{x} \frac{1}{\alpha^{1/4}\left(x-y\right)^{1/2}} dv = \frac{2 \maxfe}{\alpha^{1/4}} \sqrt{g(0) x} = \frac{2 \maxfe}{\alpha^{1/4}} \sqrt{\sqrt{-2\varphi(x)} x} \leqslant \frac{2 \maxfe}{\alpha^{1/4}} \left(-2\varphi(1)\right)^{1/4}.
-%\end{align*}
-%
-%\paragraph{Bound on $\IntUpR$}
-%
-%We use the same reparametrization as for $\IntUpR$, but with $y \in [x,1]$, to obtain
-%\begin{align*}
-%	\IntUpR \leqslant \maxfe \int_{v=-v_0(x)}^{0} \int_{y=x}^{1} \frac{1}{\left(v^2 + 2(\varphi(x) - \varphi(y))\right)^{1/2}} dy dv.
-%\end{align*}
-%On $y \geqslant x$, we may directly use
-%\begin{align*}
-%	\varphi(x) - \varphi(y) \geqslant \frac{\alpha}{2} |y - x|^2 - \varphi'(x) (y-x) \geqslant \frac{\alpha}{2} (y - x)^2
-%\end{align*}
-%to get
-%\begin{align*}
-%	\IntUpR \leqslant \maxfe \int_{v=-v_0(x)}^{0} \int_{y=x}^{1} \frac{1}{\left(v^2 + \alpha(y-x)^2\right)^{1/2}} dy dv \leqslant \maxfe \max\left(1,\frac{1}{\sqrt{\alpha}}\right) \int_{v=0}^{v_0(x)} \int_{z=0}^{1-x} \frac{1}{\left(v^2 + z^2\right)^{1/2}} dy dv.
-%\end{align*}
-%By switching to polar coordinates over the (larger) domain $(\theta,r) \in [0,\frac{\pi}{2}] \times [0,\sqrt{v_0(x)^2 + (1-x)^2}]$, we conclude to 
-%\begin{align*}
-%	\IntUpR \leqslant \maxfe \max\left(1,\frac{1}{\sqrt{\alpha}}\right) \frac{\pi}{2} \sqrt{v_0(x)^2 + (1-x)^2} \leqslant \maxfe \max\left(1,\frac{1}{\sqrt{\alpha}}\right) \frac{\pi}{2} \sqrt{1 - 2\varphi(1)}.
-%\end{align*} 
-%
-%\paragraph{Bound on $\IntLow$}
-%
-%The domain $\DomLow$ is covered by characteristics linking $x=1$ to $x=0$. We may use the same reparametrization within fixed bounds over $y$:
-%\begin{align*}
-%	\IntLow \leqslant \maxfe \int_{v=-\ve}^{-v_0(x)} \int_{y=0}^{1} \frac{1}{\left(v^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/2}} dy dv = \maxfe \int_{y=0}^{1} \int_{v=-\ve}^{-v_0(x)} \frac{1}{\left(v^2 + 2 \left(\varphi(x) - \varphi(y)\right)\right)^{1/2}} dy dv.
-%\end{align*}
-%We will use the same argument as for $\IntUpR$, but with characteristics ending on $x=0$ instead of $x=x$. Our first step is then to replace $v$ by $w$ the velocity at $x=0$, defined by $\frac{v^2}{2} + \varphi(x) = \frac{w^2}{2} + 0$. We have
-%\begin{align*}
-%	 w = - \left(v^2 + 2 \varphi(x)\right)^{1/2} \in [-\we, 0], \quad v = - \left(v^2 - 2 \varphi(x)\right)^{1/2}, \quad dv = \frac{-w}{\left(w^2-2\varphi(x)\right)^{1/2}} dw,
-%\end{align*}
-%where $\we \coloneqq \left(\ve^2 + 2 \varphi(x)\right)^{1/2} \leqslant \ve \leqslant \sqrt{-2\varphi(1)}$. Using the estimate $-\varphi(y) \geqslant \alpha \frac{y^2}{2}$, we conclude similarly that
-%\begin{align*}
-%	\IntLow 
-%	\leqslant \maxfe \int_{y=0}^{1} \int_{w=-\we}^{0} \frac{1}{\left(w^2 - 2\varphi(y)\right)^{1/2}} dy dv 
-%	= \maxfe \int_{y=0}^{1} \int_{w=0}^{\we} \frac{1}{\left(w^2 + \alpha y^2\right)^{1/2}} dy dv
-%	\leqslant \maxfe \max\left(1,\frac{1}{\sqrt{\alpha}}\right) \frac{\pi}{2} \sqrt{1 - 2 \varphi(1)}.
-%\end{align*}
-%
-%In conclusion, we obtained the uniform bound
-%\begin{align*}
-%	n_i(x) \leqslant \frac{4}{\alpha^{1/4}} \left(-2\varphi(1)\right)^{1/4} + 4 \maxfe \max\left(1,\frac{1}{\sqrt{\alpha}}\right) \frac{\pi}{2} \sqrt{1 - 2 \varphi(1)}.
-%\end{align*}
-%
-%\subsection{Lower bound on $n_i$}
-%
-%Let us consider that $f_{e,b}$ is positive on a segment. More precisely, we assume that there exists $0 \leqslant \domfel < \domfeu \leqslant \ve$ and $\minfe > 0$ such that $f_e([-\domfeu,-\domfel]) \geqslant \minfe$.
-%The value $\minfe$ is propagated along every electron characteristic crossing $(x=0,v\in[-\domfeu,-\domfel])$, so that we may use the lower estimate
-%\begin{align*}
-%	f_e(x,v) \geqslant \minfe \,\textbf{1}_{\left\{\mathcal{L}_e(0,\domfel) \leqslant \mathcal{L}_e(x,v) \leqslant \mathcal{L}_e(0,\domfeu)\right\}}.
-%\end{align*}
-%Let us parametrize the electron characteristic issued from $(0,-\domfeu)$ by $(\overline{y}(v), v)$, with $v\in[-\domfeu,0]$. Let $x\in[0,1]$, and define $\underline{w}$ and $\overline{w}$ by
-%\begin{align*}
-%	\begin{cases}
-%		\mathcal{L}_i(0,-\domfeu) = \mathcal{L}_i(x,-\underline{w}), \\
-%		\mathcal{L}_i(0,-\domfel) = \mathcal{L}_i(x,-\overline{w})
-%	\end{cases}
-%	\quad \text{that is} \quad
-%	\begin{cases}
-%		\underline{w} \coloneqq \left(\frac{\domfeu^2}{2} - 2 \varphi(x)\right)^{1/2} \\
-%		\overline{w} \coloneqq \left(\frac{\domfel^2}{2} - 2 \varphi(x)\right)^{1/2}
-%	\end{cases}
-%\end{align*}
-%
-%\begin{figure}
-%	\centering
-%	\includegraphics[width=0.5\linewidth]{images/fpcharmaps_lowerboundni}
-%	\caption{Notations for the lower bound on $n_i$.}
-%	\mysubcaption{The coloured area corresponds to the domain $\mathcal{L}_e(0,\domfel) \leqslant \mathcal{L}_e(x,v) \leqslant \mathcal{L}_e(0,\domfeu)$, on which we know that $f_e \geqslant \minfe$. The parametrization $(\overline{y}(w),w)$ of the electron characteristic crossing $(0,-\domfeu)$ is equivalent to $(y,-h(y))$.}
-%	\label{fig:charmaps_lowerboundni}
-%\end{figure}
-%
-%Then, using the (now classical) reparametrization, the ion density satisfies
-%\begin{align*}
-%	n_i(x) \geqslant \minfe \int_{w=-\overline{w}}^{-\underline{w}} \int_{y=0}^{\overline{y}(w)} \frac{1}{\left(w^2 + 2\left(\varphi(x) - \varphi(y)\right)\right)^{1/2}} dy dw.
-%\end{align*}
-%As for the integral $\IntLow$, we wish to use the velocity at $x=0$ instead of $x=x$. We define $v\in[-\domfeu,-\domfel]$ by
-%\begin{align*}
-%	\mathcal{L}_i(0,v) = \mathcal{L}_i(x,w), \quad w = - \left(v^2 - 2 \varphi(x)\right)^{1/2}, \quad dw = \frac{- v}{\left(v^2 - 2 \varphi(x)\right)^{1/2}}.
-%\end{align*}
-%This yields
-%\begin{align*}
-%	n_i(x) \geqslant \minfe \int_{v=-\domfeu}^{-\domfel} \int_{y=0}^{\overline{y}(w(v))} \frac{1}{\left(v^2 - 2\varphi(y)\right)^{1/2}} dy  \frac{-v}{\left(v^2 - 2 \varphi(x)\right)^{1/2}} dv.
-%\end{align*}
-%The upper bound $\overline{y}(w(v))$ is equal to $\varphi^{-1}\left(\frac{\mu}{2}\left(v^2 - \domfeu^2\right)\right)$.
-%Since $-\varphi(z) \leqslant -\varphi(1)$ for all $z$, this gives
-%\begin{align*}
-%	n_i(x) \geqslant \minfe \int_{v=-\domfeu}^{-\domfel} \overline{y}(w(v)) \frac{-v}{v^2 - 2\varphi(1)} dv = \minfe \int_{v=-\domfeu}^{-\domfel} \varphi^{-1}\left(\frac{\mu}{2}\left(v^2 - \domfeu^2\right)\right) \frac{-v}{v^2 - 2\varphi(1)} dv.
-%\end{align*}
-%
-%Let $v_* \in ]\domfel,\domfeu[$ be the velocity such that $v_*^2 - \domfel^2 = \frac{\domfeu^2 - \domfel^2}{2}$. We split the integral on $[-\domfeu,-v_*[ \cup [-v_*,\domfel]$ and use the decreasing monotonicity of $\varphi^{-1}$ to write
-%\begin{align*}
-%	n_i(x) 
-%	&\geqslant 0 + \varphi^{-1}\left(\frac{\mu}{2}\left(v_*^2 - \domfeu^2\right)\right) \minfe \int_{v=-v_*}^{-\domfel} \frac{-v}{v^2 - 2\varphi(1)} dv \\
-%	&= \frac{\minfe}{2} \varphi^{-1}\left(\frac{\mu}{4}\left(\domfel^2 - \domfeu^2\right)\right) \log\left(\frac{v_*^2 - 2 \varphi(1)}{\domfel^2 - 2 \varphi(1)}\right) \\
-%	&\geqslant \frac{\minfe}{2} \varphi^{-1}\left(\frac{\mu}{4}\left(\domfel^2 - \domfeu^2\right)\right) \log\left(1 + \frac{\domfeu^2 - \domfel^2}{\domfel^2 - 2 \varphi(1)}\right).
-%\end{align*}
+\paragraph{Stability}
+The function $F$ is solution to a Poisson problem with bounded continuous source term, so it enjoys $\mathcal{C}^2$ regularity in space. The boundary condition $F_{\varphi}(0)=F_{\varphi}'(0)=0$ are satisfied by construction. We turn to the stability of the variation estimates: owing to the boundedness of $n_i$ and $n_e$ stated above, we have
+\begin{align*}
+	\begin{cases}
+		- F''(x) \geqslant \frac{\kappa_1}{\sqrt{\beta} \left(\kappa_2+ \beta\right)^{1/2}}  - \kappa_3, \\
+		- F''(x) \leqslant \frac{\kappa_4}{\alpha^{1/4}} \left(\beta^{1/4} + \kappa_5\right)
+	\end{cases}
+\end{align*}
+where
+\begin{align*}
+	\kappa_1 \coloneqq \frac{\nu \sqrt{2} \minfe (\maxsuppe^2 - \minsuppe^2) \minsuppe}{\lambda^2\maxsuppe \sqrt{1+\frac{1}{\mu}}}, \quad 
+	\kappa_2 \coloneqq \frac{\maxsuppe^2}{2}, \quad
+	\kappa_3 \coloneqq \frac{2 \maxfe \maxdome}{\lambda^2}, \quad
+	\kappa_4 \coloneqq \frac{4\nu (1+\sqrt{2})}{\lambda^2}, \quad
+	\kappa_5 \coloneqq 4 \sqrt{2 \maxdome}.
+\end{align*}
+A sufficient condition for the stability $F(\K) \subset \K$ is to obtain $\alpha \leqslant -F'' \leqslant \beta$. \intern{We may not always have a solution $(\alpha,\beta)$... It depends on the coefficients.}
 
 %\bibliographystyle{alpha}
 %\bibliography{CEMRACS.bib}
