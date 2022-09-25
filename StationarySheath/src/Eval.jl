@@ -5,18 +5,18 @@
 export 𝓛ₑ, 𝓛ᵢ
 
 """
-    $(SIGNATURES)
+$(SIGNATURES)
 
-    Electric infinitesimal energy.
+Electric infinitesimal energy.
 """
 function 𝓛ₑ(params::Params, phix, v)
     return v.^2 / 2 .- 1/params.μ .* phix
 end
 
 """
-    $(SIGNATURES)
+$(SIGNATURES)
 
-    Ion infinitesimal energy.
+Ion infinitesimal energy.
 """
 function 𝓛ᵢ(phix, v) # bscrL
     return v.^2 / 2 .+ phix
@@ -29,13 +29,13 @@ end
 export evaluate_poly, eval_phi, eval_phi_dx
 
 """
-    $(SIGNATURES)
+$(SIGNATURES)
 
-    Return the polynomial 
-    ```math
-        a_1 + x (a_2 + x \\dots (a_{n-1} + x a_n))
-    ```
-    with `eval```=[a_1,\\dots,a_n]``.
+Return the polynomial 
+```math
+    a_1 + x (a_2 + x \\dots (a_{n-1} + x a_n))
+```
+with `eval```=[a_1,\\dots,a_n]``.
 """
 function evaluate_poly(eval, x)
     res = 0.0*x; # higher degree coefficient
@@ -46,18 +46,18 @@ function evaluate_poly(eval, x)
 end
 
 """
-    $(SIGNATURES)
+$(SIGNATURES)
 
-    Value of ϕ at `x`.
+Value of ϕ at `x`.
 """
 function eval_phi(phi::Phidata_poly, params::Params, x)
     return sum((phi.coeffs .* [evaluate_poly(horn, x) for horn = phi.horner])')'
 end
 
 """
-    $(SIGNATURES)
+$(SIGNATURES)
 
-    Value of ϕ' at `x`.
+Value of ϕ' at `x`.
 """
 function eval_phi_dx(phi::Phidata_poly, params::Params, x)
     return sum((phi.coeffs .* [evaluate_poly(horn, x) for horn = phi.horner_dx])')'
@@ -68,9 +68,9 @@ end
 ####################################
 
 """
-    $(SIGNATURES)
+$(SIGNATURES)
 
-    Value of ϕ at `x`.
+Value of ϕ at `x`.
 """
 function eval_phi(phi::Phidata_grid, params::Params, x)
     # linear interpolation 
@@ -80,9 +80,9 @@ function eval_phi(phi::Phidata_grid, params::Params, x)
 end
 
 """
-    $(SIGNATURES)
+$(SIGNATURES)
 
-    Value of ϕ' at `x`.
+Value of ϕ' at `x`.
 """
 function eval_phi_dx(phi::Phidata_grid, params::Params, x)
     # archibasic finite differences
@@ -97,12 +97,13 @@ end
 export get_v_char_e, get_v_char_e!
 
 """
-    $(SIGNATURES)
+$(SIGNATURES)
 
-    Return the negative ``v`` such that
-    ```math
-        \\frac{v^2}{2} - \\frac{1}{\\mu} \\phi(x) = \\frac{v_0^2}{2} - \\frac{1}{\\mu} \\phi(x_0)
-    ```    
+Return the negative ``v`` such that
+
+```math
+    \\frac{v^2}{2} - \\frac{1}{\\mu} \\phi(x) = \\frac{v_0^2}{2} - \\frac{1}{\\mu} \\phi(x_0)
+```    
 """
 function get_v_char_e(params::Params, v0, phix0, phix)
     res = v0.^2 .- 2.0./params.μ .* (phix0 .- phix)
@@ -126,12 +127,13 @@ end
 export get_v_char_i, get_v_char_i!
 
 """
-    $(SIGNATURES)
+$(SIGNATURES)
 
-    Return the negative ``v`` such that
-    ```math
-        \\frac{v^2}{2} + \\phi(x) = \\frac{v_0^2}{2} + \\phi(x_0)
-    ```
+Return the negative ``v`` such that
+
+```math
+    \\frac{v^2}{2} + \\phi(x) = \\frac{v_0^2}{2} + \\phi(x_0)
+```
 """
 function get_v_char_i(v0, phix0, phix)
     res = v0.^2 .+ 2.0 .* (phix0 .- phix)
@@ -159,13 +161,13 @@ end
 export eval_fe!, eval_fe
 
 """
-    $(SIGNATURES)
+$(SIGNATURES)
 
-    Return the value ``f_e(x,v)``. 
+Return the value ``f_e(x,v)``. 
 
-    Note that the non-emitting boundary condition has precedence over
-    the prescribed value ``f_{e,b}``, and the result will be 0
-    whenever 𝓛ₑ(x,v) ⩾ 𝓛ₑ(1,0).
+Note that the non-emitting boundary condition has precedence over
+the prescribed value ``f_{e,b}``, and the result will be 0
+whenever 𝓛ₑ(x,v) ⩾ 𝓛ₑ(1,0).
 """
 function eval_fe!(res, f_eb::Feb, params::Params, phix, v)
     res .= 𝓛ₑ(params, phix, v) # temp: electrical energy

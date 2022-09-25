@@ -5,11 +5,11 @@
 export build_fe, build_fi
 
 """
-    $(SIGNATURES)
+$(SIGNATURES)
 
-    Evaluation of ``f_e`` on the regular grid meshx × meshve. 
+Evaluation of ``f_e`` on the regular grid meshx × meshve. 
 
-    The speed mesh is computed to fit 0 ⩽ 𝓛ₑ ⩽ 𝓛ₑ(1,0).
+The speed mesh is computed to fit 0 ⩽ 𝓛ₑ ⩽ 𝓛ₑ(1,0).
 """
 function build_fe!(fe::Matrix, params::Params, f_eb::Feb, phix::Vector{Float64})
     meshve = collect(LinRange(get_v_char_e(params, 0.0, phix[end], 0.0), 0.0, params.Nve+1))
@@ -30,10 +30,9 @@ end
 #     |            \_ 
 
 """
-    $(SIGNATURES)
-    
-    Approximation of ``f_i`` on a regular grid meshx × meshvi.
+$(SIGNATURES)
 
+Approximation of ``f_i`` on a regular grid meshx × meshvi.
 """
 function build_fi!(fi::Matrix, params::Params, f_eb::Feb, phix::Vector{Float64}, phidx::Vector{Float64})
     meshvi = collect(LinRange(get_v_char_e(params, 0.0, phix[end], 0.0), 0.0, params.Nvi+1))
@@ -104,9 +103,9 @@ end
 export ploot
 
 """
-    $(SIGNATURES)
-    
-    Plot and wait for user input.
+$(SIGNATURES)
+
+Plot and wait for user input.
 """
 function ploot(mesh::Mesh, value::Vector{Float64}, tag::String; erase::Bool=true)
     println("Plotting $tag (press enter to go on)")
@@ -125,9 +124,9 @@ end
 export diags_loop, diags_end
 
 """
-    $(SIGNATURES)
-    
-    Aggregation of diagnostics performed during the fixed-point loop.
+$(SIGNATURES)
+
+Aggregation of diagnostics performed during the fixed-point loop.
 """
 function diags_loop(params::Params, phi::Phidata, ni::Vector{Float64}, ne::Vector{Float64}, 
     phix::Vector{Float64}, phixp::Vector{Float64}, n::Int, eps::Float64)
@@ -144,9 +143,9 @@ function diags_loop(params::Params, phi::Phidata, ni::Vector{Float64}, ne::Vecto
 end
 
 """
-    $(SIGNATURES)
-    
-    Aggregation of diagnostics performed at the end of the program.
+$(SIGNATURES)
+
+Aggregation of diagnostics performed at the end of the program.
 """
 function diags_end(params::Params, phi::Phidata, f_eb::Feb, ni::Vector{Float64}, ne::Vector{Float64}, 
     phix::Vector{Float64}, phidx::Vector{Float64}, n::Int)

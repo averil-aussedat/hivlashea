@@ -4,16 +4,16 @@
 ####################################
 
 """
-    $(SIGNATURES)
+$(SIGNATURES)
 
-    Compute the integral of f_e along the ion characteristic reaching ``(x_b=0,v_b<0)`` at ``\\tau=0``.
-    Uses 
-    ```math
-        \\int_{\\tau=-\\infty}^{0} f_e(x(\\tau),v(\\tau))
-        = \\int_{z=0}^{1} \\frac{f_e(z,-\\sqrt{v_b^2 - 2*\\phi(z)})}{-\\sqrt{v_b^2 - 2*\\phi(z)}} dz
-    ```
-    and a trapeze integral on the points ``(z,-g_z(v_b))`` s.t. ``z\\in``meshx.
-    Preallocated vectors vi and toint will be modified by the function.
+Compute the integral of ``f_e`` along the ion characteristic reaching ``(x_b=0,v_b<0)`` at ``\\tau=0``.
+Use
+```math
+    \\int_{\\tau=-\\infty}^{0} f_e(x(\\tau),v(\\tau))
+    = \\int_{z=0}^{1} \\frac{f_e(z,-\\sqrt{v_b^2 - 2*\\phi(z)})}{-\\sqrt{v_b^2 - 2*\\phi(z)}} dz
+```
+and a trapeze integral on the points ``(z,-g_z(v_b))`` s.t. ``z\\in``meshx.
+Preallocated vectors `vi` and `toint` will be modified by the function.
 """
 function integral_char_xb0!(vi::Vector{Float64}, toint::Vector{Float64}, params::Params, vb::Float64, phix::Vector{Float64}, f_eb::Feb)
     get_v_char_i!(vi, vb, 0.0, phix)
@@ -23,10 +23,10 @@ function integral_char_xb0!(vi::Vector{Float64}, toint::Vector{Float64}, params:
 end
 
 """
-    $(SIGNATURES)
+$(SIGNATURES)
 
-    Special case of the critical characteristic:
-    use of a rectangle integration scheme to avoid the equilibrium point ``(x=0,v=0)``.
+Special case of the critical characteristic:
+use of a rectangle integration scheme to avoid the equilibrium point ``(x=0,v=0)``.
 """
 function integral_char_00!(vi::Vector{Float64}, toint::Vector{Float64}, params::Params, phix::Vector{Float64}, f_eb::Feb)
     get_v_char_i!(vi, 0.0, 0.0, phix)
@@ -36,16 +36,16 @@ function integral_char_00!(vi::Vector{Float64}, toint::Vector{Float64}, params::
 end
 
 """
-    $(SIGNATURES)
-    
-    Compute the integral of f_e along the ion characteristic reaching ``(x_b>0,v_b=0)`` at ``\\tau=0``.
-    Here ``x_b`` is known through ``\\phi(x_b)`` only. Uses 
-    ```math
-        \\int_{\\tau=-\\infty}^{0} f_e(x(\\tau),v(\\tau))
-        = \\int_{v=vmin}^{0} \\frac{f_e(x(v),v)}{-\\phi'(x(v))} dv
-    ```
-    and a trapeze integral on the points ``(x(v),v)`` s.t. ``x(v)\\in``meshx.
-    Preallocated vectors vi and toint will be modified by the function.
+$(SIGNATURES)
+
+Compute the integral of ``f_e`` along the ion characteristic reaching ``(x_b>0,v_b=0)`` at ``\\tau=0``.
+Here ``x_b`` is known through ``\\phi(x_b)`` only. Use
+```math
+    \\int_{\\tau=-\\infty}^{0} f_e(x(\\tau),v(\\tau))
+    = \\int_{v=vmin}^{0} \\frac{f_e(x(v),v)}{-\\phi'(x(v))} dv
+```
+and a trapeze integral on the points ``(x(v),v)`` s.t. ``x(v)\\in``meshx.
+Preallocated vectors `vi` and `toint` will be modified by the function.
 """
 function integral_char_vb0!(vi::Vector{Float64}, toint::Vector{Float64}, params::Params, ixb::Int, phix::Vector{Float64}, phidx::Vector{Float64}, f_eb::Feb)
     get_v_char_i!(vi[ixb:end], 0.0, phix[ixb], phix[ixb:end])
@@ -61,12 +61,12 @@ end
 export compute_ne!, compute_ni!
 
 """
-    $(SIGNATURES)
-    
-    Computation of 
-    ```math
-        n_e(x) = \\int_{v\\in\\mathbb{R}} f_e(x,v) dv = 2 \\int_{v \\leqslant 0} f_e(x,v) dv.
-    ```
+$(SIGNATURES)
+
+Computation of 
+```math
+    n_e(x) = \\int_{v\\in\\mathbb{R}} f_e(x,v) dv = 2 \\int_{v \\leqslant 0} f_e(x,v) dv.
+```
 """
 function compute_ne!(ne::Vector, chare::Vector{Float64}, tointe::Vector{Float64}, params::Params, f_eb::Feb, phix::Vector{Float64})
     for (i,phixi) in enumerate(phix)
@@ -79,13 +79,12 @@ function compute_ne!(ne::Vector, chare::Vector{Float64}, tointe::Vector{Float64}
 end
 
 """
-    $(SIGNATURES)
+$(SIGNATURES)
 
-
-    Computation of 
-    ```math
-        n_i(x) = \\int_{v\\in\\mathbb{R}} f_i(x,v) dv = 2 \\int_{v \\leqslant 0} f_i(x_b(x,v),v_b(x,v)) dv.
-    ```
+Computation of 
+```math
+    n_i(x) = \\int_{v\\in\\mathbb{R}} f_i(x,v) dv = 2 \\int_{v \\leqslant 0} f_i(x_b(x,v),v_b(x,v)) dv.
+```
 """
 function compute_ni!(ni::Vector, chari::Vector{Float64}, vi::Vector{Float64}, vip::Vector{Float64}, toint::Vector{Float64}, 
                      params::Params, f_eb::Feb, phix::Vector{Float64}, phidx::Vector{Float64})
@@ -122,30 +121,30 @@ end
 export solve_Poisson!
 
 """
-    $(SIGNATURES)
+$(SIGNATURES)
 
-    Solve of the Poisson problem 
-    ```math
-        \\begin{cases}
-            - \\lambda^2 \\Delta \\phi(x) = n_i(x) - n_e(x), \\\\
-            \\phi(0) = \\phi'(0) = 0.
-        \\end{cases}
-    ```
+Solve of the Poisson problem 
+```math
+    \\begin{cases}
+        - \\lambda^2 \\Delta \\phi(x) = n_i(x) - n_e(x), \\\\
+        \\phi(0) = \\phi'(0) = 0.
+    \\end{cases}
+```
 """
 
 """
-    $(SIGNATURES)
+$(SIGNATURES)
 
-    Resolution by least squares when ``\\phi`` is decomposed in a polynomial basis.
+Resolution by least squares when ``\\phi`` is decomposed in a polynomial basis.
 """
 function solve_Poisson!(phi::Phidata_poly, params::Params, ni::Vector{Float64}, ne::Vector{Float64})
     phi.coeffs .= - 1.0/(params.λ^2) .* (phi.Vandermonde \ (ni - ne))
 end
 
 """
-    $(SIGNATURES)
+$(SIGNATURES)
 
-    Resolution by quadrature when ``\\phi`` is approximated pointwise.
+Resolution by quadrature when ``\\phi`` is approximated pointwise.
 """
 function solve_Poisson!(phi::Phidata_grid, params::Params, ni::Vector{Float64}, ne::Vector{Float64})
     # trapeze integration

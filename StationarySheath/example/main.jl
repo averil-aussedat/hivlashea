@@ -1,23 +1,3 @@
-"""
-    Implementation of a fixed-point algorithm for 
-    the stationary Vlasov-Poisson system.
-
-    ```math
-        \\begin{cases}
-            v \\partial_x f_e(x,v) + \\frac{1}{\\mu} \\phi''(x) \\partial_v f_e(x,v) = 0 \\\\
-            v \\partial_x f_i(x,v) - \\phi'(x) \\partial_v f_i(x,v) = \\nu f_e(x,v) \\\\
-            - \\lambda^2 \\phi''(x) = n_i(x) - n_e(x)
-        \\end{cases}
-    ```
-    with the densities ``n_s``, ``s\\in\\{i,e\\}`` defined as
-    ```math
-        n_s(x) = \\int_{v\\in\\mathbb{R}} f_s(x,v) dv.
-    ```
-
-    Code initiated during CEMRACS 2022 by Michel Mehrenberger, Mehdi Badsi, 
-    Anaïs Crestetto and Averil Prost.
-"""
-
 using StationarySheath
 
 function run(; eps=1e-10)

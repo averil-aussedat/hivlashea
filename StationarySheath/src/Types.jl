@@ -63,9 +63,10 @@ abstract type Phidata end
 """
 $(TYPEDEF)
 
-Polynomial representation of `ϕ`. Basis are
-    * canonical: starting from degree 2. 
-    * pair: only pair expononents of the canonical basis.
+Polynomial representation of `ϕ`. Basis are:
+
+  * canonical: starting from degree 2.
+  * pair: only pair expononents of the canonical basis.
 
 $(TYPEDFIELDS)
 """
@@ -74,14 +75,14 @@ struct Phidata_poly <: Phidata
     cardinal    :: Int 
     "Basis choice"
     basis       :: String
-    "Array of Horner coefficients for x -> p(x)"
+    "Array of Horner coefficients for ``x \\to p(x)``"
     horner      :: Vector{Vector{Float64}} 
-    "Array of Horner coefficients for x -> p'(x)"
+    "Array of Horner coefficients for ``x \\to p'(x)``"
     horner_dx   :: Vector{Vector{Float64}} 
     "Matrix of the linear system for the Poisson solver"
     Vandermonde :: Matrix{Float64} 
     "Coefficients in the basis"
-    coeffs      :: Vector
+    coeffs      :: Vector{Float64}
 
     function Phidata_poly(cardinal::Int, basis::String, meshx::Mesh, coeffs::Vector)
         if (length(coeffs)!=cardinal)
