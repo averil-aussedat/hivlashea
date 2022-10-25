@@ -67,10 +67,10 @@ void update_spatial_density(parallel_stuff* par_variables, double *x, int sizex,
         rho[sizex - 1] = rho[0];
     } else {
         // Symmetrization of rho
-        for (int i=0; i<(int)(sizex-1)/2; ++i) { 
-            rho[i] = (rho[i] + rho[sizex-1-i])*0.5;
-            rho[sizex-1-i] = rho[i];
-        }
+//         for (int i=0; i<(int)(sizex-1)/2; ++i) { 
+//             rho[i] = (rho[i] + rho[sizex-1-i])*0.5;
+//             rho[sizex-1-i] = rho[i];
+//         }
     }
 }
 

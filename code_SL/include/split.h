@@ -32,13 +32,15 @@ struct sll_t_splitting_coeff {
     bool    split_begin_T;
     double dt;
     int num_iteration;
+    int plot_frequency;
 };
 
 sll_t_splitting_coeff sll_f_new_time_splitting_coeff(  
-        int split_case, double dt, int num_iteration) {
+        int split_case, double dt, int num_iteration, int plot_frequency) {
     sll_t_splitting_coeff split;
     split.dt = dt;
     split.num_iteration = num_iteration;
+    split.plot_frequency = plot_frequency;
     split.split_case = split_case;
     switch (split_case) {
         case sll_p_lie_tv:
@@ -171,6 +173,7 @@ void splitting(PC_tree_t conf, sll_t_splitting_coeff* split) {
     int splitcase;
     double dt;
     long num_iteration;
+    int plot_frequency;
     char* a_string = "STRANG_XVX"; // Default case.
     if (PC_get(conf, ".case")) {
         PC_string(PC_get(conf, ".case"), &a_string);
@@ -184,6 +187,11 @@ void splitting(PC_tree_t conf, sll_t_splitting_coeff* split) {
         PC_int(PC_get(conf, ".num_iteration"), &num_iteration);
     } else {
         ERROR_MESSAGE("#Error in splitting %s: num_iteration parameter missing.\n", conf->key);
+    }
+    if (PC_get(conf, ".plot_frequency")) {
+        PC_int(PC_get(conf, ".plot_frequency"), &plot_frequency);
+    } else {
+        ERROR_MESSAGE("#Error in splitting %s: plot_frequency parameter missing.\n", conf->key);
     }
     if (strcmp(a_string, "LIE_XV") == 0) {
         splitcase = sll_p_lie_tv;
@@ -205,7 +213,7 @@ void splitting(PC_tree_t conf, sll_t_splitting_coeff* split) {
         ERROR_MESSAGE("#Error in splitting %s: unknown case.\n#Possible cases are 'LIE_XV', 'LIE_VX', 'STRANG_XVX', 'STRANG_XVX', 'TRIPLE_JUMP_XVX', 'TRIPLE_JUMP_VXV', 'ORDER6_VXV' or 'ORDER6_XVX'.\n", conf->key);
     }
     
-    *split = sll_f_new_time_splitting_coeff(splitcase, dt, num_iteration);
+    *split = sll_f_new_time_splitting_coeff(splitcase, dt, num_iteration, plot_frequency);
 }
 
 #endif // ifndef SELA_VP_1D1V_CART_SPLIT

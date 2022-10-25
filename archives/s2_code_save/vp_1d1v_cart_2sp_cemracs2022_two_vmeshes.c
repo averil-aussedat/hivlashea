@@ -171,7 +171,6 @@ int main(int argc, char *argv[]) {
     } else {
         ERROR_MESSAGE("#Missing meshvi in %s\n", argv[1]);
     }
-    
     // Read the simulation parameters [WARNING: before creating Poisson solver]
     if (PC_get(conf, ".simulation_parameters")) {
 	    read_simulation_parameters(PC_get(conf, ".simulation_parameters"), mpi_rank, &lambda, &nu);
@@ -247,7 +246,7 @@ int main(int argc, char *argv[]) {
     } else {
         ERROR_MESSAGE("#Missing adv_vi in %s\n", argv[1]);
     }
-
+ 
     #ifdef VERBOSE
         if (mpi_rank==0) {
             printf("------------- Parameters -------------\n");
@@ -266,6 +265,7 @@ int main(int argc, char *argv[]) {
             printf("--------------------------\n");
         }
     #endif
+    exit(-1);
     
     // Create the electric field, charge arrays, and the poisson solver
     rhoe = allocate_1d_array(meshx.size); // array of int_{v} f_e(t^n,x,v) for each x
@@ -275,7 +275,7 @@ int main(int argc, char *argv[]) {
     currenti = allocate_1d_array(meshx.size); // array of int_{v} v f_i(t^n,x,v)  for each x
     current = allocate_1d_array(meshx.size);  // currenti - currente
     E = allocate_1d_array(meshx.size); // electrical energy at time tn
-    
+   
     if (is_periodic) {
         // Compute electric field at initial time
         update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari,

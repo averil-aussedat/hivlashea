@@ -37,8 +37,8 @@
 // MACROS
 #define VERBOSE True // comment to hide terminal output
 #define PLOTS True // comment to remove plot diagnostics
-#define OUTFOLDER "data_output/" // where to write .dat, .hdf5, .txt...
-// #define OUTFOLDER "./" // where to write .dat and .hdf5
+//#define OUTFOLDER "data_output/" // where to write .dat, .hdf5, .txt...
+#define OUTFOLDER "./" // where to write .dat and .hdf5
 // #define OUTFOLDER "" // where to write .dat and .hdf5
 
 /*
@@ -189,6 +189,7 @@ int main(int argc, char *argv[]) {
 	    splitting(PC_get(conf, ".time_parameters"), &split);
 	    delta_t = split.dt;
 	    num_iteration = split.num_iteration;
+	    plot_frequency = split.plot_frequency;
     } else {
         ERROR_MESSAGE("#Missing time_parameters in %s\n", argv[1]);
     }
@@ -330,7 +331,6 @@ int main(int argc, char *argv[]) {
 //             ERROR_MESSAGE("#Missing E0 in %s\n", argv[1]);
 //         }
     }
-
     #ifdef PLOTS
         printf("[Proc %d] Plotting initial conditions...\n", mpi_rank);
         diag_f(&pare, 0, meshx, meshve, 0.0, "fe", OUTFOLDER, is_periodicx);
@@ -341,15 +341,20 @@ int main(int argc, char *argv[]) {
         diag_1d (rhoe, meshx.array, meshx.size, "rhoe", OUTFOLDER, 0, 0.0);
         printf("[Proc %d] Done plotting initial conditions.\n", mpi_rank);
     #endif 
-
     #ifdef VERBOSE
         printf("[Proc %d] Done initializing simulation.\n", mpi_rank);
         printf("[Proc %d] Beginning of the time loop.\n", mpi_rank);
     #endif
     
-    FILE* file_diag_energy = fopen("data_output/diag_ee.txt", "w");
+    //FILE* file_diag_energy = fopen("data_output/diag_ee.txt", "w");
+    char file_diag_energy_name[256];
+    sprintf(file_diag_energy_name, "%sdiag_ee.txt", OUTFOLDER);
+    FILE* file_diag_energy = fopen(file_diag_energy_name, "w");
     fprintf(file_diag_energy, "Time | Int(Ex^2)\n");
-    FILE* file_diag_mass   = fopen("data_output/diag_mm.txt", "w");
+    //FILE* file_diag_mass   = fopen("data_output/diag_mm.txt", "w");
+    char file_diag_mass_name[256];
+    sprintf(file_diag_mass_name, "%sdiag_mm.txt", OUTFOLDER);
+    FILE* file_diag_mass   = fopen(file_diag_mass_name, "w");
     fprintf(file_diag_mass, "Time | mi - me - lambda^2 * (E(1)+E(-1))\n");
     for (itime = 0; itime < num_iteration; itime++) {
         // #ifdef VERBOSE
@@ -447,7 +452,6 @@ int main(int argc, char *argv[]) {
         // printf("End of time step :\n");
         // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
 
-
         #ifdef PLOTS
             if ((itime < num_iteration-1) && ((itime+1) % plot_frequency == 0)) {
                 printf("[Proc %d] Plotting at time t=%.2f, itime=%d/%d.\n", mpi_rank, (itime+1)*delta_t, itime+1, num_iteration);
@@ -460,8 +464,9 @@ int main(int argc, char *argv[]) {
                 printf("energy : %e %e, mi - me - 2 lambda^2 * E(1) : %e\n", ee, ee-diffM3,mm);
             }
         #endif // ifdef PLOTS
-
-        if (itime % (int)ceil(num_iteration/20) == 0) {
+		if(num_iteration>19){
+		if (itime % (int)ceil(num_iteration/20) == 0) {
+            
             loctime = time(NULL);
             if (itime < num_iteration/20 + 5) {
                 dtime = loctime - previousloctime;
@@ -472,11 +477,10 @@ int main(int argc, char *argv[]) {
             printf("itime = %d / %d. Estimated time left : %.0fs.\n", itime, num_iteration, \
                 dtime * (num_iteration - itime)/num_iteration * 20);
         }
-
+		}
         // printf("End of time step after plots :\n");
         // stats_1D (rhoe, meshx.size, "rhoe"); stats_1D (rhoi, meshx.size, "rhoi");
     }
-
     #ifdef VERBOSE
         printf("[Proc %d] End of the time loop.\n", mpi_rank);
     #endif

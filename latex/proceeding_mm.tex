@@ -1,0 +1,693 @@
+\documentclass{article}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Packages
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\usepackage[utf8]{inputenc} % for overleaf/PLM
+\usepackage[latin1]{inputenc} % averil local
+\usepackage[T1]{fontenc} % hyphenation
+\usepackage{fullpage} % DO NOT USE IN BEAMER
+\usepackage[british,UKenglish,USenglish,american]{babel}
+%\usepackage{appendix}
+\usepackage{amssymb,amsmath,amsthm,enumerate}
+\usepackage{mathtools} % coloneqq
+%\usepackage{easybmat}
+\usepackage{enumitem}
+%\usepackage{tikz}
+%\usepackage{caption}
+\usepackage{float} % [H]
+%\usepackage{bbold}
+\usepackage{xcolor}
+\usepackage{stmaryrd} % ll/rr brackets
+%\usepackage[notcite, notref]{showkeys}
+%\usepackage[tworuled,vlined,nofillcomment]{algorithm2e}
+\usepackage[ruled,vlined]{algorithm2e}
+%\usepackage{cases} % numbered lines in cases (numcases and subnumcases)
+\usepackage[overload]{empheq} % source : https://tex.stackexchange.com/questions/31951/separate-labels-in-cases
+\usepackage{caption} % to have subfigures
+\usepackage{subcaption} % to have subfigures
+\usepackage{cleveref} % \cref. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Format
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Numerical methods for plasma sheaths}
+\author{
+	Valentin Ayot\footnote{Institut de Math\'ematiques, CNRS, UMR 5251, Universit\'e de Bordeaux, F-33405 Talence, France. \texttt{valentin.ayot@u-bordeaux.fr}}, 
+	\ Mehdi Badsi,
+	\ Yann Barsamian, 
+	\ Ana\"is Crestetto,\\
+	\ Nicolas Crouseilles,
+	\ Michel Mehrenberger,
+	 \ Averil Prost\footnote{INSA de Rouen, LMI (EA 3226 - FR CNRS 3335), 685 Avenue de l'Universit\'e, 76801 St Etienne du Rouvray cedex, France. \texttt{averil.prost@insa-rouen.fr}}, 
+	 \ Christian Tayou-Fotso\footnote{Labo. J. A. Dieudonn\'e, UMR 6621, Universit\'e Nice-Sophia Antipolis, Parc Valrose, F-06108 Nice cedex 02, France. \texttt{christian.tayou-fotso@unice.fr}}.
+ } 
+\date{}
+
+\SetKwRepeat{Do}{do}{while} % for algorithm2e package, add do-while
+
+% set dashes instead of bullets for item lists
+\setlist[itemize,1]{label=$-$}
+\setlist[itemize,2]{label=$-$}
+\setlist[itemize,3]{label=$-$}
+
+% remove unnecessary formatting of clever references
+\crefdefaultlabelformat{(#2#1#3)}
+\crefname{equation}{}{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Theorems
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theoreme}{Theorem}[section]
+\newtheorem{remarque}{Remark}[section]
+\newtheorem{lemme}{Lemma}[section]
+\numberwithin{equation}{section}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Commands
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\lp}{\left(}
+\newcommand{\rp}{\right)}
+\newcommand{\tran}[1]{\prescript{t}{}{#1}}
+\newcommand{\vol}{\textup{Vol}}
+\newcommand{\red}{\textcolor{red}}
+\newcommand{\blue}{\textcolor{blue}}
+
+\newcommand{\todo}[1]{{\color{red}\textbf{#1}}}
+\newcommand{\vv}[1]{\begin{pmatrix} #1 \end{pmatrix}} % vector
+\newcommand{\mysubeq}[2]{ % first argument : label, second : align content
+	\begin{subequations}\label{#1}
+		\begin{align}[left = {\empheqlbrace}]
+			#2
+		\end{align}
+	\end{subequations}	
+}
+\newcommand{\mysubcaption}[1]{
+	\vspace*{5pt}
+	\begin{minipage}{0.8\linewidth}
+		\begin{center}
+			\footnotesize\emph{#1}
+		\end{center}
+	\end{minipage}
+}
+\newcommand{\imh}{\textwidth} % meant to be redefined locally
+
+%\renewcommand\appendixpagename{Appendix}
+%\renewcommand\appendixtocname{Appendix}
+\renewcommand{\qedsymbol}{$\blacksquare$}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+	
+\maketitle
+
+\begin{abstract}
+	This article is a report of the   CEMRACS 2022 project, called HIVLASHEA, standing for "{\bf Hi}gh order methods for {\bf Vla}sov-Poisson models for {\bf shea}ths".
+	%achieved during the CEMRACS 2022.
+	A two-species Vlasov-Poisson model is described together with some numerical simulations, permitting to exhibit the formation of a plasma sheath. 
+	The numerical simulations are performed with two different methods: a first order classical finite difference scheme and a high order semi-Lagrangian scheme with Strang splitting; for the latter one, the implementation
+	of (non-periodic) boundary conditions is discussed. 
+	The codes are first evaluated on a one-species case, where a analytical solution is known. For the two-species case, mesh refinement and cross comparisons of the two methods are performed.
+%	We consider Vlasov-Poisson model for a two-species plasma. Our aim is to extend an existing code from periodic boundary conditions to nonperiodic boundary conditions. In particular, we focus on the interaction of the plasma with a non-emitting wall, and wish to capture the physical phenomenon called \emph{Debye sheath}. 
+%	Comparison between this numerical scheme and a finite difference scheme are presented.
+\end{abstract}
+
+%% Plan
+% 1 : Model : 
+% 	- motivation, model, difficulties
+%	- boundary conditions
+%	- symmetries
+% 2 : Numerical methods
+% 3 : Numerical results : DO WE HAVE SHEATHS????
+
+\section{Introduction}
+% What is a plasma - electrons and ions
+Plasmas are neutral at the equilibrium in a sufficiently large domain. However, near a boundary, a charge imbalance may be observed in a thin layer called \emph{sheath}.
+This phenomenon stems from the interaction of ions and electron with the boundary media (a cold metallic wall, for instance). Both species will be absorbed by the wall, but with a rate proportional to their speed. Since the electrons are moving %several order of magnitude 
+faster than the ions, a positively charged layer (the \emph{Debye sheath}) forms near the boundary. 
+
+Plasma sheaths are particularly challenging to simulate, as we have to deal with different scales. We refer to  \cite{bourneNonUniformSplinesSemiLagrangian} for a recent work on the subject.
+This study is a follow-up of \cite{badsiNumericalStabilityPlasma}. In the latter work, we studied the behavior of the numerical solution of the Vlasov equation, initialized with a sheathequilibrium. In this work, our purpose is to investigate numerically the formation of a sheath, when we include ionization in the model. 
+
+In Section 2, we introduce the corresponding system. The numerical methods are described in Section 3 and numerical results are given in Section 4. 
+
+%The difference of speed between both species is numerically challenging, since a wide range of velocities is needed to correctly model the evolution of electrons, but accuracy is required on low velocities to capture the ions. When using mesh-based approaches, it is tempting to use adapted velocity meshes for the different species. This requires the choice of an interpolation procedure: several possibilities are found in the literature, as uniform cubic splines in the GYSELA code \cite{grandgirard5DGyrokineticFull2016} and extension to non-uniform splines in \cite{bourneNonUniformSplinesSemiLagrangian}, or high-order polynomial interpolation \cite{badsiStableFixedPoint2021}. We will follow the latter method.
+%
+%Our purpose is to investigate numerically the formation of the sheath. It follows previous work of Michel Mehrenberger and Yann Barsamian \todo{is there a reference for the existing code?} on a periodic case, and of \cite{badsiNumericalStabilityPlasma} on a collisional model. Our aim is to study an ionization model with nonperiodic boundary conditions, thus extending the work of \todo{Michel and Yann - how to say it properly?}. The first section introduces the corresponding system, and derives the boundary conditions. The second section presents the numerical methods used to simulate the evolution of the plasma, and the third section gives some results and comparisons.
+
+\section{Plasma sheaths}
+
+\paragraph{The model}
+
+Let $t\in\mathbb{R}^+$ denote the time variable, $x\in [-1,1]$ denote the spatial variable in a normalized one-dimensional domain, and $v\in\mathbb{R}$ denote the speed variable. The distribution of species is described through their density in the phase space, denoted by $f_i : (t,x,v) \in \R^+ \times [-1,1]\times \R \mapsto \R$ for the ions, and $f_e : (t,x,v) \in \R^+ \times [-1,1]\times \R \mapsto \R$ for the electrons. To these kinetic quantities, we add the spatial densities $n_{i,e}$ and currents $J_{i,e}$, defined by
+\begin{align}\label{eq:def_ni_ne}
+	n_{i,e} (t,x) \coloneqq \int_{v\in\R} f_{i,e} (t,x,v) dv, \quad\text{and}\quad J_{i,e} (t,x) \coloneqq \int_{v\in\R} v f_{i,e} (t,x,v) dv. 
+\end{align}
+In the sequel, we will denote $n (t,x) \coloneqq n_i (t,x) - n_e(t,x)$, and $J(t,x) \coloneqq J_i(t,x) - J_e(t,x)$.
+
+The evolution of the densities is modelled by the Vlasov-Poisson equations. Let $\varphi : \R^+ \times [-1,1] \mapsto \R$ denote the electric potential. Then
+\mysubeq{eq:unsta_model}{
+	\partial_t f_i + v \partial_x f_i - \partial_x \varphi \, \partial_v f_i &= \nu f_e && (t,x,v) \in \R_{*}^{+} \times ]-1,1[ \times \R, \label{eq:unsta_model_fi} \\
+	\partial_t f_e + v \partial_x f_e + \frac{\partial_x \varphi }{\mu}\, \partial_v f_e &= 0 \quad\quad && (t,x,v) \in \R_{*}^{+} \times ]-1,1[ \times \R, \label{eq:unsta_model_fe} \\
+	- \lambda^2 \partial^2_{xx} \varphi &= n (t,x) && (t,x) \in \R^{+} \times ]-1,1[. \label{eq:unsta_model_phi}
+}
+The physical parameters $\nu$, $\mu$ and $\lambda$ have the following meaning:
+\begin{itemize}
+\item $\nu \geqslant 0$ is the ionization frequency. It describes the rate of creation %/ production / injection ?} 
+of ions in presence of electrons.
+\item $\mu \coloneqq m_e / m_i$ is the mass ratio between electrons and ions.
+\item $\lambda > 0$ is the Debye length.
+\end{itemize}
+
+In the sequel, we may use the electric field $E(t,x) \coloneqq - \partial_x \varphi(t,x)$ in place of the potential. Then, the second-order Poisson equation rewrites as 
+\begin{align}
+	\lambda^2 \partial_x E (t,x) = n(t,x) \quad \quad (t,x) \in \R^{+} \times ]-1,1[. \label{eq:unsta_model_E}
+\end{align}
+
+\begin{remarque}
+	To reduce the notations, we will use $f_s$, $s\in\{i,e\}$ to denote both the electronic and ionic distributions. The advection equations \cref{eq:unsta_model_fi,eq:unsta_model_fe} rewrite 
+	\begin{align*}
+		\partial f_s + v \partial_x f_s - c_s \partial_x \varphi \partial_v f_s = S_s,
+	\end{align*}
+	with the speed coefficients $c_s$ and source terms $S_s$ defined as
+	\begin{align*}
+		c_i \coloneqq 1, \quad c_e \coloneqq -\frac{1}{\mu}, \quad S_i \coloneqq \nu f_e, \quad S_e \coloneqq 0.
+	\end{align*}
+\end{remarque}
+
+The densities $f_i$ and $f_e$ are subject to initial and boundary conditions, given by
+\mysubeq{eq:unsta_model_bc}{
+	f_{s}(0,x,v) &\coloneqq f_{s}^0(x,v) && (x,v) \in ]-1,1[ \times \R, \label{eq:init} \\
+	f_{s}(t,x=\pm 1,\pm v < 0) &\coloneqq 0  && t \in \R^+_*. \label{eq:fie_bc}
+}
+The homogeneous boundary condition \cref{eq:fie_bc} stems from the non-emitting wall model: the boundary absorbs particles without any reflection.
+
+To completely describe the model, we still need to provide boundary conditions for the Poisson problem \cref{eq:unsta_model_phi}. A first one is given by the choice of a reference potential
+\begin{align}
+	\varphi(t,0) = 0 \quad \quad \forall t \in \R^+. \label{eq:phi_nul_0}
+\end{align}
+To derive a second boundary condition, we introduce a fundamental symmetry assumption.
+
+\paragraph{Symmetry}
+
+We will look for \emph{symmetric solutions} satisfying 
+\begin{align}\label{eq:phi_is_pair}
+	\varphi(t,x) = \varphi (t,-x) \quad \quad (t,x) \in \R^+ \times [-1,1].
+\end{align}
+By derivation with respect to $x \in ]-1,1[$, we immediately obtain 
+\begin{align*}
+	\partial_x \varphi(t,x) = - \partial_x \varphi (t,-x), \quad \text{i.e.} \quad E(t,x) = - E(t,-x).
+\end{align*}
+In particular, the electric field vanishes at $x=0$, and the Neumann boundary condition
+\begin{align}\label{eq:phi_bc_neumann}
+	\partial_x \varphi (t,0) = 0 \quad \text{or equivalently} \quad E(t,0) = 0
+\end{align}
+may be used (with \cref{eq:phi_nul_0}) to close the Poisson equation \cref{eq:unsta_model_phi}.
+
+
+Let us notice that the advection equations \cref{eq:unsta_model_fi,eq:unsta_model_fe} are driven by the vector fields
+\begin{align*}
+	(t,x,v) \to (1, v, E(t,x)) \eqqcolon V_i(t,x,v) \quad \text{and} \quad (t,x,v) \to (1, v, -E(t,x)/\mu) \eqqcolon V_e(t,x,v).
+\end{align*}
+ Both these fields satisfy the radial symmetry $V_s(t,x,v) = V_s(t,-x,-v)$. In consequence, if we assume that $f_s^0(x,v)=f_s^0(-x,-v)$, the solutions $f_s(t,x,v)$ will be radially symmetric around $(t,0,0)$, i.e. 
+ \begin{align*}
+ 	f_i(t,x,v) = f_i(t,-x,-v) \quad \text{and} \quad f_e(t,x,v) = f_e(t,-x,-v) \quad \forall (t,x,v) \in \R^+ \times [-1,1] \times \mathbb{R}.
+ \end{align*}
+ 
+ In particular, we have 
+ \begin{align*}
+ 	n_s (t,x) &= \int_{v\in\mathbb{R}} f_s (t,x,v) dv =  \int_{w\in\mathbb{R}} f_s (t,x,-w) dw = \int_{w\in\mathbb{R}} f_s (t,-x,w) dw = n_s (t,-x),  \quad \text{and} \\
+ 	J_s (t,x) &= \int_{v\in\mathbb{R}} v f_s (t,x,v) dv =  - \int_{w\in\mathbb{R}} w f_s (t,x,-w) dw = - \int_{w\in\mathbb{R}} w f_s (t,-x,w) dw = - J_s (t,-x).
+ \end{align*}
+ 
+ \begin{remarque}[Additional symmetry of $f_e$] Notice that the function $f : (t,x,v) \to f_e(t,x,v) - f_e(t,x,-v)$ satisfies the linear equation 
+ 	 \begin{align*}
+ 	 	0 = \partial_t f (t,x,v) + v \partial_x f (t,x,v) - \frac{E(t,x)}{\mu} \partial_v f (t,x,v). % = \vv{\partial_t f & \partial_x f & \partial_v f} \mathrel{\raisebox{\normalbaselineskip}{$\vv{1 \\ v \\ - E/\mu}$}}.
+ 	 \end{align*}
+ 	 The boundary condition \cref{eq:fie_bc} gives $f(t,\pm 1, \pm v < 0) = 0$. If, in addition, we assume that the initial condition $f_e^0$ satisfies $f_e^0(x,v) - f_e^0(x,-v) = 0$, then we obtain 
+ 	 \begin{align}\label{eq:fe_sym_v}
+ 	 	f_e(t,x,v) = f_e(t,x,-v) \quad \forall (t,x,v) \in \R^+ \times [-1,1] \times \mathbb{R}.
+ 	 \end{align}
+ \end{remarque}
+ 
+ \paragraph{Deriving a boundary condition at $x=\pm 1$}
+ 
+ The centered Neumann condition \cref{eq:phi_bc_neumann} enforces continuity of $\partial_x \varphi$ at $x=0$. We may avoid this constraint by deriving another Neumann condition, given on the boundary $x=\pm 1$.
+ 
+% Let us consider the following Neumann boundary condition:
+% \begin{align}
+% 	\partial_x \varphi(t,\pm 1) \coloneqq C_{\pm} (t) \quad \quad t \in \R^+. \label{eq:phi_bc_C}
+% \end{align}
+%We wish to derive an expression for the functions $C_{\pm}$. 
+First, we derive with respect to time the Poisson equation \cref{eq:unsta_model_phi}
+\begin{align*}
+	- \partial_t (\lambda^2\partial_{xx}^2 \varphi) = \partial_t n, 	
+\end{align*}
+and considering the difference between the $v$-integration of the Vlasov equations \cref{eq:unsta_model_fi,eq:unsta_model_fe} gives 
+\begin{align*}
+	\partial_t n = \nu n_e - \partial_x J,
+\end{align*}
+so that, using $E=-\partial_x \varphi$, we get 
+\begin{align*}
+	\partial_x (\lambda^2\partial_t E + J) = \nu n_e, \quad \forall x\in ]-1, 1[. 	
+\end{align*}
+
+Integrating now in space leads to 
+\begin{align}\label{eq:ampere_integ}
+	\lambda^2\partial_t E(t, 1) + J(t, 1) = \lambda^2\partial_t E(t, -1) + J(t, -1) +\nu \int_{-1}^1 n_e (t, x) dx,  
+\end{align}
+%and time integration gives
+%\begin{align*}
+%	E(t,1) - E(0,1) = E(t,-1) - E(0,-1) + \frac{1}{\lambda^2} \int_{0}^t \left(J(s,-1) - J(s,1) + \nu \int_{-1}^1 n_e(s,x)\,dx\right) ds.
+%\end{align*}
+
+and using the symmetries $E(t,1)=-E(t, -1)$ and  $J(t,1)=-J(t, -1)$, it comes 
+\begin{align}\label{eq:ampere_bc}
+	\lambda^2\partial_t E(t, \pm 1) + J(t, \pm 1)  = \pm \frac{\nu}{2} \int_{-1}^1 n_e (t, x)dx.
+\end{align}
+Time integration gives a condition of the form $\partial_x\varphi(t,\pm 1) = C_{\pm}(t)$, where
+\begin{align}\label{eq:ampere_bc_phi}
+%	\partial_x \varphi(t, 1) =\partial_x \varphi(0, 1) +\frac{1}{\lambda^2}\int_0^t (J_i-J_e)(s, 1)ds - \frac{\nu}{2\lambda^2}\int_0^t  \int_{-1}^1 \rho_e(s, x)dx ds \equiv C(t). 
+%	- \lambda^2 \partial_x \varphi(t, 1) + \lambda^2 \partial_x \varphi (0, 1) + \int_0^t J (s, 1) ds &=  \frac{\nu}{2}\int_0^t  \int_{-1}^1 n_e (s, x) dx ds \equiv C(t). \\
+%	\partial_x \varphi(t, 1) &= \partial_x \varphi (0, 1) + \frac{1}{\lambda^2} \int_0^t J (s, 1) ds - \frac{\nu}{2 \lambda^2}\int_0^t  \int_{-1}^1 n_e (s, x) dx ds \equiv C(t). 
+	C_{\pm} (t) \coloneqq \partial_x \varphi (0,\pm1) + \frac{1}{\lambda^2} \int_0^t J (s, \pm1) ds \mp \frac{\nu}{2 \lambda^2}\int_0^t  \int_{-1}^1 n_e (s, x) dx ds. 
+\end{align}
+
+%In the sequel, we chose to consider the centered boundary condition \cref{eq:phi_bc_neumann}.
+
+\section{Numerical methods}
+
+\subsection{Poisson equation}
+
+The Poisson problem is solved with integral representations of the variable $E$.
+%Here, we present the integral representation of the electric field that we may use.
+
+First, we consider the centered Neumann boundary condition \cref{eq:phi_bc_neumann}. Then, integrating the Poisson problem \cref{eq:unsta_model_E} over $[0,x]$ yields
+\begin{align}\label{eq:integral_representation_E_sym}
+	E(t,x) = 0 + \int_0^x n(t,y) dy = \int_0^x \int_{v\in\R} [f_i(t,y,v) - f_e(t,y,v)] dv dy.
+\end{align}
+
+Let us now consider the boundary condition \cref{eq:ampere_bc}. The spacial domain $[-1,1]$ is split into its positive and negative part, and integrating \cref{eq:unsta_model_E} gives
+\begin{align}\label{eq:integral_representation_E_naturalbc}
+	E(t,x) = 
+	\begin{cases}
+	E(t,\phantom{-}1) - \int_{x\phantom{-}}^{1} n(t,y) dy = - C_{+}(t) - \int_{x\phantom{-}}^1 \int_{v\in\R} [f_i(t,y,v) - f_e(t,y,v)] dv dy & x \in [0,1] \\
+	E(t,-1) + \int_{-1}^x n(t,y) dy = -C_{-}(t) + \int_{-1}^x \int_{v\in\R} [f_i(t,y,v) - f_e(t,y,v)] dv dy & x \in [-1,0[ 
+	\end{cases}
+\end{align}
+Note that here, the electric field may "jump" at $x=0$. Both expressions may be approximated by quadrature formulas. 
+
+\subsection{Finite Differences (FD)}
+
+Define a numerical computation domain $\Omega \coloneqq [-1,1] \times [-\overline{V},\overline{V}]$, with a large enough maximum speed $\overline{V}$. Let $(x_j, v_k)^{j\in\llbracket0,J\rrbracket}_{k\in\llbracket0,K\rrbracket}$ be a cartesian grid of $\Omega$ of step $(\Delta x, \Delta v)$. We discretize the advection equations on the subgrid $(x_j, v_k)^{j\in\llbracket1,J-1\rrbracket}_{k\in\llbracket1,K-1\rrbracket}$ by an explicit Euler scheme in time, and the upwind scheme in space:
+\begin{align}\label{eq:FDscheme}
+	\frac{f_{s,j,k}^{n+1} - f_{s,j,k}^{n}}{\Delta t} + D^-_{j,k} f_s^n \vv{v_k\\c_s E_j^n}_{+} +D^+_{j,k} f_s^n \vv{v_k\\c_s E_j^n}_{-} = S_{s,j,k}^n,
+\end{align}
+where $a_+ = \max(a,0)$ and $a_{-} = \min(a,0)$ are respectively the pointwise positive and negative parts, and the decentered discrete differences are defined as
+\begin{align*}
+	D^{\pm}_{j,k} f \coloneqq \pm \left(\frac{f_{j\pm 1,k} - f_{j,k}}{\Delta x}, \frac{f_{j,k\pm 1} - f_{j,k}}{\Delta v}\right).
+\end{align*}
+
+The values of $f_{s,j,k}^n$ on the boundary are taken as follows:
+\begin{itemize}
+\item the boundary condition \cref{eq:fie_bc} yields $f_{s,j,k}^n = 0$ whenever $x_j=-1, v_k > 0$ or $x_j=1, v_k < 0$.
+\item It is considered that $\overline{V}$ is large enough to take the values on the speed boundary $v_k = \pm \overline{V}$ equal to 0.
+\item The remaining values $f_{s,j,k}^n$, $x_j=-1, -\overline{V} < v_k \leqslant 0$ or $x_j=1, 0 \leqslant v_k < \overline{V}$ may be computed using the scheme \cref{eq:FDscheme}, since the sign of the speed allows to use only inner points.
+\end{itemize}
+
+%With these approximations, we may compute the electric field $E$ by a quadrature approximation of the integral representation \todo{either} \cref{eq:integral_representation_E_sym} \todo{or} \cref{eq:integral_representation_E_naturalbc}.
+
+The upwind scheme is known to be diffusive, and stable under the CFL condition 
+\begin{align*}
+	1 - \max_{k} |v_k| \frac{\Delta t}{\Delta x} - |c_s| \max_{j} |E^n_j| \frac{\Delta t}{\Delta v} \geqslant 0 \quad \forall s \in \{i,e\}\text{ and } n \in \llbracket1,N\rrbracket.
+\end{align*}
+Given $\Delta x$ and $\Delta v$, we deduce a sufficiently small value of $\Delta t$ with the bound
+\begin{align*}
+	\Delta t \leqslant \min\left(\frac{\Delta x}{\overline{V}}, \min(1,\mu)\frac{\Delta v}{E_{\text{max}}}\right), \quad E_{\text{max}}>0 \text{ postulated \emph{a priori}.}
+\end{align*}
+
+\subsection{Semi-Lagrangian (SL)}
+
+The full model \cref{eq:unsta_model} nicely lends itself to approximation by time splitting. Indeed, consider the following Strang splitting decomposition. 
+
+%We use a splitting method in time. The full model \cref{eq:unsta_model} is decomposed in elementary operators, namely
+%\begin{itemize}
+%\item The 1D advection operators along dimensions $x$ and $v$, given by the flows of $\partial_t f + v \partial_x f = 0$ and $\partial_t f + c_s E \partial_v f = 0$, with $c_s \in \{1, -\frac{1}{\mu}\}$.
+%\item The resolution of the Poisson problem.
+%\end{itemize}
+%We use Strang splitting to reach order 2 in time. More precisely, the algorithm is given by
+
+%\todo{EITHER ALGO FORMULATION}
+%
+%\begin{algorithm}[H]
+%	\DontPrintSemicolon
+%	\SetAlgoLined
+%	Let $f_{i,e}^0$ be given.\;
+%	Solve the Poisson problem for $E^0$. \;
+%	\For{$n \in \llbracket1,N\rrbracket$}{
+%		Solve the homogeneous advection in variable $x$ for $f_{i,e}^*$ on time step $\Delta t/2$.\;
+%		Solve the Poisson problem for $E^{n,*}$.\;
+%		Solve the pointwise ODE $\partial_t f_i = \nu f_e^{*}$ for $f_i^{**}$ on time step $\Delta t/2$.\;
+%		Solve the advection in variable $v$ for $f_{i,e}^{***}$ on time step $\Delta t$.\;
+%		Solve the pointwise ODE $\partial_t f_i = \nu f_e^{***}$ for $f_i^{****}$ on time step $\Delta t/2$.\;
+%		Solve the Poisson problem for $E^{n+1}$.\;
+%		Solve the homogeneous advection in variable $x$ for $f_{i,e}^{n+1}$ on time step $\Delta t/2$.\;
+%	}
+%	\caption{Semi-Lagrangian scheme}
+%\end{algorithm}
+%
+%\todo{OR EQUATION FORMULATION}
+
+%Following \todo{ref Michel ?}, we decompose the full model \cref{eq:unsta_model} in 	
+%\begin{align*}
+%	\mathcal{A}_{s,x}^{\Delta t / 2} \circ \mathcal{P}^{\Delta t / 2} \circ \mathcal{A}_{s,v}^{\Delta t} \circ \mathcal{P}^{\Delta t / 2} \circ \mathcal{A}_{s,x}^{\Delta t / 2} 
+%\end{align*}
+\begin{align*}
+	\frac{\Delta t}{2} \quad\quad&
+	\begin{cases}
+		\partial_t f_s + v \partial_x f_s = 0 & \text{Linear advection along $x$,} \\
+		\lambda^2 \partial_x E = n_i - n_e & \text{Poisson problem,} \\
+	\end{cases} \\
+%%%
+	\frac{\Delta t}{2} \quad\quad&
+	\partial_t f_i = \nu f_e \quad\quad\quad\quad\quad \text{Ionization,} \\
+%%%
+	\Delta t \quad\quad&
+	\partial_t f_s + c_s E \partial_v f_s = 0 \quad \text{Linear advection along $v$,} \\
+%%%
+	\frac{\Delta t}{2} \quad\quad&
+	\partial_t f_i = \nu f_e \quad\quad\quad\quad\quad \text{Ionization,} \\
+%%%
+	\frac{\Delta t}{2} \quad\quad&
+	\begin{cases}
+		\lambda^2 \partial_x E = n_i - n_e & \text{Poisson problem,}\\
+		\partial_t f_s + v \partial_x f_s = 0 & \text{Linear advection along $x$.}
+	\end{cases} 
+\end{align*}
+
+%\todo{END EITHER OR.}
+Each of the splitting step may be solved exactly. Indeed, the Poisson problems are solved by the integral representations \cref{eq:integral_representation_E_sym,eq:integral_representation_E_naturalbc}. The ionization steps are pointwise ODE with time-independant source term, and are exactly solved by the explicit Euler scheme. Finally, notice that each advection is at constant speed with respect to the advection variable. This allows for the use of elementary 1D solvers. 
+
+%\todo{We now describe the treatment of the boundaries.} 
+%In order to describe the algorithm completely, we need to give the detail of the resolution of the Poisson problem. 
+
+
+\paragraph{Numerical treatment of the boundaries}
+
+%The full model \cref{eq:unsta_model} includes multi-dimensional advection equations for $f_{i,e}$, supplemented with well-placed boundary conditions \cref{eq:fie_bc}. However, the main algorithm uses a splitting method that relies on 1D advection solvers. Therefore, we may first
+Let us focus on the elementary advection equation with constant speed $a>0$
+\begin{align*}
+	\partial_t f (t,x) + a \partial_x f(t,x) = 0, \quad f(t,-1) = 0, \quad \forall (t,x) \in \R^+_* \times ]-1,1[.
+\end{align*}
+Let $(x_j)_{j\in\llbracket0,J\rrbracket}$ be a space mesh of step $\Delta x \coloneqq 2/J$, and $(t_n)_{n\in\llbracket 0,N \rrbracket}$ be a time mesh of step $\Delta t \coloneqq T/N$.
+We follow the work of \cite{coulombelNeumannNumericalBoundary2020}, and consider a semi-Lagrangian scheme defined as
+\begin{align*}
+	f^{n+1}_j = \text{Lagrange interpolation}\left(f^n, x_j - a \Delta t\right) \coloneqq \sum_{k=-d}^{d+1} f^n_{j_0+k} L_k (\alpha), \ 
+\end{align*}
+with $(L_k)_{k\in\llbracket-d,d+1\rrbracket}$ the Lagrange polynomes defined by $L_k(z)=\prod_{\ell=-d,\ell\not=k}^{d+1}\frac{z-k}{\ell-k}$
+(which satisfy $L_k(\ell) = \delta_{k\ell}$ for $\ell\in \llbracket-d,d+1\rrbracket$), and $x_j - a \Delta t = x_{j_0}+\alpha \Delta x,\ j_0\in \mathbb{Z}, \alpha\in [0,1[$.
+%satisfying $L_k(x_l) = \delta_{kl}$. The stencil of the Lagrange interpolation uses $2d + 2$ points, where $d\in\N$.
+%The Lagrange interpolation will use a centered stencil of $2d+2$ points, where $d\in\N$. 
+The boundaries are treated as follows:
+\begin{itemize}
+\item the \emph{inflow} side, corresponding to $x=-1$, relies on the analytical solution $f(t,x) = 0$ $\forall x \leqslant a t$. Whenever the scheme needs a value $f^n_j$ with $j < 0$, it may be exactly taken equal to 0.
+\item in the case $d>0$, the Lagrange stencil may also need \emph{outflow} values $f^n_{j}$ with $j>J$. Such values may be determined by polynomial extrapolation. Let $k_b \in \N$, and let $p$ be the unique polynomial of degree $k_b$ interpolating $(x_j, f^n_j)$ for $j\in \llbracket J-k_b,J\rrbracket$. The \emph{outflow ghost points} will be defined by $f^n_j \coloneqq p(-1 + j \Delta x)$ $\forall j > N$. 
+\end{itemize}
+
+%\subsection{Fixed-point (FP)}
+%
+%This algorithm is heavily inspired from the fixed-point procedure developped in \cite{badsiStableFixedPoint2021} for a collisional model.
+%We focus on the equilibrium state $(f_i, f_e, \varphi)$ solving the stationary system
+%%\begin{align}\label{eq:sta_model}
+%%	\begin{cases}
+%%		v \partial_x f_i (x,v) - \partial_x \varphi(x) \partial_v f_i(x,v) = \nu f_e (x,v) & (x,v) \in ]-1,1[ \times \R, \\
+%%		v \partial_x f_e (x,v) + \frac{1}{\mu}\partial_x \varphi(x) \partial_v f_e(x,v) = 0 & (x,v) \in ]-1,1[ \times \R,\\
+%%		- \lambda^2 \partial^2_{xx} \varphi (x) = n (x) & x \in ]-1,1[.
+%%	\end{cases}
+%%\end{align}
+%\begin{subnumcases}{\label{eq:sta_model}}
+%		v \partial_x f_i (x,v) - \partial_x \varphi(x) \,\partial_v f_i(x,v) = \nu f_e (x,v) \quad\quad (x,v) \in ]-1,1[ \times \R, \label{eq:sta_model_fi} \\
+%		v \partial_x f_e (x,v) + \frac{\partial_x \varphi(x)}{\mu} \partial_v f_e(x,v) = 0 \hfill (x,v) \in ]-1,1[ \times \R, \label{eq:sta_model_fe}\\
+%		- \lambda^2 \partial^2_{xx} \varphi (x) = n (x) \hfill x \in ]-1,1[. \label{eq:sta_model_phi}
+%\end{subnumcases}
+%
+%To be consistent with the evolutionary model \cref{eq:unsta_model}, the following boundary conditions are considered:
+%\begin{subnumcases}{}
+%		\varphi(0) \coloneqq 0  & Reference potential, \\
+%		\pm \partial_x \varphi(\pm 1) \coloneqq C & Neumann boundary conditions, \\
+%		f_{s}(x=\pm 1,\pm v < 0) \coloneqq 0 & Non-emitting boundary conditions.
+%\end{subnumcases}
+%However, the problem lack some additional information to be well-posed. Indeed, the advection equation \cref{eq:sta_model_fe} implies that $f_e$ is constant along its characteristic lines, given by the level lines of the infinitesimal energy $\mathcal{L}_e (x,v) \coloneqq \frac{v^2}{2} - \frac{\varphi}{\mu}$. According to the structure of $\varphi$, these curves are closed, and may not cross the boundary $x=\pm 1$ (see \cref{fig:characteristics}). We give a value to these lines by enforcing
+%\begin{align}\label{eq:sta_feb}
+%	f_e(0,v) = f_{e,b} (v), \quad \forall v \leqslant 0. 
+%\end{align}
+%\todo{Accorder les notations entre Mehdi, Nicolas, Anaïs, Michel, Yann, le pape et Averil.}
+%
+%\begin{figure}
+%	\centering
+%	\includegraphics[width=0.9\linewidth]{images/characteristics}
+%	\caption{Typical structure of the characteristic lines in the plan $(x,v)$.}
+%	\label{fig:characteristics}
+%\end{figure}
+%
+%Let us describe the fixed-point steps. Suppose that a candidate $\varphi^k$ is given. Then:
+%\begin{enumerate}
+%\item We may deduce the characteristic lines for the equations \cref{eq:sta_model_fi,eq:sta_model_fe}, and compute approximations $f_{i,e}^k$.
+%\item By integration on $v$, we may compute $n^k \coloneqq n_i^k - n_e^k$.
+%\item The next iterate $\varphi^{k+1}$ is defined as the solution of the Poisson problem \cref{eq:sta_model_phi} with source term $n^k$.
+%\end{enumerate}
+
+\section{Numerical results}
+\subsection{1-species validation test case}
+
+We rely on the work of \cite{malkovNonstationaryAntonovSelfgravitating2020} to provide an analytical solution in a 1-species case. Consider the simplified stationary model describing the density of particles $f = f(t,x,v)$, and the potential $\varphi=\varphi(t,x)$:
+\mysubeq{eq:one_species_model}{
+	\partial_t f + v \partial_x f  - \partial_x \varphi \partial_v f &= 0 && (t,x,v) \in \R^+_* \times ]-1,1[ \times \mathbb{R}, \label{sta_1sp_f} \\
+	\partial^2_{xx} \varphi &= \int_{v\in\mathbb{R}} f dv && (t,x) \in \R^+ \times ]-1,1[. \label{sta_phi}
+}
+The initial and boundary conditions are given by 
+\mysubeq{eq:one_species_model_bc}{
+	f(0,x,v) \coloneqq f^0(x,v), \quad f(t,x=\pm1, \pm v < 0) &= 0 \\
+	\varphi(t,0) = \partial_x \varphi (t,0) &= 0 
+}
+
+This model may be seen as a particular case of the two-species Vlasov-Poisson \cref{eq:unsta_model}, upon taking the following parameters:
+\begin{align*}
+	f_i^0 \equiv 0, \quad \nu = 0, \quad \mu = -1, \quad \lambda = 1, \quad f_e^0 = f^0.
+\end{align*}
+
+The reader may verify that \cref{eq:one_species_model} is solved in $\R^+ \times [-1,1] \times \mathbb{R}$ by the following stationary couple:
+\begin{align}\label{eq:Malkov_solution}
+	f(t,x,v) \coloneqq 
+	\begin{cases}
+		\frac{1}{\pi} \left(1 - x^2 - v^2\right)^{-1/2} & \text{if } x^2 + v^2 < 1 \\
+		0 & \text{otherwise}
+	\end{cases}, \quad \text{and} \quad
+	\varphi(t,x) \coloneqq \frac{x^2}{2}.
+\end{align}
+It is numerically relevant to extend the Malkov solution \cref{eq:Malkov_solution} to spatial domains $x \in [-1-\varepsilon, 1+\varepsilon]$ by 
+\begin{align}\label{eq:Malkov_solution_ext}
+	f(t,x,v) \coloneqq 
+	\begin{cases}
+		\frac{1}{\pi} \left(1 - x^2 - v^2\right)^{-1/2} & \text{if } x^2 + v^2 < 1 \\
+		0 & \text{otherwise}
+	\end{cases}, \quad \text{and} \quad
+	\varphi(t,x) \coloneqq \left\{\begin{array}{c}
+	x^2/2,\ \ x<1\\
+	|x|-\frac{1}{2},\ x\ge 1
+	\end{array}\right.%\min\left(\frac{x^2}{2}, \frac{|x|}{2}\right).
+\end{align}
+
+\Cref{fig:malkov_solutions} illustrates the stationary solutions.
+
+\begin{figure}
+	\centering
+	\renewcommand{\imh}{0.33\linewidth}
+	\includegraphics[trim = 50 10 55 30, clip, height=\imh]{images/malkov_solution_Ee}
+	\includegraphics[trim = 100 10 60 30, clip, height=\imh]{images/malkov_solution_fe}
+	\caption{Malkov solutions \cref{eq:Malkov_solution_ext} on $[-1.5,1.5]$. Right: electric field $E$. Left: density $f$.}
+	\mysubcaption{The electric field is extended outside of $[-1,1]$ by a constant. The density $f$ is represented in the domain $[-1.5,1.5]\times[-2,2]$, and truncated to 10.}
+	\label{fig:malkov_solutions}
+\end{figure}
+
+\todo{For now, I don't reach order 1. Maybe bug?}
+
+%\begin{figure}[H]
+	\input{ltf_Malkov_DF}
+	\input{ltf_Malkov_SL}
+%\end{figure}
+
+\subsection{Comparison between (SL) and (FD)}
+
+In the sequel, we use the following physical parameters:
+\begin{align}\label{eq:param_simu}
+	\lambda = \frac{1}{2}, \quad \mu = \frac{1}{100}, \quad\text{and}\quad \nu = 20.
+\end{align}
+The initial conditions are chosen as the thermodynamic equilibrium in an infinite spatial domain, or in a domain with periodic condition. The densities are then given by
+\begin{align*}
+	f_{i}^0 (x,v) \coloneqq \frac{\exp\left(- \frac{v^2}{2}\right)}{\sqrt{2\pi}}, \quad \text{and} \quad f_{e}^0 (x,v) \coloneqq \sqrt{\mu}\frac{\exp\left(- \mu \frac{v^2}{2}\right)}{\sqrt{2\pi}}.
+\end{align*}
+In order to satisfy the boundary conditions, we multiply $f_{i,e}$ by a mask, defined as
+\begin{align*}
+	\text{mask}(x,v) \coloneqq \frac{1}{2} \left(\tanh\left(\frac{x - (-0.8)}{0.1}\right) - \tanh\left(\frac{x - 0.8}{0.1}\right)\right).
+\end{align*}
+
+\Cref{fig:init_cond} illustrates the resulting initial conditions.
+\begin{figure}
+	\centering
+	\renewcommand{\imh}{0.33\linewidth}
+	\includegraphics[height=\imh]{images/fi_init}
+	\includegraphics[height=\imh]{images/fe_init}
+	\caption{Initial conditions $f_i^0$ (left) and $f_e^0$ (right).}
+	\label{fig:init_cond}
+\end{figure}
+
+\paragraph{Short time}
+
+The simulations run over the spatial domain $x \in [-1,1]$. The semi-Lagrangian code computes the electron velocities on $v_e \in [-50, 50]$, and ion velocities on $v_i \in [-8, 8]$. The finite differences code uses the same mesh for ions and electrons, chosen as $v\in[-50,50]$. To simplify the comparison, visualisations of $f_i$ for (FD) are restricted to the coordinates $f_{i,j,k}$ such that $v_k \in [-8,8]$.
+
+\begin{figure}
+	\centering
+	\newcommand{\rootSL}{../code_SL/}
+%	\newcommand{\rootFD}{../../DynamicElectricSheath.jl/data/two_species/}
+	\newcommand{\rootFD}{../temp_res_DF/}
+	\newcommand{\dirSL}{run_comp_short_time_2sp_Nx1000_Nvi2001_Nve2001_Nt1563}
+	\newcommand{\dirFD}{run_comp_short_time_2sp_Nx1000_Nv2000_Nt1563}
+	\renewcommand{\imh}{0.33\linewidth}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{\rootFD\dirFD/comp_E_\dirSL.png}
+		\includegraphics[height=\imh]{\rootFD\dirFD/comp_rho_\dirSL.png}
+		\caption{Electric field (left) and density $\rho$ (right)}
+		\label{subfig:compT0025_E_rho}
+	\end{subfigure}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{\rootFD\dirFD/fi}
+		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fi}
+		\caption{Ion density}
+		\label{subfig:compT0025_ion}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{\rootFD\dirFD/fe}
+		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fe}
+		\caption{Electron density}
+		\label{subfig:compT0025_electron}
+	\end{subfigure}
+	\caption{Comparison between finite differences (left) and semi-Lagrangian (right) at $T=0.025$.}
+	\label{fig:compT0025}
+\end{figure}  
+
+\Cref{fig:compT0025} illustrates the very short-time behaviour of both codes. At time $t=0$, the initial conditions are chosen so that $E = \rho = 0$, corresponding to a neutral plasma. The initial velocity field is then given by $(v, 0)$, and we observe the shear of the initial conditions. The electric field conserve the same variations through both codes, with a difference in scale.
+
+\begin{figure}
+	\centering
+	\newcommand{\rootSL}{../code_SL/}
+%	\newcommand{\rootFD}{../../DynamicElectricSheath.jl/data/two_species/}
+	\newcommand{\rootFD}{../temp_res_DF/}
+	\newcommand{\dirSL}{run_comp_short_time_2sp_Nx1000_Nvi2001_Nve2001_Nt6250}
+	\newcommand{\dirFD}{run_comp_short_time_2sp_Nx1000_Nv2000_Nt6250}
+	
+	\renewcommand{\imh}{0.33\linewidth}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{\rootFD\dirFD/comp_E_\dirSL.png}
+		\includegraphics[height=\imh]{\rootFD\dirFD/comp_rho_\dirSL.png}
+		\caption{Electric field (left) and density $\rho$ (right)}
+		\label{subfig:compT01_E_rho}
+	\end{subfigure}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{\rootFD\dirFD/fi}
+		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fi}
+		\caption{Ion density}
+		\label{subfig:compT01_ion}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{\rootFD\dirFD/fe}
+		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fe}
+		\caption{Electron density}
+		\label{subfig:compT01_electron}
+	\end{subfigure}
+	\caption{Comparison between finite differences (left) and semi-Lagrangian (right) at $T=0.1$.}
+	\label{fig:compT01}
+\end{figure}  
+
+The same simulation at time $T=0.1$ shows a greater divergence between both methods. The electric field does not have the same extremal values, and the comparison of $\rho$ reveals a difference of variations. The approximations of the ion density $f_i$ seem quite similar, but the shape of the electric density $f_e$ differs: the semi-lagrangian code produces sharper approximation and a more elongated profile.
+
+\paragraph{Long time}
+
+Now, we turn to the long-term simulations, with $T=200$. Here, we free the semi-Lagrangian code from the artificial CFL condition imposed for fair comparisons. \Cref{fig:compT200} illustrates the behavior of both codes on long time, with parameters given by \cref{eq:param_simu}. 
+
+The finite difference code suffers from its diffusion, and the approximations of $f_i$ and $f_e$ are almost everywhere reduced to 0. The point $(x=0,v=0)$ stands out, since it is an equilibrium point: the value $f_e(t,0,0)$ is constant with respect to $t$ (both in the continuous model, and in the discrete model provided $(x=0,v=0)$ belongs to the mesh), and 
+\begin{align*}
+	\partial_t f_i (t,0,0) = f_e(t,0,0),  \quad \text{so that} \quad f_i(t,0,0) = f_i(0,0,0) + t f_e(0,0,0).
+\end{align*}
+This explains the results of \cref{fig:compT200}. The value $f^n_{e,j_0,k_0} \simeq f_e(T,0,0)$ is stationary, but the maximum of $f_e^n$ outside a small neighbourhood of $(x=0,v=0)$ is 0 at machine precision.
+%The numerical maximum of $f_i$ is equal to $159.97581842617524$, and the error with respect to $f_i(0,0,0) + (T=200) \times (\nu = 20) \times f_e(0,0,0)$ is of order $10^{-8}$. 
+The value $f^n_{i,j_0,k_0} \simeq f_i(T,0,0)$ is not taken into account in the colormap, since
+\begin{align*}
+	\max_{j,k} f^n_{i,j,k} = f^n_{i,j_0,k_0} = 159.97581842617524, \quad \text{and} \quad \left|f^n_{i,j_0,k_0} - (f^0_{i,j_0,k_0} + T \nu f^0_{e,j_0,k_0})\right| = 8.98 \times 10^{-9}.
+\end{align*}
+
+At the opposite, the semi-Lagrangian scheme does not produce vanishing approximations. 
+
+\begin{figure}
+	\centering
+	\newcommand{\rootSL}{../code_SL/}
+%	\newcommand{\rootFD}{../../DynamicElectricSheath.jl/data/two_species/}
+	\newcommand{\rootFD}{../temp_res_DF/}
+	\newcommand{\dirSL}{run_comp_long_time_2sp_Nx1000_Nvi2001_Nve2001_Nt100000}
+	\newcommand{\dirFD}{run_comp_long_time_2sp_Nx200_Nv400_Nt2500000}
+	
+	\renewcommand{\imh}{0.33\linewidth}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{\rootFD\dirFD/comp_E_\dirSL.png}
+		\includegraphics[height=\imh]{\rootFD\dirFD/comp_rho_\dirSL.png}
+		\caption{Electric field (left) and density $\rho$ (right)}
+		\mysubcaption{The maximum of $\rho$ for the (DF) code is equal to 39.983965094090.}
+		\label{subfig:compT200_E_rho}
+	\end{subfigure}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{\rootFD\dirFD/fi}
+		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fi}
+		\caption{Ion density} 
+		\label{subfig:compT200_ion}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{\rootFD\dirFD/fe}
+		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fe}
+		\caption{Electron density}
+		\label{subfig:compT200_electron}
+	\end{subfigure}
+	\caption{Comparison between finite differences (left) and semi-Lagrangian (right) at $T=200$.}
+	\label{fig:compT200}
+\end{figure}  
+
+\bibliographystyle{alpha}
+\bibliography{CEMRACS.bib}
+
+\end{document}
