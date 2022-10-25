@@ -440,10 +440,10 @@ int main(int argc, char *argv[]) {
         // diag_energy(E, meshx.array, meshx.size, &ee); 
         diag_energy(&pari, &pare, meshx, meshvi, meshve, delta_t, E, lambda, mu, &diffM3, &ee);
         diag_mass_conservation (meshx, rhoi, rhoe, lambda, E, &mm); 
-        if (mpi_rank == 0) {
         update_rho_and_current(&meshx, &meshve, &meshvi, &pare, &pari, &Mass_e, rhoe, rhoi, rho, currente, currenti, current, is_periodicx);
         // update_E_from_rho_and_current_1d(solver, delta_t, Mass_e, rho, current, E); // lambda^2 d_x E = rho
         update_E_from_rho_and_current_1d (meshx.size-1, (meshx.max-meshx.min)/(meshx.size-1), solver.lambda, rho, E);
+        if (mpi_rank == 0) {
 
             fprintf(file_diag_energy, "%1.20lg %1.20lg %1.20lg %1.20lg\n", ((double)itime+1)*delta_t, ee,diffM3,E[meshx.size-1]);
             fprintf(file_diag_mass, "%1.20lg %1.20lg\n", ((double)itime+1)*delta_t, mm);
