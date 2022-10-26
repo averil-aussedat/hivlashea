@@ -27,8 +27,8 @@
 \usepackage[overload]{empheq} % source : https://tex.stackexchange.com/questions/31951/separate-labels-in-cases
 \usepackage{caption} % to have subfigures
 \usepackage{subcaption} % to have subfigures
+\usepackage{hyperref}
 \usepackage{cleveref} % \cref. 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Format
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -45,7 +45,6 @@
 	 \ Christian Tayou-Fotso\footnote{Labo. J. A. Dieudonn\'e, UMR 6621, Universit\'e Nice-Sophia Antipolis, Parc Valrose, F-06108 Nice cedex 02, France. \texttt{christian.tayou-fotso@unice.fr}}.
  } 
 \date{}
-
 \SetKwRepeat{Do}{do}{while} % for algorithm2e package, add do-while
 
 % set dashes instead of bullets for item lists
@@ -112,6 +111,8 @@
 \begin{document}
 	
 \maketitle
+
+\emph{Centre de Calcul Intensif d'Aix-Marseille is acknowledged for granting access to its high performance computing resources}
 
 \begin{abstract}
 	This article is a report of the   CEMRACS 2022 project, called HIVLASHEA, standing for "{\bf Hi}gh order methods for {\bf Vla}sov-Poisson models for {\bf shea}ths".
@@ -686,6 +687,134 @@ At the opposite, the semi-Lagrangian scheme does not produce vanishing approxima
 	\caption{Comparison between finite differences (left) and semi-Lagrangian (right) at $T=200$.}
 	\label{fig:compT200}
 \end{figure}  
+
+\paragraph{Numerical results for the SL code for different discretizations}
+We want here to compare the semi-Lagrangian code with different discretizations.
+We have here no exact solution at hand to validate the code; so we validate it by comparing the numerical parameters. We restrict here to final time $T=20$ and look for "converged" numerical parameters.
+It is beneficial that the code is parallel (remap strategy of the selalib project\footnote{\url{https://selalib.github.io/selalib.html}}); in practice we do the simuations on a labtop or in the mesocentre of Marseille
+($16$ cores for interactive mode and $32$ cores for submitted jobs, which can be prone to delays, depending on the queue).
+
+We choose to use a high number for the electron density, by taking $N_v=8193$, 
+and we study the change for $N_x$ and $N_{v_i}$, taking first $N_x=256$ and $N_{v_i}=2049$, and then taking $N_x=1024$ and  $N_{v_i}=4097$.
+Numerical results are shown on Figure \ref{fig:comp_phasespace}. We clearly see that the results are quite similar, with a more diffusive solution for the coarser mesh, which is encouraging.
+
+On Figure \ref{fig:comp_temps}, we study the validity of the time discretization, changing the value of $\Delta t$, which goes from
+$\Delta t=0.00125$ to $\Delta t=0.000125$. We again see that results are very similar, which is a good point.
+
+We have used $d=8$ with periodic boundary conditions for the interpolation in velocity, and $k_b=1$ together with $d=2$ for the spatial interpolation.
+Lagrange interpolation of degree $3$  (that is, $d=1$) is used for passing from the ion velocity mesh to the electron velocity mesh (which is needed for the ionization).
+
+The ion density and the electric field seem not to change much; but the electron density is varying a lot and becomes more and more complex with respect to time,
+and filaments appear. Note that we have to take quite small time steps, as we have chosen $\mu=1/100$, which makes the study more difficult, but it is nearer to more physically relevant parameters. 
+We have chosen also a high number for $N_{v_e}$; this permits to better keep the symmetry, without imposing it a priori (which is in fact possible, by a symmetrization of $\rho$).
+
+We remark also that the spatial interpolation does not lead to unstable results, which can occur sometimes when extrapolation is used (see \cite{badsiNumericalStabilityPlasma}).
+We have used an odd number of points in order to prevent from having  $0$ as mesh points, which would lead to increase of the value at constant rate, in the ionization step.
+
+The study of the numerical equilibrium and the study of the behavior of the ion densiity around $(0,0)$ which is quite complex at equilibrium, are not tackled here and are out of the scope of this work.
+%The behavior of the ion densition 
+\begin{figure}
+	\centering
+	\newcommand{\rootSL}{../code_SL/}
+%	\newcommand{\rootFD}{../../DynamicElectricSheath.jl/data/two_species/}
+	\newcommand{\rootFD}{../temp_res_DF/}
+	\newcommand{\dirSL}{run_comp_long_time_2sp_Nx1000_Nvi2001_Nve2001_Nt100000}
+	\newcommand{\dirFD}{run_comp_long_time_2sp_Nx200_Nv400_Nt2500000}
+	
+	\renewcommand{\imh}{0.25\linewidth}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{images/E_run5ab.png}
+		\includegraphics[height=\imh]{images/E_run5ac.png}
+		\caption{Electric field}
+		%\mysubcaption{The maximum of $\rho$ for the (DF) code is equal to 39.983965094090.}
+		%\label{subfig:compT200_E_rho}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{images/rho_run5ab.png}
+		\includegraphics[height=\imh]{images/rho_run5ac.png}
+		\caption{Density $\rho$}
+		%\mysubcaption{The maximum of $\rho$ for the (DF) code is equal to 39.983965094090.}
+		%\label{subfig:compT200_E_rho}
+	\end{subfigure}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{images/fi_run5ab.png}
+		\includegraphics[height=\imh]{images/fi_run5ac.png}
+		\caption{Ion density} 
+		%\label{subfig:compT200_ion}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{images/fe_run5ab.png}
+		\includegraphics[height=\imh]{images/fe_run5ac.png}
+		\caption{Electron density}
+		%\label{subfig:compT200_electron}
+	\end{subfigure}
+	\caption{Comparison of semi-Lagrangian code for different discretizations. Run1:  $N_x=256,\ N_{v_i}=2049$ (left); Run2: $N_x=1024,\ N_{v_i}=4097$ (right) at $T=20$.
+	Other numerical parameters are $N_{v_e}=8193$ and $\Delta t = 0.00025$. We have used $[-60,60]$ for $v_e$ and  $[-50,50]$ for $v_i$.
+	The ion density is zoomed for $v_i\in [-4.5,4.5]$}
+	\label{fig:comp_phasespace}
+\end{figure}  
+
+\begin{figure}
+	\centering
+	\newcommand{\rootSL}{../code_SL/}
+%	\newcommand{\rootFD}{../../DynamicElectricSheath.jl/data/two_species/}
+	\newcommand{\rootFD}{../temp_res_DF/}
+	\newcommand{\dirSL}{run_comp_long_time_2sp_Nx1000_Nvi2001_Nve2001_Nt100000}
+	\newcommand{\dirFD}{run_comp_long_time_2sp_Nx200_Nv400_Nt2500000}
+	
+	\renewcommand{\imh}{0.25\linewidth}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=0.3\linewidth]{images/rhoT1.png}
+		\includegraphics[height=\imh,width=0.3\linewidth]{images/feT1.png}
+		\includegraphics[height=\imh,width=0.3\linewidth]{images/feT1_run_job2.png}
+		\caption{$T=1$}
+		%\mysubcaption{The maximum of $\rho$ for the (DF) code is equal to 39.983965094090.}
+		%\label{subfig:compT200_E_rho}
+	\end{subfigure}
+
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=0.3\linewidth]{images/rhoT2.png}
+		\includegraphics[height=\imh,width=0.3\linewidth]{images/feT2.png}
+		\includegraphics[height=\imh,width=0.3\linewidth]{images/feT2_run_job2.png}
+		\caption{$T=2$}
+		%\mysubcaption{The maximum of $\rho$ for the (DF) code is equal to 39.983965094090.}
+		%\label{subfig:compT200_E_rho}
+	\end{subfigure}
+
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=0.3\linewidth]{images/rhoT5.png}
+		\includegraphics[height=\imh,width=0.3\linewidth]{images/feT5.png}
+		\includegraphics[height=\imh,width=0.3\linewidth]{images/feT5_run_job2.png}
+		\caption{$T=5$}
+		%\mysubcaption{The maximum of $\rho$ for the (DF) code is equal to 39.983965094090.}
+		%\label{subfig:compT200_E_rho}
+	\end{subfigure}
+
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=0.3\linewidth]{images/rhoT10.png}
+		\includegraphics[height=\imh,width=0.3\linewidth]{images/feT10.png}
+		\includegraphics[height=\imh,width=0.3\linewidth]{images/feT10_run_job2.png}
+		\caption{$T=10$}
+		%\mysubcaption{The maximum of $\rho$ for the (DF) code is equal to 39.983965094090.}
+		%\label{subfig:compT200_E_rho}
+	\end{subfigure}
+
+
+	\caption{Density $\rho$ (left) and electron density (middle) for time $T\in \{1,2,5,10\}$ with Run2; electron density is also given, by changing $\Delta t$ to $0.000025$ (right)}
+	\label{fig:comp_temps}
+\end{figure}  
+
 
 \bibliographystyle{alpha}
 \bibliography{CEMRACS.bib}
