@@ -632,6 +632,49 @@ The simulations run over the spatial domain $x \in [-1,1]$. The semi-Lagrangian 
 	\label{fig:compT01}
 \end{figure}  
 
+\begin{figure}
+	\centering
+	\newcommand{\rootSL}{../code_SL/}
+%	\newcommand{\rootFD}{../../DynamicElectricSheath.jl/data/two_species/}
+	\newcommand{\rootFD}{../temp_res_DF/}
+	\newcommand{\dirSL}{run_comp_short_time_2sp_Nx1000_Nvi2001_Nve2001_Nt6250}
+	\newcommand{\dirFD}{run_comp_short_time_2sp_Nx1000_Nv2000_Nt6250}
+	
+	\renewcommand{\imh}{0.25\linewidth}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{images/ET0p1_FD.png}
+		\includegraphics[height=\imh]{images/ET0p1.png}
+		\caption{Electric field }
+		\label{subfig:compT01_E_rho}
+	\end{subfigure}
+
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{images/rhoT0p1_FD.png}
+		\includegraphics[height=\imh]{images/rhoT0p1.png}
+		\caption{Density $\rho$}
+		\label{subfig:compT01_E_rho}
+	\end{subfigure}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{images/fiT0p1_FD.png}
+		\includegraphics[height=\imh]{images/fiT0p1.png}
+		\caption{Ion density}
+		\label{subfig:compT01_ion}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh]{images/feT0p1_FD.png}
+		\includegraphics[height=\imh]{images/feT0p1.png}
+		\caption{Electron density}
+		\label{subfig:compT01_electron}
+	\end{subfigure}
+	\caption{Comparison between finite differences (left) and semi-Lagrangian (right) at $T=0.1$.}
+	\label{fig:compT01}
+\end{figure}  
 The same simulation at time $T=0.1$ shows a greater divergence between both methods. The electric field does not have the same extremal values, and the comparison of $\rho$ reveals a difference of variations. The approximations of the ion density $f_i$ seem quite similar, but the shape of the electric density $f_e$ differs: the semi-lagrangian code produces sharper approximation and a more elongated profile.
 
 \paragraph{Long time}
