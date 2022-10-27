@@ -33,7 +33,7 @@
 % Format
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\title{Numerical methods for plasma sheaths}
+\title{Numerical simulations of plasma sheaths}
 \author{
 	Valentin Ayot\footnote{Institut de Math\'ematiques, CNRS, UMR 5251, Universit\'e de Bordeaux, F-33405 Talence, France. \texttt{valentin.ayot@u-bordeaux.fr}}, 
 	\ Mehdi Badsi,
@@ -98,7 +98,8 @@
 		\end{center}
 	\end{minipage}
 }
-\newcommand{\imh}{\textwidth} % meant to be redefined locally
+\newcommand{\imh}{\textheight} % meant to be redefined locally
+\newcommand{\imw}{\textwidth} % meant to be redefined locally
 
 %\renewcommand\appendixpagename{Appendix}
 %\renewcommand\appendixtocname{Appendix}
@@ -118,9 +119,9 @@
 	This article is a report of the   CEMRACS 2022 project, called HIVLASHEA, standing for "{\bf Hi}gh order methods for {\bf Vla}sov-Poisson models for {\bf shea}ths".
 	%achieved during the CEMRACS 2022.
 	A two-species Vlasov-Poisson model is described together with some numerical simulations, permitting to exhibit the formation of a plasma sheath. 
-	The numerical simulations are performed with two different methods: a first order classical finite difference scheme and a high order semi-Lagrangian scheme with Strang splitting; for the latter one, the implementation
+	The numerical simulations are performed with two different methods: a first order classical finite difference (FD) scheme and a high order semi-Lagrangian (SL) scheme with Strang splitting; for the latter one, the implementation
 	of (non-periodic) boundary conditions is discussed. 
-	The codes are first evaluated on a one-species case, where a analytical solution is known. For the two-species case, mesh refinement and cross comparisons of the two methods are performed.
+	The codes are first evaluated on a one-species case, where a analytical solution is known. For the two-species case, cross comparisons and the influence of the numerical parameters for the SL method are performed in order to have an idea of a reference numerical simulation.
 %	We consider Vlasov-Poisson model for a two-species plasma. Our aim is to extend an existing code from periodic boundary conditions to nonperiodic boundary conditions. In particular, we focus on the interaction of the plasma with a non-emitting wall, and wish to capture the physical phenomenon called \emph{Debye sheath}. 
 %	Comparison between this numerical scheme and a finite difference scheme are presented.
 \end{abstract}
@@ -471,6 +472,10 @@ The boundaries are treated as follows:
 %\end{enumerate}
 
 \section{Numerical results}
+
+The semi-Lagrangian code is written in \texttt{C}; it uses subroutines (translated from Fortran) of the selalib library \footnote{\url{https://selalib.github.io/selalib.html}}. The code works in parallel using MPI.
+The finite difference scheme has been written in Julia.
+
 \subsection{1-species validation test case}
 
 We rely on the work of \cite{malkovNonstationaryAntonovSelfgravitating2020} to provide an analytical solution in a 1-species case. Consider the simplified stationary model describing the density of particles $f = f(t,x,v)$, and the potential $\varphi=\varphi(t,x)$:
@@ -530,7 +535,7 @@ It is numerically relevant to extend the Malkov solution \cref{eq:Malkov_solutio
 	\input{ltf_Malkov_SL}
 %\end{figure}
 
-\subsection{Comparison between (SL) and (FD)}
+\subsection{Two species case} % and comparison between (SL) and (FD)}
 
 In the sequel, we use the following physical parameters:
 \begin{align}\label{eq:param_simu}
@@ -555,206 +560,343 @@ In order to satisfy the boundary conditions, we multiply $f_{i,e}$ by a mask, de
 	\label{fig:init_cond}
 \end{figure}
 
+
+The simulations run over the spatial domain $x \in [-1,1]$. The semi-Lagrangian (SL) code computes the electron velocities on $v_e \in [-60, 60]$, and ion velocities on $v_i \in [-50, 50]$. The finite differences (FD) code uses the same mesh for ions and electrons, chosen as $v\in[-60,60]$. To simplify the comparison, visualisations of $f_i$ are restricted to the coordinates $f_{i,j,k}$ such that $v_k \in [-5,5]$.
+For the finite differences code, we use $N_x=512$, $N_{v_e}=N_{v_i}=513$; the time step is computed in order to satisfy the CFL condition; a further time step is used for terminating to the final time $T$.  
+For the semi-Lagrangian code, we will use
+
+\begin{itemize}
+\item Run0: $N_x=512$, $N_{v_e}=N_{v_i}=513$, $\Delta t = 0.00025$,
+\item Run1: $N_x=256$, $N_{v_e}=8193$ and $N_{v_i}=2049$, $\Delta t = 0.00025$,
+\item Run2: $N_x=1024$, $N_{v_e}=8193$ and $N_{v_i}=2049$, $\Delta t = 0.00025$,
+\item Run3: $N_x=1024$, $N_{v_e}=8193$ and $N_{v_i}=2049$, $\Delta t = 0.000025$.
+\end{itemize}
+
+Always for the SL scheme, we have used $d=8$ with periodic boundary conditions for the interpolation in velocity, and $k_b=1$ together with $d=2$ for the spatial interpolation.
+Lagrange interpolation of degree $3$  (that is, $d=1$) is used for passing from the ion velocity mesh to the electron velocity mesh (which is needed for the ionization).
+
+As diagnostics, we represent the electric field $E$, the charge density $\rho$, the ion distribution function $f_i$ and the electron distribution function $f_e$ at different times $T\in \left\{0.1,0.2,1,2,5,20\right\}$.
+
 \paragraph{Short time}
 
-The simulations run over the spatial domain $x \in [-1,1]$. The semi-Lagrangian code computes the electron velocities on $v_e \in [-50, 50]$, and ion velocities on $v_i \in [-8, 8]$. The finite differences code uses the same mesh for ions and electrons, chosen as $v\in[-50,50]$. To simplify the comparison, visualisations of $f_i$ for (FD) are restricted to the coordinates $f_{i,j,k}$ such that $v_k \in [-8,8]$.
+We first look at the results for short times: $T=0.1$ (Figure \ref{fig:compT01}) and $T=0.2$ (Figure \ref{fig:compT02}). For the semi-Lagrangian code, we use the parameters of Run2, which gives a reference solution.
+We see that the results are very similar with the FD code for $T=0.1$, which permits to validate the results by cross comparisons. For $T=0.2$, differences begin to appear; the sharp profile of $f_e$ is not well
+reproduced by the FD scheme which has also a coarser mesh. We can see also the differences on the charge density.
 
-\begin{figure}
-	\centering
-	\newcommand{\rootSL}{../code_SL/}
-%	\newcommand{\rootFD}{../../DynamicElectricSheath.jl/data/two_species/}
-	\newcommand{\rootFD}{../temp_res_DF/}
-	\newcommand{\dirSL}{run_comp_short_time_2sp_Nx1000_Nvi2001_Nve2001_Nt1563}
-	\newcommand{\dirFD}{run_comp_short_time_2sp_Nx1000_Nv2000_Nt1563}
-	\renewcommand{\imh}{0.33\linewidth}
-	
-	\begin{subfigure}{\textwidth}
-		\centering
-		\includegraphics[height=\imh]{\rootFD\dirFD/comp_E_\dirSL.png}
-		\includegraphics[height=\imh]{\rootFD\dirFD/comp_rho_\dirSL.png}
-		\caption{Electric field (left) and density $\rho$ (right)}
-		\label{subfig:compT0025_E_rho}
-	\end{subfigure}
-	
-	\begin{subfigure}{\textwidth}
-		\centering
-		\includegraphics[height=\imh]{\rootFD\dirFD/fi}
-		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fi}
-		\caption{Ion density}
-		\label{subfig:compT0025_ion}
-	\end{subfigure}
-	\begin{subfigure}{\textwidth}
-		\centering
-		\includegraphics[height=\imh]{\rootFD\dirFD/fe}
-		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fe}
-		\caption{Electron density}
-		\label{subfig:compT0025_electron}
-	\end{subfigure}
-	\caption{Comparison between finite differences (left) and semi-Lagrangian (right) at $T=0.025$.}
-	\label{fig:compT0025}
-\end{figure}  
-
-\Cref{fig:compT0025} illustrates the very short-time behaviour of both codes. At time $t=0$, the initial conditions are chosen so that $E = \rho = 0$, corresponding to a neutral plasma. The initial velocity field is then given by $(v, 0)$, and we observe the shear of the initial conditions. The electric field conserve the same variations through both codes, with a difference in scale.
-
-\begin{figure}
-	\centering
-	\newcommand{\rootSL}{../code_SL/}
-%	\newcommand{\rootFD}{../../DynamicElectricSheath.jl/data/two_species/}
-	\newcommand{\rootFD}{../temp_res_DF/}
-	\newcommand{\dirSL}{run_comp_short_time_2sp_Nx1000_Nvi2001_Nve2001_Nt6250}
-	\newcommand{\dirFD}{run_comp_short_time_2sp_Nx1000_Nv2000_Nt6250}
-	
-	\renewcommand{\imh}{0.33\linewidth}
-	
-	\begin{subfigure}{\textwidth}
-		\centering
-		\includegraphics[height=\imh]{\rootFD\dirFD/comp_E_\dirSL.png}
-		\includegraphics[height=\imh]{\rootFD\dirFD/comp_rho_\dirSL.png}
-		\caption{Electric field (left) and density $\rho$ (right)}
-		\label{subfig:compT01_E_rho}
-	\end{subfigure}
-	
-	\begin{subfigure}{\textwidth}
-		\centering
-		\includegraphics[height=\imh]{\rootFD\dirFD/fi}
-		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fi}
-		\caption{Ion density}
-		\label{subfig:compT01_ion}
-	\end{subfigure}
-	\begin{subfigure}{\textwidth}
-		\centering
-		\includegraphics[height=\imh]{\rootFD\dirFD/fe}
-		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fe}
-		\caption{Electron density}
-		\label{subfig:compT01_electron}
-	\end{subfigure}
-	\caption{Comparison between finite differences (left) and semi-Lagrangian (right) at $T=0.1$.}
-	\label{fig:compT01}
-\end{figure}  
-
-\begin{figure}
-	\centering
-	\newcommand{\rootSL}{../code_SL/}
-%	\newcommand{\rootFD}{../../DynamicElectricSheath.jl/data/two_species/}
-	\newcommand{\rootFD}{../temp_res_DF/}
-	\newcommand{\dirSL}{run_comp_short_time_2sp_Nx1000_Nvi2001_Nve2001_Nt6250}
-	\newcommand{\dirFD}{run_comp_short_time_2sp_Nx1000_Nv2000_Nt6250}
-	
-	\renewcommand{\imh}{0.25\linewidth}
-	
-	\begin{subfigure}{\textwidth}
-		\centering
-		\includegraphics[height=\imh]{images/ET0p1_FD.png}
-		\includegraphics[height=\imh]{images/ET0p1.png}
-		\caption{Electric field }
-		\label{subfig:compT01_E_rho}
-	\end{subfigure}
-
-	\begin{subfigure}{\textwidth}
-		\centering
-		\includegraphics[height=\imh]{images/rhoT0p1_FD.png}
-		\includegraphics[height=\imh]{images/rhoT0p1.png}
-		\caption{Density $\rho$}
-		\label{subfig:compT01_E_rho}
-	\end{subfigure}
-	
-	\begin{subfigure}{\textwidth}
-		\centering
-		\includegraphics[height=\imh]{images/fiT0p1_FD.png}
-		\includegraphics[height=\imh]{images/fiT0p1.png}
-		\caption{Ion density}
-		\label{subfig:compT01_ion}
-	\end{subfigure}
-	\begin{subfigure}{\textwidth}
-		\centering
-		\includegraphics[height=\imh]{images/feT0p1_FD.png}
-		\includegraphics[height=\imh]{images/feT0p1.png}
-		\caption{Electron density}
-		\label{subfig:compT01_electron}
-	\end{subfigure}
-	\caption{Comparison between finite differences (left) and semi-Lagrangian (right) at $T=0.1$.}
-	\label{fig:compT01}
-\end{figure}  
-The same simulation at time $T=0.1$ shows a greater divergence between both methods. The electric field does not have the same extremal values, and the comparison of $\rho$ reveals a difference of variations. The approximations of the ion density $f_i$ seem quite similar, but the shape of the electric density $f_e$ differs: the semi-lagrangian code produces sharper approximation and a more elongated profile.
+%The same simulation at time $T=0.1$ shows a greater divergence between both methods. The electric field does not have the same extremal values, and the comparison of $\rho$ reveals a difference of variations. The approximations of the ion density $f_i$ seem quite similar, but the shape of the electric density $f_e$ differs: the semi-lagrangian code produces sharper approximation and a more elongated profile.
 
 \paragraph{Long time}
 
-Now, we turn to the long-term simulations, with $T=200$. Here, we free the semi-Lagrangian code from the artificial CFL condition imposed for fair comparisons. \Cref{fig:compT200} illustrates the behavior of both codes on long time, with parameters given by \cref{eq:param_simu}. 
+Now, we turn to the long-term simulations, with $T=20$, on Figure \ref{fig:compT20}.  %Here, we free the semi-Lagrangian code from the artificial CFL condition imposed for fair comparisons. \Cref{fig:compT200} illustrates the behavior of both codes on long time, with parameters given by \cref{eq:param_simu}. 
+%
+The finite difference code suffers from its diffusion, and the approximations of $f_i$ and $f_e$ are much damped. Electric field and charge density are really different.
+On the contrary, the SL scheme gives much better results (in comparison with refined runs, as we will see later), while it uses the same number of points. We can distinguish a little degradation of the symmetry, by looking at the charge density.
+%almost everywhere reduced to 0. %The point $(x=0,v=0)$ stands out, since it is an equilibrium point: the value $f_e(t,0,0)$ is constant with respect to $t$ (both in the continuous model, and in the discrete model provided $(x=0,v=0)$ belongs to the mesh), and 
+%\begin{align*}
+%	\partial_t f_i (t,0,0) = f_e(t,0,0),  \quad \text{so that} \quad f_i(t,0,0) = f_i(0,0,0) + t f_e(0,0,0).
+%\end{align*}
+%This explains the results of \cref{fig:compT200}. The value $f^n_{e,j_0,k_0} \simeq f_e(T,0,0)$ is stationary, but the maximum of $f_e^n$ outside a small neighbourhood of $(x=0,v=0)$ is 0 at machine precision.
+%%The numerical maximum of $f_i$ is equal to $159.97581842617524$, and the error with respect to $f_i(0,0,0) + (T=200) \times (\nu = 20) \times f_e(0,0,0)$ is of order $10^{-8}$. 
+%The value $f^n_{i,j_0,k_0} \simeq f_i(T,0,0)$ is not taken into account in the colormap, since
+%\begin{align*}
+%	\max_{j,k} f^n_{i,j,k} = f^n_{i,j_0,k_0} = 159.97581842617524, \quad \text{and} \quad \left|f^n_{i,j_0,k_0} - (f^0_{i,j_0,k_0} + T \nu f^0_{e,j_0,k_0})\right| = 8.98 \times 10^{-9}.
+%\end{align*}
+%
+%At the opposite, the semi-Lagrangian scheme does not produce vanishing approximations. 
 
-The finite difference code suffers from its diffusion, and the approximations of $f_i$ and $f_e$ are almost everywhere reduced to 0. The point $(x=0,v=0)$ stands out, since it is an equilibrium point: the value $f_e(t,0,0)$ is constant with respect to $t$ (both in the continuous model, and in the discrete model provided $(x=0,v=0)$ belongs to the mesh), and 
-\begin{align*}
-	\partial_t f_i (t,0,0) = f_e(t,0,0),  \quad \text{so that} \quad f_i(t,0,0) = f_i(0,0,0) + t f_e(0,0,0).
-\end{align*}
-This explains the results of \cref{fig:compT200}. The value $f^n_{e,j_0,k_0} \simeq f_e(T,0,0)$ is stationary, but the maximum of $f_e^n$ outside a small neighbourhood of $(x=0,v=0)$ is 0 at machine precision.
-%The numerical maximum of $f_i$ is equal to $159.97581842617524$, and the error with respect to $f_i(0,0,0) + (T=200) \times (\nu = 20) \times f_e(0,0,0)$ is of order $10^{-8}$. 
-The value $f^n_{i,j_0,k_0} \simeq f_i(T,0,0)$ is not taken into account in the colormap, since
-\begin{align*}
-	\max_{j,k} f^n_{i,j,k} = f^n_{i,j_0,k_0} = 159.97581842617524, \quad \text{and} \quad \left|f^n_{i,j_0,k_0} - (f^0_{i,j_0,k_0} + T \nu f^0_{e,j_0,k_0})\right| = 8.98 \times 10^{-9}.
-\end{align*}
 
-At the opposite, the semi-Lagrangian scheme does not produce vanishing approximations. 
+\paragraph{Looking for a reference solution} %Numerical results for the SL code for different discretizations}
 
-\begin{figure}
-	\centering
-	\newcommand{\rootSL}{../code_SL/}
-%	\newcommand{\rootFD}{../../DynamicElectricSheath.jl/data/two_species/}
-	\newcommand{\rootFD}{../temp_res_DF/}
-	\newcommand{\dirSL}{run_comp_long_time_2sp_Nx1000_Nvi2001_Nve2001_Nt100000}
-	\newcommand{\dirFD}{run_comp_long_time_2sp_Nx200_Nv400_Nt2500000}
-	
-	\renewcommand{\imh}{0.33\linewidth}
-	
-	\begin{subfigure}{\textwidth}
-		\centering
-		\includegraphics[height=\imh]{\rootFD\dirFD/comp_E_\dirSL.png}
-		\includegraphics[height=\imh]{\rootFD\dirFD/comp_rho_\dirSL.png}
-		\caption{Electric field (left) and density $\rho$ (right)}
-		\mysubcaption{The maximum of $\rho$ for the (DF) code is equal to 39.983965094090.}
-		\label{subfig:compT200_E_rho}
-	\end{subfigure}
-	
-	\begin{subfigure}{\textwidth}
-		\centering
-		\includegraphics[height=\imh]{\rootFD\dirFD/fi}
-		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fi}
-		\caption{Ion density} 
-		\label{subfig:compT200_ion}
-	\end{subfigure}
-	\begin{subfigure}{\textwidth}
-		\centering
-		\includegraphics[height=\imh]{\rootFD\dirFD/fe}
-		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fe}
-		\caption{Electron density}
-		\label{subfig:compT200_electron}
-	\end{subfigure}
-	\caption{Comparison between finite differences (left) and semi-Lagrangian (right) at $T=200$.}
-	\label{fig:compT200}
-\end{figure}  
+It is not easy to find a reference solution, as we look for late time solution, and the Vlasov equation is prone to filamentation. We have here also the problem that the time scale for the ions is different to the time scale for the electrons, which implies that short time steps have to be used in order to be able to follow the dynamics (even if we use here a semi-Lagrangian scheme, whose time step is not restricted by the strong CFL condition
+of the finite difference scheme).
 
-\paragraph{Numerical results for the SL code for different discretizations}
-We want here to compare the semi-Lagrangian code with different discretizations.
-We have here no exact solution at hand to validate the code; so we validate it by comparing the numerical parameters. We restrict here to final time $T=20$ and look for "converged" numerical parameters.
-It is beneficial that the code is parallel (remap strategy of the selalib project\footnote{\url{https://selalib.github.io/selalib.html}}); in practice we do the simuations on a labtop or in the mesocentre of Marseille
-($16$ cores for interactive mode and $32$ cores for submitted jobs, which can be prone to delays, depending on the queue).
+It is interesting to notice that we can have converged solutions for a fixed time step, taking for exemple $\Delta t = 0.0025$ (or even $\Delta t =0.025$), but the corresponding solution is then not (at all) converged in time
+(results are not shown here to save place; we can remark that the results on charge density can be quite different; looking at the electron distribution function, we see some shifting
+of the solution). So we have diminished the time step to $\Delta t = 0.00025$, and the comparison with the same simulations with  $\Delta t = 0.000025$ on Figure \ref{fig:comp_temps} 
+is now much similar, which indicates that the 
+time step is now fine enough. Note that for semi-Lagrangian schemes, taking the smallest possible time step does not necessarily lead to a better result (due to accumulation of errors, as the number of interpolations 
+increases).
 
-We choose to use a high number for the electron density, by taking $N_v=8193$, 
-and we study the change for $N_x$ and $N_{v_i}$, taking first $N_x=256$ and $N_{v_i}=2049$, and then taking $N_x=1024$ and  $N_{v_i}=4097$.
-Numerical results are shown on Figure \ref{fig:comp_phasespace}. We clearly see that the results are quite similar, with a more diffusive solution for the coarser mesh, which is encouraging.
+We choose to use a very fine discretization in velocity for the electron by taking $N_v=8193$ (some results, not shown, with $N_v=16385$ have lead to indistinguishable results).
+We then make vary $N_x$ and $N_{v_i}$; we remark that $N_x$ can be quite lower and $N_{v_i}$ a little lower also, as we have similar results taking $(N_x,N_{v_i})=(256,2049)$ and 
+$(N_x,N_{v_i})=(1024,4097)$, as we can see on Figure \ref{fig:comp_phasespace} (the first one is more diffusive which is coherent). 
+%We would like to have a solution that is 
 
-On Figure \ref{fig:comp_temps}, we study the validity of the time discretization, changing the value of $\Delta t$, which goes from
-$\Delta t=0.00125$ to $\Delta t=0.000125$. We again see that results are very similar, which is a good point.
-
-We have used $d=8$ with periodic boundary conditions for the interpolation in velocity, and $k_b=1$ together with $d=2$ for the spatial interpolation.
-Lagrange interpolation of degree $3$  (that is, $d=1$) is used for passing from the ion velocity mesh to the electron velocity mesh (which is needed for the ionization).
-
-The ion density and the electric field seem not to change much; but the electron density is varying a lot and becomes more and more complex with respect to time,
-and filaments appear. Note that we have to take quite small time steps, as we have chosen $\mu=1/100$, which makes the study more difficult, but it is nearer to more physically relevant parameters. 
-We have chosen also a high number for $N_{v_e}$; this permits to better keep the symmetry, without imposing it a priori (which is in fact possible, by a symmetrization of $\rho$).
+%We want here to compare the semi-Lagrangian code with different discretizations.
+%We have here no exact solution at hand to validate the code; so we validate it by comparing the numerical parameters. We restrict here to final time $T=20$ and look for "converged" numerical parameters.
+%It is beneficial that the code is parallel (remap strategy of the selalib project\footnote{\url{https://selalib.github.io/selalib.html}}); in practice we do the simulations on a labtop or in the mesocentre of Marseille
+%($16$ cores for interactive mode and $32$ cores for submitted jobs, which can be prone to delays, depending on the queue).
+%
+%We choose to use a high number for the electron density, by taking $N_v=8193$, 
+%and we study the change for $N_x$ and $N_{v_i}$, taking first $N_x=256$ and $N_{v_i}=2049$, and then taking $N_x=1024$ and  $N_{v_i}=4097$.
+%Numerical results are shown on Figure \ref{fig:comp_phasespace}. We clearly see that the results are quite similar, with a more diffusive solution for the coarser mesh, which is encouraging.
+%
+%On Figure \ref{fig:comp_temps}, we study the validity of the time discretization, changing the value of $\Delta t$, which goes from
+%$\Delta t=0.00125$ to $\Delta t=0.000125$. We again see that results are very similar, which is a good point.
+%
+%
+%The ion density and the electric field seem not to change much; but the electron density is varying a lot and becomes more and more complex with respect to time,
+%and filaments appear. Note that we have to take quite small time steps, as we have chosen $\mu=1/100$, which makes the study more difficult, but it is nearer to more physically relevant parameters. 
+%We have chosen also a high number for $N_{v_e}$; this permits to better keep the symmetry, without imposing it a priori (which is in fact possible, by a symmetrization of $\rho$).
 
 We remark also that the spatial interpolation does not lead to unstable results, which can occur sometimes when extrapolation is used (see \cite{badsiNumericalStabilityPlasma}).
 We have used an odd number of points in order to prevent from having  $0$ as mesh points, which would lead to increase of the value at constant rate, in the ionization step.
 
-The study of the numerical equilibrium and the study of the behavior of the ion densiity around $(0,0)$ which is quite complex at equilibrium, are not tackled here and are out of the scope of this work.
+The study of the numerical equilibrium and the study of the behavior of the ion density around $(0,0)$ which is quite complex at equilibrium, are not tackled here and are out of the scope of this work.
+
+
+%\begin{figure}
+%	\centering
+%	\newcommand{\rootSL}{../code_SL/}
+%%	\newcommand{\rootFD}{../../DynamicElectricSheath.jl/data/two_species/}
+%	\newcommand{\rootFD}{../temp_res_DF/}
+%	\newcommand{\dirSL}{run_comp_short_time_2sp_Nx1000_Nvi2001_Nve2001_Nt1563}
+%	\newcommand{\dirFD}{run_comp_short_time_2sp_Nx1000_Nv2000_Nt1563}
+%	\renewcommand{\imh}{0.33\linewidth}
+%	
+%	\begin{subfigure}{\textwidth}
+%		\centering
+%		\includegraphics[height=\imh]{\rootFD\dirFD/comp_E_\dirSL.png}
+%		\includegraphics[height=\imh]{\rootFD\dirFD/comp_rho_\dirSL.png}
+%		\caption{Electric field (left) and density $\rho$ (right)}
+%		\label{subfig:compT0025_E_rho}
+%	\end{subfigure}
+%	
+%	\begin{subfigure}{\textwidth}
+%		\centering
+%		\includegraphics[height=\imh]{\rootFD\dirFD/fi}
+%		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fi}
+%		\caption{Ion density}
+%		\label{subfig:compT0025_ion}
+%	\end{subfigure}
+%	\begin{subfigure}{\textwidth}
+%		\centering
+%		\includegraphics[height=\imh]{\rootFD\dirFD/fe}
+%		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fe}
+%		\caption{Electron density}
+%		\label{subfig:compT0025_electron}
+%	\end{subfigure}
+%	\caption{Comparison between finite differences (left) and semi-Lagrangian (right) at $T=0.025$.}
+%	\label{fig:compT0025}
+%\end{figure}  
+%
+%\Cref{fig:compT0025} illustrates the very short-time behaviour of both codes. At time $t=0$, the initial conditions are chosen so that $E = \rho = 0$, corresponding to a neutral plasma. The initial velocity field is then given by $(v, 0)$, and we observe the shear of the initial conditions. The electric field conserve the same variations through both codes, with a difference in scale.
+
+%\begin{figure}
+%	\centering
+%	\newcommand{\rootSL}{../code_SL/}
+%%	\newcommand{\rootFD}{../../DynamicElectricSheath.jl/data/two_species/}
+%	\newcommand{\rootFD}{../temp_res_DF/}
+%	\newcommand{\dirSL}{run_comp_short_time_2sp_Nx1000_Nvi2001_Nve2001_Nt6250}
+%	\newcommand{\dirFD}{run_comp_short_time_2sp_Nx1000_Nv2000_Nt6250}
+%	
+%	\renewcommand{\imh}{0.33\linewidth}
+%	
+%	\begin{subfigure}{\textwidth}
+%		\centering
+%		\includegraphics[height=\imh]{\rootFD\dirFD/comp_E_\dirSL.png}
+%		\includegraphics[height=\imh]{\rootFD\dirFD/comp_rho_\dirSL.png}
+%		\caption{Electric field (left) and density $\rho$ (right)}
+%		\label{subfig:compT01_E_rho}
+%	\end{subfigure}
+%	
+%	\begin{subfigure}{\textwidth}
+%		\centering
+%		\includegraphics[height=\imh]{\rootFD\dirFD/fi}
+%		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fi}
+%		\caption{Ion density}
+%		\label{subfig:compT01_ion}
+%	\end{subfigure}
+%	\begin{subfigure}{\textwidth}
+%		\centering
+%		\includegraphics[height=\imh]{\rootFD\dirFD/fe}
+%		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fe}
+%		\caption{Electron density}
+%		\label{subfig:compT01_electron}
+%	\end{subfigure}
+%	\caption{Comparison between finite differences (left) and semi-Lagrangian (right) at $T=0.1$.}
+%	\label{fig:compT01}
+%\end{figure}  
+
+\begin{figure}
+	\centering
+	\newcommand{\rootSL}{../code_SL/}
+%	\newcommand{\rootFD}{../../DynamicElectricSheath.jl/data/two_species/}
+	\newcommand{\rootFD}{../temp_res_DF/}
+	\newcommand{\dirSL}{run_comp_short_time_2sp_Nx1000_Nvi2001_Nve2001_Nt6250}
+	\newcommand{\dirFD}{run_comp_short_time_2sp_Nx1000_Nv2000_Nt6250}
+	
+	\renewcommand{\imh}{0.24\textheight}
+	\renewcommand{\imw}{0.45\linewidth}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=\imw]{images/ET0p1_FD.png}
+		\includegraphics[height=\imh,width=\imw]{images/ET0p1.png}
+		\caption{Electric field }
+		\label{subfig:compT01_E}
+	\end{subfigure}
+
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=\imw]{images/rhoT0p1_FD.png}
+		\includegraphics[height=\imh,width=\imw]{images/rhoT0p1.png}
+		\caption{Density $\rho$}
+		\label{subfig:compT01_rho}
+	\end{subfigure}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=\imw]{images/fiT0p1_FD.png}
+		\includegraphics[height=\imh,width=\imw]{images/fiT0p1.png}
+		\caption{Ion distribution function}
+		\label{subfig:compT01_ion}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=\imw]{images/feT0p1_FD.png}
+		\includegraphics[height=\imh,width=\imw]{images/feT0p1.png}
+		\caption{Electron distribution function}
+		\label{subfig:compT01_electron}
+	\end{subfigure}
+	\caption{Comparison between finite differences (left) and semi-Lagrangian (right) at $T=0.1$. The Semi-Lagrangian code uses parameters of Run2}
+	\label{fig:compT01}
+\end{figure}  
+
+\begin{figure}
+	\centering
+	\newcommand{\rootSL}{../code_SL/}
+%	\newcommand{\rootFD}{../../DynamicElectricSheath.jl/data/two_species/}
+	\newcommand{\rootFD}{../temp_res_DF/}
+	\newcommand{\dirSL}{run_comp_short_time_2sp_Nx1000_Nvi2001_Nve2001_Nt6250}
+	\newcommand{\dirFD}{run_comp_short_time_2sp_Nx1000_Nv2000_Nt6250}
+	
+	\renewcommand{\imh}{0.24\textheight}
+	\renewcommand{\imw}{0.45\linewidth}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=\imw]{images/ET0p2_FD.png}
+		\includegraphics[height=\imh,width=\imw]{images/ET0p2.png}
+		\caption{Electric field }
+		\label{subfig:compT02_E}
+	\end{subfigure}
+
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=\imw]{images/rhoT0p2_FD.png}
+		\includegraphics[height=\imh,width=\imw]{images/rhoT0p2.png}
+		\caption{Density $\rho$}
+		\label{subfig:compT02_rho}
+	\end{subfigure}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=\imw]{images/fiT0p2_FD.png}
+		\includegraphics[height=\imh,width=\imw]{images/fiT0p2.png}
+		\caption{Ion distribution function}
+		\label{subfig:compT02_ion}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=\imw]{images/feT0p2_FD.png}
+		\includegraphics[height=\imh,width=\imw]{images/feT0p2.png}
+		\caption{Electron distribution function}
+		\label{subfig:compT02_electron}
+	\end{subfigure}
+	\caption{Comparison between finite differences (left) and semi-Lagrangian (right) at $T=0.2$. The Semi-Lagrangian code uses parameters of Run2}
+	\label{fig:compT02}
+\end{figure}  
+
+
+
+
+
+
+
+\begin{figure}
+	\centering
+	\newcommand{\rootSL}{../code_SL/}
+%	\newcommand{\rootFD}{../../DynamicElectricSheath.jl/data/two_species/}
+	\newcommand{\rootFD}{../temp_res_DF/}
+	\newcommand{\dirSL}{run_comp_short_time_2sp_Nx1000_Nvi2001_Nve2001_Nt6250}
+	\newcommand{\dirFD}{run_comp_short_time_2sp_Nx1000_Nv2000_Nt6250}
+	
+	\renewcommand{\imh}{0.24\textheight}
+	\renewcommand{\imw}{0.45\linewidth}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=\imw]{images/ET20_FD.png}
+		\includegraphics[height=\imh,width=\imw]{images/ET20_512.png}
+		\caption{Electric field }
+		\label{subfig:compT02_E}
+	\end{subfigure}
+
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=\imw]{images/rhoT20_FD.png}
+		\includegraphics[height=\imh,width=\imw]{images/rhoT20_512.png}
+		\caption{Density $\rho$}
+		\label{subfig:compT02_rho}
+	\end{subfigure}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=\imw]{images/fiT20_FD.png}
+		\includegraphics[height=\imh,width=\imw]{images/fiT20_512.png}
+		\caption{Ion distribution function}
+		\label{subfig:compT02_ion}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=\imw]{images/feT20_FD.png}
+		\includegraphics[height=\imh,width=\imw]{images/feT20_512.png}
+		\caption{Electron distribution function}
+		\label{subfig:compT02_electron}
+	\end{subfigure}
+	\caption{Comparison between finite differences (left) and semi-Lagrangian  (right) at $T=20$. The Semi-Lagrangian code uses parameters of Run0
+	%, with $N_x=512,\ N_{v_e}=N_{v_i}=513$ for both codes. %For the semi-Lagrangian code, we use $\Delta t=0.00025$, $[-60,60]$ for $v_e$ and  $[-50,50]$ for $v_i$. The ion density is zoomed for $v_i\in [-5,5]$
+	}
+	\label{fig:compT20}
+\end{figure}  
+
+%\begin{figure}
+%	\centering
+%	\newcommand{\rootSL}{../code_SL/}
+%%	\newcommand{\rootFD}{../../DynamicElectricSheath.jl/data/two_species/}
+%	\newcommand{\rootFD}{../temp_res_DF/}
+%	\newcommand{\dirSL}{run_comp_long_time_2sp_Nx1000_Nvi2001_Nve2001_Nt100000}
+%	\newcommand{\dirFD}{run_comp_long_time_2sp_Nx200_Nv400_Nt2500000}
+%	
+%	\renewcommand{\imh}{0.33\linewidth}
+%	
+%	\begin{subfigure}{\textwidth}
+%		\centering
+%		\includegraphics[height=\imh]{\rootFD\dirFD/comp_E_\dirSL.png}
+%		\includegraphics[height=\imh]{\rootFD\dirFD/comp_rho_\dirSL.png}
+%		\caption{Electric field (left) and density $\rho$ (right)}
+%		\mysubcaption{The maximum of $\rho$ for the (DF) code is equal to 39.983965094090.}
+%		\label{subfig:compT200_E_rho}
+%	\end{subfigure}
+%	
+%	\begin{subfigure}{\textwidth}
+%		\centering
+%		\includegraphics[height=\imh]{\rootFD\dirFD/fi}
+%		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fi}
+%		\caption{Ion density} 
+%		\label{subfig:compT200_ion}
+%	\end{subfigure}
+%	\begin{subfigure}{\textwidth}
+%		\centering
+%		\includegraphics[height=\imh]{\rootFD\dirFD/fe}
+%		\includegraphics[height=\imh]{\rootSL\dirSL/python_diags/fe}
+%		\caption{Electron density}
+%		\label{subfig:compT200_electron}
+%	\end{subfigure}
+%	\caption{Comparison between finite differences (left) and semi-Lagrangian (right) at $T=200$.}
+%	\label{fig:compT200}
+%\end{figure}  
+
 %The behavior of the ion densition 
 \begin{figure}
 	\centering
@@ -764,20 +906,21 @@ The study of the numerical equilibrium and the study of the behavior of the ion 
 	\newcommand{\dirSL}{run_comp_long_time_2sp_Nx1000_Nvi2001_Nve2001_Nt100000}
 	\newcommand{\dirFD}{run_comp_long_time_2sp_Nx200_Nv400_Nt2500000}
 	
-	\renewcommand{\imh}{0.25\linewidth}
+	\renewcommand{\imh}{0.24\textheight}
+	\renewcommand{\imw}{0.45\linewidth}
 	
 	\begin{subfigure}{\textwidth}
 		\centering
-		\includegraphics[height=\imh]{images/E_run5ab.png}
-		\includegraphics[height=\imh]{images/E_run5ac.png}
+		\includegraphics[height=\imh,width=\imw]{images/E_run5ab.png}
+		\includegraphics[height=\imh,width=\imw]{images/E_run5ac.png}
 		\caption{Electric field}
 		%\mysubcaption{The maximum of $\rho$ for the (DF) code is equal to 39.983965094090.}
 		%\label{subfig:compT200_E_rho}
 	\end{subfigure}
 	\begin{subfigure}{\textwidth}
 		\centering
-		\includegraphics[height=\imh]{images/rho_run5ab.png}
-		\includegraphics[height=\imh]{images/rho_run5ac.png}
+		\includegraphics[height=\imh,width=\imw]{images/rho_run5ab.png}
+		\includegraphics[height=\imh,width=\imw]{images/rho_run5ac.png}
 		\caption{Density $\rho$}
 		%\mysubcaption{The maximum of $\rho$ for the (DF) code is equal to 39.983965094090.}
 		%\label{subfig:compT200_E_rho}
@@ -785,21 +928,23 @@ The study of the numerical equilibrium and the study of the behavior of the ion 
 	
 	\begin{subfigure}{\textwidth}
 		\centering
-		\includegraphics[height=\imh]{images/fi_run5ab.png}
-		\includegraphics[height=\imh]{images/fi_run5ac.png}
-		\caption{Ion density} 
+		\includegraphics[height=\imh,width=\imw]{images/fi_run5ab.png}
+		\includegraphics[height=\imh,width=\imw]{images/fi_run5ac.png}
+		\caption{Ion distribution function} 
 		%\label{subfig:compT200_ion}
 	\end{subfigure}
 	\begin{subfigure}{\textwidth}
 		\centering
-		\includegraphics[height=\imh]{images/fe_run5ab.png}
-		\includegraphics[height=\imh]{images/fe_run5ac.png}
-		\caption{Electron density}
+		\includegraphics[height=\imh,width=\imw]{images/fe_run5ab.png}
+		\includegraphics[height=\imh,width=\imw]{images/fe_run5ac.png}
+		\caption{Electron distribution function}
 		%\label{subfig:compT200_electron}
 	\end{subfigure}
-	\caption{Comparison of semi-Lagrangian code for different discretizations. Run1:  $N_x=256,\ N_{v_i}=2049$ (left); Run2: $N_x=1024,\ N_{v_i}=4097$ (right) at $T=20$.
-	Other numerical parameters are $N_{v_e}=8193$ and $\Delta t = 0.00025$. We have used $[-60,60]$ for $v_e$ and  $[-50,50]$ for $v_i$.
-	The ion density is zoomed for $v_i\in [-4.5,4.5]$}
+	\caption{Comparison of semi-Lagrangian codes: parameter of Run1 (left) and parameters of Run2 (right) }
+	%for different discretizations. Run1:  $N_x=256,\ N_{v_i}=2049$ (left); Run2: $N_x=1024,\ N_{v_i}=4097$ (right) at $T=20$.
+	%Other numerical parameters are $N_{v_e}=8193$ and $\Delta t = 0.00025$. We have used $[-60,60]$ for $v_e$ and  $[-50,50]$ for $v_i$.
+	%The ion density is zoomed for $v_i\in [-5,5]$
+	%}
 	\label{fig:comp_phasespace}
 \end{figure}  
 
@@ -811,7 +956,8 @@ The study of the numerical equilibrium and the study of the behavior of the ion 
 	\newcommand{\dirSL}{run_comp_long_time_2sp_Nx1000_Nvi2001_Nve2001_Nt100000}
 	\newcommand{\dirFD}{run_comp_long_time_2sp_Nx200_Nv400_Nt2500000}
 	
-	\renewcommand{\imh}{0.25\linewidth}
+	\renewcommand{\imh}{0.24\textheight}
+	\renewcommand{\imw}{0.45\linewidth}
 	
 	\begin{subfigure}{\textwidth}
 		\centering
@@ -854,7 +1000,10 @@ The study of the numerical equilibrium and the study of the behavior of the ion 
 	\end{subfigure}
 
 
-	\caption{Density $\rho$ (left) and electron density (middle) for time $T\in \{1,2,5,10\}$ with Run2; electron density is also given, by changing $\Delta t$ to $0.000025$ (right)}
+	\caption{Density $\rho$ (left) and electron distribution function (middle and right) for time $T\in \{1,2,5,10\}$; 
+	 The Semi-Lagrangian code is used with parameters of Run2 (left, middle) and of Run3 (right).
+	%Run2; electron distribution function is also given, by changing $\Delta t$ to $0.000025$ (right)
+	}
 	\label{fig:comp_temps}
 \end{figure}  
 
