@@ -36,11 +36,11 @@
 \title{Numerical simulations of plasma sheaths}
 \author{
 	Valentin Ayot\footnote{Institut de Math\'ematiques, CNRS, UMR 5251, Universit\'e de Bordeaux, F-33405 Talence, France. \texttt{valentin.ayot@u-bordeaux.fr}}, 
-	\ Mehdi Badsi,
+	\ Mehdi Badsi\footnote{Nantes Universit\'e, Laboratoire de Math\'ematiques Jean Leray, 2 Chemin de la Houssini\`ere BP 92208, 44322 Nantes Cedex 3},
 	\ Yann Barsamian, 
-	\ Ana\"is Crestetto,\\
-	\ Nicolas Crouseilles,
-	\ Michel Mehrenberger,
+	\ Ana\"is Crestetto\footnote{Nantes Universit\'e, Laboratoire de Math\'ematiques Jean Leray, 2 Chemin de la Houssini\`ere BP 92208, 44322 Nantes Cedex 3},\\
+	\ Nicolas Crouseilles\footnote{Univ Rennes, Inria (Mingus team), IRMAR UMR 6625 and ENS Rennes, France. \texttt{nicolas.crouseilles@inria.fr}},
+	\ Michel Mehrenberger\footnote{I2M, CMI, UMR 7373, 39 rue Fr\'ed\'eric Joliot Curie, 13453 Marseille Cedex 13},
 	 \ Averil Prost\footnote{INSA de Rouen, LMI (EA 3226 - FR CNRS 3335), 685 Avenue de l'Universit\'e, 76801 St Etienne du Rouvray cedex, France. \texttt{averil.prost@insa-rouen.fr}}, 
 	 \ Christian Tayou-Fotso\footnote{Labo. J. A. Dieudonn\'e, UMR 6621, Universit\'e Nice-Sophia Antipolis, Parc Valrose, F-06108 Nice cedex 02, France. \texttt{christian.tayou-fotso@unice.fr}}.
  } 
@@ -121,7 +121,7 @@
 	A two-species Vlasov-Poisson model is described together with some numerical simulations, permitting to exhibit the formation of a plasma sheath. 
 	The numerical simulations are performed with two different methods: a first order classical finite difference (FD) scheme and a high order semi-Lagrangian (SL) scheme with Strang splitting; for the latter one, the implementation
 	of (non-periodic) boundary conditions is discussed. 
-	The codes are first evaluated on a one-species case, where a analytical solution is known. For the two-species case, cross comparisons and the influence of the numerical parameters for the SL method are performed in order to have an idea of a reference numerical simulation.
+	The codes are first evaluated on a one-species case, where an analytical solution is known. For the two-species case, cross comparisons and the influence of the numerical parameters for the SL method are performed in order to have an idea of a reference numerical simulation.
 %	We consider Vlasov-Poisson model for a two-species plasma. Our aim is to extend an existing code from periodic boundary conditions to nonperiodic boundary conditions. In particular, we focus on the interaction of the plasma with a non-emitting wall, and wish to capture the physical phenomenon called \emph{Debye sheath}. 
 %	Comparison between this numerical scheme and a finite difference scheme are presented.
 \end{abstract}
@@ -140,10 +140,30 @@ Plasmas are neutral at the equilibrium in a sufficiently large domain. However, 
 This phenomenon stems from the interaction of ions and electron with the boundary media (a cold metallic wall, for instance). Both species will be absorbed by the wall, but with a rate proportional to their speed. Since the electrons are moving %several order of magnitude 
 faster than the ions, a positively charged layer (the \emph{Debye sheath}) forms near the boundary. 
 
-Plasma sheaths are particularly challenging to simulate, as we have to deal with different scales. We refer to  \cite{bourneNonUniformSplinesSemiLagrangian} for a recent work on the subject.
-This study is a follow-up of \cite{badsiNumericalStabilityPlasma}. In the latter work, we studied the behavior of the numerical solution of the Vlasov equation, initialized with a sheathequilibrium. In this work, our purpose is to investigate numerically the formation of a sheath, when we include ionization in the model. 
+Plasma sheaths are particularly challenging to simulate, as we have to deal with different scales. and in this region, 
+the plasma parameters (temperature or density) develop steep gradients. Due to their different mass, 
+electrons and ions have a very different behavior close to the boundary, a two-species model is required 
+to describe the formation of the sheath. Moreover, kinetic  models are necessary to capture the velocity 
+effect of the particles \cite{bourneNonUniformSplinesSemiLagrangian}.  Hence, we are considering in this work 
+a two-species Vlasov model to run simulations of the plasma sheath. 
 
-In Section 2, we introduce the corresponding system. The numerical methods are described in Section 3 and numerical results are given in Section 4. 
+Recent works are dedicated to the non homogeneous equilibrium sheath, both on the mathematical side and on the numerical side \cite{badsiCollisionalSheathSolutions2021, badsiStableFixedPoint2021, despresMinimizationFormulationBikinetic2016}. 
+%We refer to  \cite{bourneNonUniformSplinesSemiLagrangian} for a recent work on the subject. 
+Regarding the dynamical approaches, one refer to \cite{manfredi2014, bourneNonUniformSplinesSemiLagrangian} 
+or \cite{badsiNumericalStabilityPlasma} for which this study is a follow-up. 
+In the latter work, we studied the behavior of the numerical solution of the Vlasov equation, initialized with a sheath
+homogeneous equilibrium. In this work, our purpose is to investigate numerically the formation of a sheath, 
+when we include ionization in the model, inspired by the recent work \cite{Alvarez_Laguna_2020} where a fluid model 
+is proposed.   
+
+Then, we are concerned by the numerical approximation of the two-species Vlasov model including ionization and boundary. 
+To do so, we propose a high order semi-Lagrangian method combined with a time splitting method. 
+The presence of boundaries requires specific adaptation to define correctly the semi-Lagrangian method close to the boundary. 
+We adapt the strategies developed in \cite{coulombelNeumannNumericalBoundary2020, boutinHighOrderNumerical2021} 
+to define inflow and outflow ghost points according to the order of the Lagrange interpolation used in the semi-Lagrangian method.  
+
+The rest of the work is organized as follows: In Section 2, we introduce the two-species Vlasov-Poisson system with boundary,  
+the numerical methods are described in Section 3 and numerical results are given in Section 4. 
 
 %The difference of speed between both species is numerically challenging, since a wide range of velocities is needed to correctly model the evolution of electrons, but accuracy is required on low velocities to capture the ions. When using mesh-based approaches, it is tempting to use adapted velocity meshes for the different species. This requires the choice of an interpolation procedure: several possibilities are found in the literature, as uniform cubic splines in the GYSELA code \cite{grandgirard5DGyrokineticFull2016} and extension to non-uniform splines in \cite{bourneNonUniformSplinesSemiLagrangian}, or high-order polynomial interpolation \cite{badsiStableFixedPoint2021}. We will follow the latter method.
 %
@@ -159,11 +179,11 @@ Let $t\in\mathbb{R}^+$ denote the time variable, $x\in [-1,1]$ denote the spatia
 \end{align}
 In the sequel, we will denote $n (t,x) \coloneqq n_i (t,x) - n_e(t,x)$, and $J(t,x) \coloneqq J_i(t,x) - J_e(t,x)$.
 
-The evolution of the densities is modelled by the Vlasov-Poisson equations. Let $\varphi : \R^+ \times [-1,1] \mapsto \R$ denote the electric potential. Then
+The evolution of the densities is modelled by the Vlasov-Poisson equations. Let $\varphi : \R^+ \times [-1,1] \mapsto \R$ denote the electric potential, then we consider the following model satisfied by $(f_e, f_e, \varphi)$ 
 \mysubeq{eq:unsta_model}{
-	\partial_t f_i + v \partial_x f_i - \partial_x \varphi \, \partial_v f_i &= \nu f_e && (t,x,v) \in \R_{*}^{+} \times ]-1,1[ \times \R, \label{eq:unsta_model_fi} \\
-	\partial_t f_e + v \partial_x f_e + \frac{\partial_x \varphi }{\mu}\, \partial_v f_e &= 0 \quad\quad && (t,x,v) \in \R_{*}^{+} \times ]-1,1[ \times \R, \label{eq:unsta_model_fe} \\
-	- \lambda^2 \partial^2_{xx} \varphi &= n (t,x) && (t,x) \in \R^{+} \times ]-1,1[. \label{eq:unsta_model_phi}
+	\partial_t f_i + v \partial_x f_i - \partial_x \varphi \, \partial_v f_i &= \nu f_e, && (t,x,v) \in \R_{*}^{+} \times ]-1,1[ \times \R, \label{eq:unsta_model_fi} \\
+	\partial_t f_e + v \partial_x f_e + \frac{\partial_x \varphi }{\mu}\, \partial_v f_e &= 0, \quad\quad && (t,x,v) \in \R_{*}^{+} \times ]-1,1[ \times \R, \label{eq:unsta_model_fe} \\
+	- \lambda^2 \partial^2_{xx} \varphi &= n (t,x), && (t,x) \in \R^{+} \times ]-1,1[. \label{eq:unsta_model_phi}
 }
 The physical parameters $\nu$, $\mu$ and $\lambda$ have the following meaning:
 \begin{itemize}
@@ -172,18 +192,17 @@ of ions in presence of electrons.
 \item $\mu \coloneqq m_e / m_i$ is the mass ratio between electrons and ions.
 \item $\lambda > 0$ is the Debye length.
 \end{itemize}
-
 In the sequel, we may use the electric field $E(t,x) \coloneqq - \partial_x \varphi(t,x)$ in place of the potential. Then, the second-order Poisson equation rewrites as 
 \begin{align}
-	\lambda^2 \partial_x E (t,x) = n(t,x) \quad \quad (t,x) \in \R^{+} \times ]-1,1[. \label{eq:unsta_model_E}
+	\lambda^2 \partial_x E (t,x) = n(t,x), \quad \quad (t,x) \in \R^{+} \times ]-1,1[. \label{eq:unsta_model_E}
 \end{align}
 
 \begin{remarque}
-	To reduce the notations, we will use $f_s$, $s\in\{i,e\}$ to denote both the electronic and ionic distributions. The advection equations \cref{eq:unsta_model_fi,eq:unsta_model_fe} rewrite 
+	To reduce the notations, we will use $f_s$, $s\in\{i,e\}$ to denote both the electronic and ionic distributions. The Vlasov equations \cref{eq:unsta_model_fi,eq:unsta_model_fe} rewrite 
 	\begin{align*}
 		\partial f_s + v \partial_x f_s - c_s \partial_x \varphi \partial_v f_s = S_s,
 	\end{align*}
-	with the speed coefficients $c_s$ and source terms $S_s$ defined as
+	with the coefficients $c_s$ and source terms $S_s$ defined as
 	\begin{align*}
 		c_i \coloneqq 1, \quad c_e \coloneqq -\frac{1}{\mu}, \quad S_i \coloneqq \nu f_e, \quad S_e \coloneqq 0.
 	\end{align*}
@@ -191,10 +210,10 @@ In the sequel, we may use the electric field $E(t,x) \coloneqq - \partial_x \var
 
 The densities $f_i$ and $f_e$ are subject to initial and boundary conditions, given by
 \mysubeq{eq:unsta_model_bc}{
-	f_{s}(0,x,v) &\coloneqq f_{s}^0(x,v) && (x,v) \in ]-1,1[ \times \R, \label{eq:init} \\
-	f_{s}(t,x=\pm 1,\pm v < 0) &\coloneqq 0  && t \in \R^+_*. \label{eq:fie_bc}
+	f_{s}(0,x,v) &\coloneqq f_{s}^0(x,v), && (x,v) \in ]-1,1[ \times \R, \label{eq:init} \\
+	f_{s}(t,x=\pm 1,\pm v < 0) &\coloneqq 0,  && t \in \R^+_*. \label{eq:fie_bc}
 }
-The homogeneous boundary condition \cref{eq:fie_bc} stems from the non-emitting wall model: the boundary absorbs particles without any reflection.
+The homogeneous boundary condition \cref{eq:fie_bc} stems from the non-emitting wall model: the boundary absorbs particles without any reflection. This loss of particles is compensated by the ionization source term in the right hand side of \eqref{eq:unsta_model_fi}. 
 
 To completely describe the model, we still need to provide boundary conditions for the Poisson problem \cref{eq:unsta_model_phi}. A first one is given by the choice of a reference potential
 \begin{align}
@@ -204,7 +223,7 @@ To derive a second boundary condition, we introduce a fundamental symmetry assum
 
 \paragraph{Symmetry}
 
-We will look for \emph{symmetric solutions} satisfying 
+We will look for \emph{symmetric solutions} for \ref{eq:unsta_model}, ie solutions satisfying 
 \begin{align}\label{eq:phi_is_pair}
 	\varphi(t,x) = \varphi (t,-x) \quad \quad (t,x) \in \R^+ \times [-1,1].
 \end{align}
@@ -219,7 +238,7 @@ In particular, the electric field vanishes at $x=0$, and the Neumann boundary co
 may be used (with \cref{eq:phi_nul_0}) to close the Poisson equation \cref{eq:unsta_model_phi}.
 
 
-Let us notice that the advection equations \cref{eq:unsta_model_fi,eq:unsta_model_fe} are driven by the vector fields
+Let us notice that the Vlasov equations \cref{eq:unsta_model_fi,eq:unsta_model_fe} are driven by the vector fields
 \begin{align*}
 	(t,x,v) \to (1, v, E(t,x)) \eqqcolon V_i(t,x,v) \quad \text{and} \quad (t,x,v) \to (1, v, -E(t,x)/\mu) \eqqcolon V_e(t,x,v).
 \end{align*}
@@ -227,10 +246,10 @@ Let us notice that the advection equations \cref{eq:unsta_model_fi,eq:unsta_mode
  \begin{align*}
  	f_i(t,x,v) = f_i(t,-x,-v) \quad \text{and} \quad f_e(t,x,v) = f_e(t,-x,-v) \quad \forall (t,x,v) \in \R^+ \times [-1,1] \times \mathbb{R}.
  \end{align*}
- 
- In particular, we have 
+
+ In particular, we have for the densities and currents 
  \begin{align*}
- 	n_s (t,x) &= \int_{v\in\mathbb{R}} f_s (t,x,v) dv =  \int_{w\in\mathbb{R}} f_s (t,x,-w) dw = \int_{w\in\mathbb{R}} f_s (t,-x,w) dw = n_s (t,-x),  \quad \text{and} \\
+ 	n_s (t,x) &= \int_{v\in\mathbb{R}} f_s (t,x,v) dv =  \int_{w\in\mathbb{R}} f_s (t,x,-w) dw = \int_{w\in\mathbb{R}} f_s (t,-x,w) dw = n_s (t,-x),  \\ %\quad \text{and} \\
  	J_s (t,x) &= \int_{v\in\mathbb{R}} v f_s (t,x,v) dv =  - \int_{w\in\mathbb{R}} w f_s (t,x,-w) dw = - \int_{w\in\mathbb{R}} w f_s (t,-x,w) dw = - J_s (t,-x).
  \end{align*}
  
@@ -257,16 +276,15 @@ First, we derive with respect to time the Poisson equation \cref{eq:unsta_model_
 \begin{align*}
 	- \partial_t (\lambda^2\partial_{xx}^2 \varphi) = \partial_t n, 	
 \end{align*}
-and considering the difference between the $v$-integration of the Vlasov equations \cref{eq:unsta_model_fi,eq:unsta_model_fe} gives 
+and considering the difference between the $v$-integration of the Vlasov equations \cref{eq:unsta_model_fi,eq:unsta_model_fe} gives (recalling $n=n_i-n_e$ and $J=J_i-J_e$) 
 \begin{align*}
 	\partial_t n = \nu n_e - \partial_x J,
 \end{align*}
-so that, using $E=-\partial_x \varphi$, we get 
+leads to (using $E=-\partial_x \varphi$) 
 \begin{align*}
 	\partial_x (\lambda^2\partial_t E + J) = \nu n_e, \quad \forall x\in ]-1, 1[. 	
 \end{align*}
-
-Integrating now in space leads to 
+Integrating now in space $x\in\in [-1, 1]$ leads to 
 \begin{align}\label{eq:ampere_integ}
 	\lambda^2\partial_t E(t, 1) + J(t, 1) = \lambda^2\partial_t E(t, -1) + J(t, -1) +\nu \int_{-1}^1 n_e (t, x) dx,  
 \end{align}
@@ -279,21 +297,21 @@ and using the symmetries $E(t,1)=-E(t, -1)$ and  $J(t,1)=-J(t, -1)$, it comes
 \begin{align}\label{eq:ampere_bc}
 	\lambda^2\partial_t E(t, \pm 1) + J(t, \pm 1)  = \pm \frac{\nu}{2} \int_{-1}^1 n_e (t, x)dx.
 \end{align}
-Time integration gives a condition of the form $\partial_x\varphi(t,\pm 1) = C_{\pm}(t)$, where
+Time integration gives a condition of the form $E(t,\pm 1) = C_{\pm}(t)$, where %$\partial_x\varphi(t,\pm 1) = C_{\pm}(t)$, where
 \begin{align}\label{eq:ampere_bc_phi}
-%	\partial_x \varphi(t, 1) =\partial_x \varphi(0, 1) +\frac{1}{\lambda^2}\int_0^t (J_i-J_e)(s, 1)ds - \frac{\nu}{2\lambda^2}\int_0^t  \int_{-1}^1 \rho_e(s, x)dx ds \equiv C(t). 
-%	- \lambda^2 \partial_x \varphi(t, 1) + \lambda^2 \partial_x \varphi (0, 1) + \int_0^t J (s, 1) ds &=  \frac{\nu}{2}\int_0^t  \int_{-1}^1 n_e (s, x) dx ds \equiv C(t). \\
-%	\partial_x \varphi(t, 1) &= \partial_x \varphi (0, 1) + \frac{1}{\lambda^2} \int_0^t J (s, 1) ds - \frac{\nu}{2 \lambda^2}\int_0^t  \int_{-1}^1 n_e (s, x) dx ds \equiv C(t). 
-	C_{\pm} (t) \coloneqq \partial_x \varphi (0,\pm1) + \frac{1}{\lambda^2} \int_0^t J (s, \pm1) ds \mp \frac{\nu}{2 \lambda^2}\int_0^t  \int_{-1}^1 n_e (s, x) dx ds. 
+	E(t,\pm 1) = C_{\pm} (t) \coloneqq E(0,\pm1) - \frac{1}{\lambda^2} \int_0^t J (s, \pm1) ds \pm \frac{\nu}{2 \lambda^2}\int_0^t  \int_{-1}^1 n_e (s, x) dx ds. 
 \end{align}
+\textcolor{red}{NC : ne vaut-il pas mieux definir la constante par rapport au champ $E$ plutot que par rapport au potentiel $\varphi$ dont on ne sert plus ?}
 
 %In the sequel, we chose to consider the centered boundary condition \cref{eq:phi_bc_neumann}.
 
 \section{Numerical methods}
+In this section, the numerical methods used to approximate the system \ref{eq:unsta_model} are described. 
+First, we focis on the Poisson equation and  then, two numerical methods are presented for the Vlasov part. 
 
 \subsection{Poisson equation}
-
-The Poisson problem is solved with integral representations of the variable $E$.
+First, we focus on the approximation of the Poisson equation \ref{eq:unsta_model_phi}
+ The Poisson problem is solved with integral representations of the variable $E$.
 %Here, we present the integral representation of the electric field that we may use.
 
 First, we consider the centered Neumann boundary condition \cref{eq:phi_bc_neumann}. Then, integrating the Poisson problem \cref{eq:unsta_model_E} over $[0,x]$ yields
@@ -301,12 +319,12 @@ First, we consider the centered Neumann boundary condition \cref{eq:phi_bc_neuma
 	E(t,x) = 0 + \int_0^x n(t,y) dy = \int_0^x \int_{v\in\R} [f_i(t,y,v) - f_e(t,y,v)] dv dy.
 \end{align}
 
-Let us now consider the boundary condition \cref{eq:ampere_bc}. The spacial domain $[-1,1]$ is split into its positive and negative part, and integrating \cref{eq:unsta_model_E} gives
+Let us now consider the boundary condition \ref{eq:ampere_bc_phi}. The spatial domain $[-1,1]$ is split into its positive and negative part, and integrating \cref{eq:unsta_model_E} gives
 \begin{align}\label{eq:integral_representation_E_naturalbc}
 	E(t,x) = 
 	\begin{cases}
-	E(t,\phantom{-}1) - \int_{x\phantom{-}}^{1} n(t,y) dy = - C_{+}(t) - \int_{x\phantom{-}}^1 \int_{v\in\R} [f_i(t,y,v) - f_e(t,y,v)] dv dy & x \in [0,1] \\
-	E(t,-1) + \int_{-1}^x n(t,y) dy = -C_{-}(t) + \int_{-1}^x \int_{v\in\R} [f_i(t,y,v) - f_e(t,y,v)] dv dy & x \in [-1,0[ 
+	E(t,\phantom{-}1) - \int_{x\phantom{-}}^{1} n(t,y) dy =  C_{+}(t) - \int_{x\phantom{-}}^1 \int_{v\in\R} [f_i(t,y,v) - f_e(t,y,v)] dv dy & x \in [0,1] \\
+	E(t,-1) + \int_{-1}^x n(t,y) dy = C_{-}(t) + \int_{-1}^x \int_{v\in\R} [f_i(t,y,v) - f_e(t,y,v)] dv dy & x \in [-1,0[ 
 	\end{cases}
 \end{align}
 Note that here, the electric field may "jump" at $x=0$. Both expressions may be approximated by quadrature formulas. 
@@ -317,21 +335,20 @@ Define a numerical computation domain $\Omega \coloneqq [-1,1] \times [-\overlin
 \begin{align}\label{eq:FDscheme}
 	\frac{f_{s,j,k}^{n+1} - f_{s,j,k}^{n}}{\Delta t} + D^-_{j,k} f_s^n \vv{v_k\\c_s E_j^n}_{+} +D^+_{j,k} f_s^n \vv{v_k\\c_s E_j^n}_{-} = S_{s,j,k}^n,
 \end{align}
-where $a_+ = \max(a,0)$ and $a_{-} = \min(a,0)$ are respectively the pointwise positive and negative parts, and the decentered discrete differences are defined as
+where $a_+ = \max(a,0)$ and $a_{-} = \min(a,0)$ are respectively the pointwise positive and negative parts, and the uncentered finite differences are defined as
 \begin{align*}
 	D^{\pm}_{j,k} f \coloneqq \pm \left(\frac{f_{j\pm 1,k} - f_{j,k}}{\Delta x}, \frac{f_{j,k\pm 1} - f_{j,k}}{\Delta v}\right).
 \end{align*}
-
-The values of $f_{s,j,k}^n$ on the boundary are taken as follows:
+The values of $f_{s,j,k}^n$ on the boundary ($j=0, J$ and $k=0, K$) are taken as follows:
 \begin{itemize}
 \item the boundary condition \cref{eq:fie_bc} yields $f_{s,j,k}^n = 0$ whenever $x_j=-1, v_k > 0$ or $x_j=1, v_k < 0$.
-\item It is considered that $\overline{V}$ is large enough to take the values on the speed boundary $v_k = \pm \overline{V}$ equal to 0.
-\item The remaining values $f_{s,j,k}^n$, $x_j=-1, -\overline{V} < v_k \leqslant 0$ or $x_j=1, 0 \leqslant v_k < \overline{V}$ may be computed using the scheme \cref{eq:FDscheme}, since the sign of the speed allows to use only inner points.
+\item it is considered that $\overline{V}$ is large enough to take the values on the speed boundary $v_k = \pm \overline{V}$ equal to 0.
+\item the remaining values $f_{s,j,k}^n$, $x_j=-1, -\overline{V} < v_k \leqslant 0$ or $x_j=1, 0 \leqslant v_k < \overline{V}$ may be computed using the scheme \cref{eq:FDscheme}, since the sign of the speed allows to use only inner points.
 \end{itemize}
 
 %With these approximations, we may compute the electric field $E$ by a quadrature approximation of the integral representation \todo{either} \cref{eq:integral_representation_E_sym} \todo{or} \cref{eq:integral_representation_E_naturalbc}.
 
-The upwind scheme is known to be diffusive, and stable under the CFL condition 
+\noindent The upwind scheme is known to be diffusive, and stable under the CFL condition 
 \begin{align*}
 	1 - \max_{k} |v_k| \frac{\Delta t}{\Delta x} - |c_s| \max_{j} |E^n_j| \frac{\Delta t}{\Delta v} \geqslant 0 \quad \forall s \in \{i,e\}\text{ and } n \in \llbracket1,N\rrbracket.
 \end{align*}
@@ -342,7 +359,7 @@ Given $\Delta x$ and $\Delta v$, we deduce a sufficiently small value of $\Delta
 
 \subsection{Semi-Lagrangian (SL)}
 
-The full model \cref{eq:unsta_model} nicely lends itself to approximation by time splitting. Indeed, consider the following Strang splitting decomposition. 
+The full model \cref{eq:unsta_model} nicely lends itself to approximation by time splitting. Indeed, consider the following Strang splitting decomposition 
 
 %We use a splitting method in time. The full model \cref{eq:unsta_model} is decomposed in elementary operators, namely
 %\begin{itemize}
@@ -400,7 +417,9 @@ The full model \cref{eq:unsta_model} nicely lends itself to approximation by tim
 \end{align*}
 
 %\todo{END EITHER OR.}
-Each of the splitting step may be solved exactly. Indeed, the Poisson problems are solved by the integral representations \cref{eq:integral_representation_E_sym,eq:integral_representation_E_naturalbc}. The ionization steps are pointwise ODE with time-independant source term, and are exactly solved by the explicit Euler scheme. Finally, notice that each advection is at constant speed with respect to the advection variable. This allows for the use of elementary 1D solvers. 
+Each of the splitting step may be solved exactly \textcolor{red}{(NC: pas vraiment "exactly" \`a cause des conditions aux bords 
+$C_\pm$ qui font intervenir des int\'egrales en temps ; on avait construit une m\'ethode de type trap\`eze en temps pour cela 
+qu'on pourrait \'ecrire)}. Indeed, the Poisson problems are solved by the integral representations \cref{eq:integral_representation_E_sym,eq:integral_representation_E_naturalbc}. The ionization steps are pointwise ODE with time-independant source term, and are exactly solved by the explicit Euler scheme. Finally, notice that each advection is at constant speed with respect to the advection variable. This allows for the use of elementary 1D solvers.  
 
 %\todo{We now describe the treatment of the boundaries.} 
 %In order to describe the algorithm completely, we need to give the detail of the resolution of the Poisson problem. 
@@ -414,18 +433,18 @@ Let us focus on the elementary advection equation with constant speed $a>0$
 	\partial_t f (t,x) + a \partial_x f(t,x) = 0, \quad f(t,-1) = 0, \quad \forall (t,x) \in \R^+_* \times ]-1,1[.
 \end{align*}
 Let $(x_j)_{j\in\llbracket0,J\rrbracket}$ be a space mesh of step $\Delta x \coloneqq 2/J$, and $(t_n)_{n\in\llbracket 0,N \rrbracket}$ be a time mesh of step $\Delta t \coloneqq T/N$.
-We follow the work of \cite{coulombelNeumannNumericalBoundary2020}, and consider a semi-Lagrangian scheme defined as
+We follow the work of \cite{coulombelNeumannNumericalBoundary2020, boutinHighOrderNumerical2021}, and consider a semi-Lagrangian scheme defined as
 \begin{align*}
 	f^{n+1}_j = \text{Lagrange interpolation}\left(f^n, x_j - a \Delta t\right) \coloneqq \sum_{k=-d}^{d+1} f^n_{j_0+k} L_k (\alpha), \ 
 \end{align*}
-with $(L_k)_{k\in\llbracket-d,d+1\rrbracket}$ the Lagrange polynomes defined by $L_k(z)=\prod_{\ell=-d,\ell\not=k}^{d+1}\frac{z-k}{\ell-k}$
+with $(L_k)_{k\in\llbracket-d,d+1\rrbracket}$ the Lagrange polynomes of degree $(2d+1)$ defined by $L_k(z)=\prod_{\ell=-d,\ell\not=k}^{d+1}\frac{z-k}{\ell-k}$
 (which satisfy $L_k(\ell) = \delta_{k\ell}$ for $\ell\in \llbracket-d,d+1\rrbracket$), and $x_j - a \Delta t = x_{j_0}+\alpha \Delta x,\ j_0\in \mathbb{Z}, \alpha\in [0,1[$.
 %satisfying $L_k(x_l) = \delta_{kl}$. The stencil of the Lagrange interpolation uses $2d + 2$ points, where $d\in\N$.
 %The Lagrange interpolation will use a centered stencil of $2d+2$ points, where $d\in\N$. 
 The boundaries are treated as follows:
 \begin{itemize}
 \item the \emph{inflow} side, corresponding to $x=-1$, relies on the analytical solution $f(t,x) = 0$ $\forall x \leqslant a t$. Whenever the scheme needs a value $f^n_j$ with $j < 0$, it may be exactly taken equal to 0.
-\item in the case $d>0$, the Lagrange stencil may also need \emph{outflow} values $f^n_{j}$ with $j>J$. Such values may be determined by polynomial extrapolation. Let $k_b \in \N$, and let $p$ be the unique polynomial of degree $k_b$ interpolating $(x_j, f^n_j)$ for $j\in \llbracket J-k_b,J\rrbracket$. The \emph{outflow ghost points} will be defined by $f^n_j \coloneqq p(-1 + j \Delta x)$ $\forall j > N$. 
+\item in the case $d>0$, the Lagrange stencil may also need \emph{outflow} values $f^n_{j}$ with $j>J$. Such values may be determined by polynomial extrapolation. Let $k_b \in \N$, and let $p$ be the unique polynomial of degree $k_b$ interpolating $(x_j, f^n_j)$ for $j\in \llbracket J-k_b,J\rrbracket$. The \emph{outflow ghost points} will be defined by $f^n_j \coloneqq p(-1 + j \Delta x)$ $\forall j > N$ {\textcolor{red}{(NC: j'aurais mis $f^n_j \coloneqq p(1+j\Delta x)$  $\forall j>0$ ou alors $f^n_j \coloneqq p(-1+j\Delta x)$  $\forall j>J$)}}. {\textcolor{red}{(NC: N'y a-t-il pas une relation entre $k_b$ et $d$ ?)}}
 \end{itemize}
 
 %\subsection{Fixed-point (FP)}
@@ -478,29 +497,27 @@ The finite difference scheme has been written in Julia.
 
 \subsection{1-species validation test case}
 
-We rely on the work of \cite{malkovNonstationaryAntonovSelfgravitating2020} to provide an analytical solution in a 1-species case. Consider the simplified stationary model describing the density of particles $f = f(t,x,v)$, and the potential $\varphi=\varphi(t,x)$:
+We rely on the work of \cite{malkovNonstationaryAntonovSelfgravitating2020} to provide an analytical solution in a 1-species case. Consider the simplified stationary {\textcolor{red}{(NC: pourquoi 'stationary' ?)}} model describing the density of particles $f = f(t,x,v)$, and the potential $\varphi=\varphi(t,x)$:
 \mysubeq{eq:one_species_model}{
-	\partial_t f + v \partial_x f  - \partial_x \varphi \partial_v f &= 0 && (t,x,v) \in \R^+_* \times ]-1,1[ \times \mathbb{R}, \label{sta_1sp_f} \\
-	\partial^2_{xx} \varphi &= \int_{v\in\mathbb{R}} f dv && (t,x) \in \R^+ \times ]-1,1[. \label{sta_phi}
+	\partial_t f + v \partial_x f  - \partial_x \varphi \partial_v f &= 0, && (t,x,v) \in \R^+_* \times ]-1,1[ \times \mathbb{R}, \label{sta_1sp_f} \\
+	\partial^2_{xx} \varphi &= \int_{v\in\mathbb{R}} f dv, && (t,x) \in \R^+ \times ]-1,1[. \label{sta_phi}
 }
 The initial and boundary conditions are given by 
 \mysubeq{eq:one_species_model_bc}{
-	f(0,x,v) \coloneqq f^0(x,v), \quad f(t,x=\pm1, \pm v < 0) &= 0 \\
-	\varphi(t,0) = \partial_x \varphi (t,0) &= 0 
+	f(0,x,v) \coloneqq f^0(x,v), \quad f(t,x=\pm1, \pm v < 0) &= 0,  \\
+	\varphi(t,0) = \partial_x \varphi (t,0) &= 0.  
 }
-
 This model may be seen as a particular case of the two-species Vlasov-Poisson \cref{eq:unsta_model}, upon taking the following parameters:
 \begin{align*}
 	f_i^0 \equiv 0, \quad \nu = 0, \quad \mu = -1, \quad \lambda = 1, \quad f_e^0 = f^0.
 \end{align*}
-
 The reader may verify that \cref{eq:one_species_model} is solved in $\R^+ \times [-1,1] \times \mathbb{R}$ by the following stationary couple:
 \begin{align}\label{eq:Malkov_solution}
 	f(t,x,v) \coloneqq 
 	\begin{cases}
-		\frac{1}{\pi} \left(1 - x^2 - v^2\right)^{-1/2} & \text{if } x^2 + v^2 < 1 \\
-		0 & \text{otherwise}
-	\end{cases}, \quad \text{and} \quad
+		\frac{1}{\pi} \left(1 - x^2 - v^2\right)^{-1/2} & \text{if } x^2 + v^2 < 1,  \\
+		0 & \text{otherwise}, 
+	\end{cases} \quad \text{and} \quad
 	\varphi(t,x) \coloneqq \frac{x^2}{2}.
 \end{align}
 It is numerically relevant to extend the Malkov solution \cref{eq:Malkov_solution} to spatial domains $x \in [-1-\varepsilon, 1+\varepsilon]$ by 
@@ -536,8 +553,8 @@ It is numerically relevant to extend the Malkov solution \cref{eq:Malkov_solutio
 %\end{figure}
 
 \subsection{Two species case} % and comparison between (SL) and (FD)}
-
-In the sequel, we use the following physical parameters:
+In this part, we focus on the two-species model \eqref{eq:unsta_model} 
+and n the sequel, we use the following physical parameters:
 \begin{align}\label{eq:param_simu}
 	\lambda = \frac{1}{2}, \quad \mu = \frac{1}{100}, \quad\text{and}\quad \nu = 20.
 \end{align}
@@ -573,9 +590,9 @@ For the semi-Lagrangian code, we will use
 \end{itemize}
 
 Always for the SL scheme, we have used $d=8$ with periodic boundary conditions for the interpolation in velocity, and $k_b=1$ together with $d=2$ for the spatial interpolation.
-Lagrange interpolation of degree $3$  (that is, $d=1$) is used for passing from the ion velocity mesh to the electron velocity mesh (which is needed for the ionization).
+Lagrange interpolation of degree $3$  (that is, $d=1$) is used for passing from the ion velocity mesh to the electron velocity mesh (which is needed for the ionization step).
 
-As diagnostics, we represent the electric field $E$, the charge density $\rho$, the ion distribution function $f_i$ and the electron distribution function $f_e$ at different times $T\in \left\{0.1,0.2,1,2,5,20\right\}$.
+As diagnostics, we represent the electric field $E$, the charge density $n=n_i-n_e$, the ion distribution function $f_i$ and the electron distribution function $f_e$ at different times $T\in \left\{0.1,0.2,1,2,5,20\right\}$.
 
 \paragraph{Short time}
 
@@ -589,7 +606,7 @@ reproduced by the FD scheme which has also a coarser mesh. We can see also the d
 
 Now, we turn to the long-term simulations, with $T=20$, on Figure \ref{fig:compT20}.  %Here, we free the semi-Lagrangian code from the artificial CFL condition imposed for fair comparisons. \Cref{fig:compT200} illustrates the behavior of both codes on long time, with parameters given by \cref{eq:param_simu}. 
 %
-The finite difference code suffers from its diffusion, and the approximations of $f_i$ and $f_e$ are much damped. Electric field and charge density are really different.
+The finite difference code suffers from numerical diffusion, and the approximations of $f_i$ and $f_e$ are much damped. Electric field and charge density are really different.
 On the contrary, the SL scheme gives much better results (in comparison with refined runs, as we will see later), while it uses the same number of points. We can distinguish a little degradation of the symmetry, by looking at the charge density.
 %almost everywhere reduced to 0. %The point $(x=0,v=0)$ stands out, since it is an equilibrium point: the value $f_e(t,0,0)$ is constant with respect to $t$ (both in the continuous model, and in the discrete model provided $(x=0,v=0)$ belongs to the mesh), and 
 %\begin{align*}
@@ -607,7 +624,7 @@ On the contrary, the SL scheme gives much better results (in comparison with ref
 
 \paragraph{Looking for a reference solution} %Numerical results for the SL code for different discretizations}
 
-It is not easy to find a reference solution, as we look for late time solution, and the Vlasov equation is prone to filamentation. We have here also the problem that the time scale for the ions is different to the time scale for the electrons, which implies that short time steps have to be used in order to be able to follow the dynamics (even if we use here a semi-Lagrangian scheme, whose time step is not restricted by the strong CFL condition
+It is not easy to find a reference solution, as we look for long time solution, and the Vlasov equation is prone to filamentation. We have here also the problem that the time scale for the ions is different to the time scale for the electrons, which implies that short time steps have to be used in order to be able to follow the dynamics (even if we use here a semi-Lagrangian scheme, whose time step is not restricted by the strong CFL condition
 of the finite difference scheme).
 
 It is interesting to notice that we can have converged solutions for a fixed time step, taking for exemple $\Delta t = 0.0025$ (or even $\Delta t =0.025$), but the corresponding solution is then not (at all) converged in time
