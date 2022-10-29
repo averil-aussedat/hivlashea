@@ -628,8 +628,8 @@ It is not easy to find a reference solution, as we look for long time solution, 
 of the finite difference scheme).
 
 It is interesting to notice that we can have converged solutions for a fixed time step, taking for exemple $\Delta t = 0.0025$ (or even $\Delta t =0.025$), but the corresponding solution is then not (at all) converged in time
-(results are not shown here to save place; we can remark that the results on charge density can be quite different; looking at the electron distribution function, we see some shifting
-of the solution). So we have diminished the time step to $\Delta t = 0.00025$, and the comparison with the same simulations with  $\Delta t = 0.000025$ on Figure \ref{fig:comp_temps} 
+(results are shown on Figure \ref{fig:comp_temps2}; we can remark that the results on charge density can be quite different; looking at the electron distribution function, we see some shifting
+of the solution, and even more changes for $\Delta t =0.025$). So we have diminished the time step to $\Delta t = 0.00025$, and the comparison with the same simulations with  $\Delta t = 0.000025$ on Figure \ref{fig:comp_temps} 
 is now much similar, which indicates that the 
 time step is now fine enough. Note that for semi-Lagrangian schemes, taking the smallest possible time step does not necessarily lead to a better result (due to accumulation of errors, as the number of interpolations 
 increases).
@@ -1023,6 +1023,83 @@ The study of the numerical equilibrium and the study of the behavior of the ion 
 	}
 	\label{fig:comp_temps}
 \end{figure}  
+
+\begin{figure}
+	\centering
+	\newcommand{\rootSL}{../code_SL/}
+%	\newcommand{\rootFD}{../../DynamicElectricSheath.jl/data/two_species/}
+	\newcommand{\rootFD}{../temp_res_DF/}
+	\newcommand{\dirSL}{run_comp_long_time_2sp_Nx1000_Nvi2001_Nve2001_Nt100000}
+	\newcommand{\dirFD}{run_comp_long_time_2sp_Nx200_Nv400_Nt2500000}
+	
+	\renewcommand{\imh}{0.24\textheight}
+	\renewcommand{\imw}{0.45\linewidth}
+	
+%	\begin{subfigure}{\textwidth}
+%		\centering
+%		\includegraphics[height=\imh,width=0.3\linewidth]{images/rhoT10_run5u.png}
+%		\includegraphics[height=\imh,width=0.3\linewidth]{images/rhoT10_run5v.png}
+%		\includegraphics[height=\imh,width=0.3\linewidth]{images/rhoT10_run5w.png}
+%		\caption{$T=1$}
+%		%\mysubcaption{The maximum of $\rho$ for the (DF) code is equal to 39.983965094090.}
+%		%\label{subfig:compT200_E_rho}
+%	\end{subfigure}
+
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=0.45\linewidth]{images/rhoT5_run5af.png}
+		\includegraphics[height=\imh,width=0.45\linewidth]{images/rhoT5_run5h.png}
+		\caption{$\rho$ for $\Delta t=0.025$. $N_x=256, N_{v_e}=N_{v_i}=1023$ (left): $N_x=4096  , N_{v_e}=8193,\ N_{v_i}=16385$ (right)}
+		%\mysubcaption{The maximum of $\rho$ for the (DF) code is equal to 39.983965094090.}
+		%\label{subfig:compT200_E_rho}
+	\end{subfigure}
+
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=0.45\linewidth]{images/feT5_run5af.png}
+		\includegraphics[height=\imh,width=0.45\linewidth]{images/feT5_run5h.png}
+		\caption{$f_e$ for $\Delta t=0.025$. $N_x=256, N_{v_e}=N_{v_i}=1023$ (left): $N_x=4096  , N_{v_e}=8193,\ N_{v_i}=16385$ (right)}
+		%\mysubcaption{The maximum of $\rho$ for the (DF) code is equal to 39.983965094090.}
+		%\label{subfig:compT200_E_rho}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=0.45\linewidth]{images/rhoT5_run5n.png}
+		\includegraphics[height=\imh,width=0.45\linewidth]{images/rhoT5_run5z.png}
+		\caption{$\rho$ for $\Delta t=0.0025$. $N_x=256, N_{v_e}=N_{v_i}=1023$ (left): $N_x=512  , N_{v_e}=N_{v_i} = 8193$ (right)}
+		%\mysubcaption{The maximum of $\rho$ for the (DF) code is equal to 39.983965094090.}
+		%\label{subfig:compT200_E_rho}
+	\end{subfigure}
+
+
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=0.45\linewidth]{images/feT5_run5n.png}
+		\includegraphics[height=\imh,width=0.45\linewidth]{images/feT5_run5z.png}
+		\caption{$\rho$ for $\Delta t=0.0025$. $N_x=256, N_{v_e}=N_{v_i}=1023$ (left): $N_x=512  , N_{v_e}=N_{v_i} = 8193$ (right)}
+		%\mysubcaption{The maximum of $\rho$ for the (DF) code is equal to 39.983965094090.}
+		%\label{subfig:compT200_E_rho}
+	\end{subfigure}
+
+%	\begin{subfigure}{\textwidth}
+%		\centering
+%		\includegraphics[height=\imh,width=0.2\linewidth]{images/rhoT5_run5n.png}
+%		\includegraphics[height=\imh,width=0.2\linewidth]{images/rhoT5_run5z.png}
+%		\includegraphics[height=\imh,width=0.2\linewidth]{images/feT5_run5n.png}
+%		\includegraphics[height=\imh,width=0.2\linewidth]{images/feT5_run5z.png}
+%		\caption{$T=5$}
+%		%\mysubcaption{The maximum of $\rho$ for the (DF) code is equal to 39.983965094090.}
+%		%\label{subfig:compT200_E_rho}
+%	\end{subfigure}
+
+
+	\caption{Density $\rho$ and electron distribution function$f_e$ for time $T=5$; with $\Delta t=0.025$ and $\Delta t = 0.0025$
+	 The Semi-Lagrangian code is used; coarse mesh on the left and fine mesh on the right.
+	%Run2; electron distribution function is also given, by changing $\Delta t$ to $0.000025$ (right)
+	}
+	\label{fig:comp_temps2}
+\end{figure}  
+
 
 
 \bibliographystyle{alpha}
