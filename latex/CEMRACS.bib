@@ -1,19 +1,15 @@
-@article{alvarez-lagunaPlasmasheathTransitionMultifluid2020,
-  title = {Plasma-Sheath Transition in Multi-Fluid Models with Inertial Terms under Low Pressure Conditions: Comparison with the Classical and Kinetic Theory},
-  shorttitle = {Plasma-Sheath Transition in Multi-Fluid Models with Inertial Terms under Low Pressure Conditions},
-  author = {{Alvarez-Laguna}, Alejandro and Magin, Thierry and Massot, Marc and Bourdon, Anne and Chabert, Pascal},
+@article{alvarezlagunaAsymptoticPreservingWellbalanced2020,
+  title = {An Asymptotic Preserving Well-Balanced Scheme for the Isothermal Fluid Equations in Low-Temperature Plasmas at Low-Pressure},
+  author = {Alvarez Laguna, A. and Pichard, T. and Magin, T. and Chabert, P. and Bourdon, A. and Massot, M.},
   year = {2020},
-  month = feb,
-  journal = {Plasma Sources Science and Technology},
-  volume = {29},
-  number = {2},
-  pages = {025003},
-  publisher = {{IOP Publishing}},
-  issn = {0963-0252},
-  doi = {10.1088/1361-6595/ab6242},
-  abstract = {We present high-order accuracy simulations of the plasma-sheath transition with an ion\textendash electron multi-fluid model that considers the electron inertial terms and the ion pressure gradient. By means of a third-order accuracy time-dependent finite volume scheme, we solve the isothermal multi-fluid equations with realistic ion-to-electron mass ratios. We propose a numerical procedure and boundary conditions that retrieve a steady-state solution of a planar 1D floating sheath. The classical solution to this problem neglects the ion temperature since the model equations present a singularity for a finite ion temperature. The multi-fluid simulations provide a rigorous solution to the plasma-sheath transition without singularities. We compare our solution to the classical theory, finding perfect agreement when the ion-to-electron temperature tends to zero. We discuss the effect of the ion temperature, the electron inertia, and the elastic collisions with neutrals in low-pressure plasmas. Finally, relying on a kinetic approach, we derive analytical expressions for the electron macroscopic quantities inside a steady sheath that assumes a truncated Maxwellian electron velocity distribution function (EVDF) with a wall that collects the electron random flux. The derived analytical expressions are beyond the classical isothermal solution with Boltzmann electrons. The isothermal multi-fluid solution captures properly the first two moments of the EVDF inside the sheath. Our analytical expressions show the need for solving for higher-order moments to fully explain the electron physics inside the sheath, as opposite to the classical isothermal assumption. This work demonstrates that the multi-fluid simulations are able to capture the plasma-sheath transition under weakly collisional conditions with a solution that is consistent with the classical and the kinetic theory.},
+  month = oct,
+  journal = {Journal of Computational Physics},
+  volume = {419},
+  pages = {109634},
+  issn = {00219991},
+  doi = {10.1016/j.jcp.2020.109634},
   langid = {english},
-  file = {/home/averil/Zotero/storage/WLY3ZVD8/Alvarez-Laguna et al. - 2020 - Plasma-sheath transition in multi-fluid models wit.pdf}
+  file = {/home/averil/Zotero/storage/FMY2KIV3/Alvarez Laguna et al. - 2020 - An asymptotic preserving well-balanced scheme for .pdf}
 }
 
 @article{badsiCollisionalSheathSolutions2021,
@@ -31,10 +27,13 @@
   file = {/home/averil/Zotero/storage/FF74RB26/Badsi - 2021 - Collisional sheath solutions of a bi-species Vlaso.pdf}
 }
 
-@article{badsiNumericalStabilityPlasma,
+@article{badsiNumericalStabilityPlasma2018,
   title = {Numerical Stability of Plasma Sheath},
   author = {Badsi, Mehdi and Mehrenberger, Michel and Navoret, Laurent},
-  pages = {16},
+  year = {2018},
+  journal = {ESAIM: Proceedings and Surveys, SMAI 2017},
+  volume = {64},
+  pages = {17--36},
   abstract = {We are interested in developing a numerical method for capturing stationary sheaths, that a plasma forms in contact with a metallic wall. This work is based on a bi-species (ion/electron) Vlasov-Amp`ere model proposed in [3]. The main question addressed in this work is to know if classical numerical schemes can preserve stationary solutions with boundary conditions, since these solutions are not a priori conserved at the discrete level. In the context of high-order semi-Lagrangian method, due to their large stencil, interpolation near the boundary of the domain requires also a specific treatment.},
   langid = {english},
   file = {/home/averil/Zotero/storage/8BA3SGCG/Badsi et al. - Numerical stability of plasma sheath.pdf}
@@ -54,10 +53,11 @@
   file = {/home/averil/Zotero/storage/D2Y95P8J/Badsi et al. - 2021 - A stable fixed point method for the numerical simu.pdf}
 }
 
-@article{bourneNonUniformSplinesSemiLagrangian,
+@article{bourneNonUniformSplinesSemiLagrangian2022,
   title = {Non-{{Uniform Splines}} for {{Semi-Lagrangian Kinetic Simulations}} of the {{Plasma Sheath}}},
   author = {Bourne, Emily and Munschy, Yann and Grandgirard, Virginie and Mehrenberger, Michel and Ghendrih, Philippe},
-  pages = {35},
+  year = {2022},
+  month = aug,
   abstract = {Numerical methods based on non-uniform splines of varying degrees are used to run kinetic semi-Lagrangian simulations of the plasma sheath. The sheath describes a region of plasma in contact with a wall, acting as a heat, momentum, and particle bath. The latter regulates the current loss and consequently the electric field. At micro scale it then influences the development of plasma turbulence and at a larger scale plasma rotation. However this region is particularly difficult to simulate, due to its kinetic nature and the presence of steep gradients requiring fine numerical resolution. In this work, a new well-conditioned method for determining the coefficients for Schoenberg's ``best'' quadrature is presented, providing improved precision compared to a naive approach based on b-spline derivatives (4 extra significant figures of precision are obtained for coefficients of the fifth order scheme). The construction of a simulation grid from Greville abcissae of judiciously chosen non-uniform knots is shown to reduce the memory requirements by 89\% for the simulation presented. Cubic splines are found to provide a good compromise between fast convergence and controlled oscillations preserving positivity. Despite the reduction in performance associated with using non-uniform spline schemes, effective parallelisation through the use of GPUs leads to non-uniform simulations running 5.5 times faster than uniform simulations providing equivalent results.},
   langid = {english},
   file = {/home/averil/Zotero/storage/LVV8IW4R/Bourne et al. - Non-Uniform Splines for Semi-Lagrangian Kinetic Si.pdf}
@@ -85,7 +85,6 @@
   journal = {Journal of Physics: Conference Series},
   volume = {561},
   number = {1},
-  pages = {012005},
   issn = {1742-6596},
   doi = {10.1088/1742-6596/561/1/012005},
   abstract = {In this work we present a new Eulerian kinetic 1D3V code devoted to the study of plasma-wall interactions and sheath structure. The code solves the Vlasov-Poisson system for two or more kinetic species on a one-dimensional spatial grid between two limiting plates, in the presence of a uniform magnetic field tilted with respect to the normal to the plates. A source-sink term in the Vlasov equation leads to a stationary solution comprising a magnetic and a collisional presheath, as well as the usual Debye sheath in front of the wall. Thanks to a nonuniform spatial grid the sheath structure can be resolved accurately. Several advection schemes are implemented and the code is parallelized. Here, the code is used to illustrate the problems of a stationary sheath-presheath structure in front of a negatively biased wall, with and without a tilted magnetic field.},
@@ -138,10 +137,13 @@
   file = {/home/averil/Zotero/storage/SRGQGV4A/Després et al. - 2016 - A minimization formulation of a bi-kinetic sheath.pdf}
 }
 
-@article{goldbergBoundaryExtrapolationTheorem,
+@article{goldbergBoundaryExtrapolationTheorem1977,
   title = {On a {{Boundary Extrapolation Theorem}} by {{Kreiss}}},
   author = {Goldberg, Moshe},
-  pages = {9},
+  year = {1977},
+  journal = {Mathematics of Computation},
+  volume = {31},
+  pages = {469--477},
   abstract = {A hardly known and very important result of Kreiss is proven explicitly: Outflow boundary extrapolation, which complements stable dissipative schemes for linear hyperbolic initial value problems, maintains stability. In view of this result, the Lax-Wendroff and the Gottlieb-Turkel schemes are applied to a test problem. As expected from the rate-of-convergence theory by Gustafsson, global order of accuracy is preserved if outflow boundary computations employ extrapolation of (local) accuracy of the same order.},
   langid = {english},
   file = {/home/averil/Zotero/storage/GITHVJTX/Goldberg - On a Boundary Extrapolation Theorem by Kreiss.pdf}
