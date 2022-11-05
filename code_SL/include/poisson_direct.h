@@ -284,7 +284,7 @@ void update_E_from_rho_and_current_1d_cb (poisson_solver_direct p, double dt,
  * @param[out] rho :  int_{v}   (fe(t,x,v) - fi(t,x,v)) dv   for each xi
  * @param[out] E : electric field for each xi
  */
-void update_E_from_rho_and_current_1d (int N, double dx, double lambda, double* rho, double* E) {
+void update_E_from_rho_and_current_1d_E0 (int N, double dx, double lambda, double* rho, double* E) {
 
     int i=0, i0 = (int)(N/2); // middle of the domain 
     double factor = 0.5 * dx / (lambda*lambda); // 0.5 from trapezes
@@ -301,6 +301,37 @@ void update_E_from_rho_and_current_1d (int N, double dx, double lambda, double* 
     for (i=i0-1; i>=0; --i) {
         E[i] = E[i+1] - factor * (rho[i+1] + rho[i]);
     }
+}
+
+void update_E_from_rho_and_current_1d (int N, double dx, double lambda, double* rho, double* E) {
+
+    int i; 
+    double factor = 0.5 * dx / (lambda*lambda); // 0.5 from trapezes
+	double C,val;
+	double L;
+	
+//	C = 0.
+// 	for  i in range(1,N+1):
+// 		val = factor*(rho[i-1]+rho[i])
+// 		E[i] = E[i-1]+val
+// 		C += val
+// 	print(C)	
+// 	C = -C/2.
+// 	for i in range(N+1):
+// 		E[i] +=C	
+	L = ((double)N)*dx;
+	C = 0.0;
+    E[0] = 0.0;
+    for (i=1; i<=N; ++i) {
+    	val = factor * (rho[i-1] + rho[i]);
+        E[i] = E[i-1] + val;
+        C += val;
+    }
+    C = -C/L;
+    for (i=0; i<=N; ++i) {
+        E[i] += C;
+    }
+
 }
 
 #endif // ifndef SELA_VP_1D1V_CART_POISSON_DIRECT
