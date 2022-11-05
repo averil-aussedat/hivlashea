@@ -38,7 +38,7 @@
 \author{
 	Valentin Ayot\footnote{Institut de Math\'ematiques, CNRS, UMR 5251, Universit\'e de Bordeaux, France. \texttt{valentin.ayot@u-bordeaux.fr}}, 
 	\ Mehdi Badsi\footnote{Laboratoire de Math\'ematiques Jean Leray, UMR 6629, Nantes Universit\'e, France. \texttt{mehdi.badsi@univ-nantes.fr}},
-	\ Yann Barsamian\footnote{Universit� libre de Bruxelles, Belgique. \texttt{yann.barsamian@gmail.com}}, 
+	\ Yann Barsamian\footnote{Université libre de Bruxelles, Belgique. \texttt{yann.barsamian@gmail.com}}, 
 	\ Ana\"is Crestetto\footnote{Laboratoire de Math\'ematiques Jean Leray, UMR 6629, Nantes Universit\'e, France. \texttt{anais.crestetto@univ-nantes.fr}},\\
 	\ Nicolas Crouseilles\footnote{Inria (Mingus team), IRMAR UMR 6625 and ENS Rennes, Univ Rennes, France. \texttt{nicolas.crouseilles@inria.fr}},
 	\ Michel Mehrenberger\footnote{I2M, CMI, UMR 7373, Aix-Marseille Universit\'e, France. \texttt{michel.mehrenberger@univ-amu.fr}},
@@ -141,7 +141,7 @@
 
 \highlight{Aknowledgements}{
 	Centre de Calcul Intensif d'Aix-Marseille is acknowledged for granting access to its high performance computing resources.
-	\todo{Thanks to Eurofusion, the CEMRACS organizers, the CIRM's boars and of course, to our super advisors (� compl�ter)}	
+	\todo{Thanks to Eurofusion, the CEMRACS organizers, the CIRM's boars and of course, to our super advisors (à compléter)}	
 }
 
 \section*{Introduction}
@@ -493,7 +493,7 @@ The boundaries are treated as follows:
 %\begin{align}\label{eq:sta_feb}
 %	f_e(0,v) = f_{e,b} (v), \quad \forall v \leqslant 0. 
 %\end{align}
-%\todo{Accorder les notations entre Mehdi, Nicolas, Anaïs, Michel, Yann, le pape et Averil.}
+%\todo{Accorder les notations entre Mehdi, Nicolas, AnaÃ¯s, Michel, Yann, le pape et Averil.}
 %
 %\begin{figure}
 %	\centering
@@ -857,12 +857,13 @@ The study of the numerical equilibrium and the study of the behavior of the ion 
 	\newcommand{\dirFD}{run_comp_short_time_2sp_Nx1000_Nv2000_Nt6250}
 	
 	\renewcommand{\imh}{0.24\textheight}
-	\renewcommand{\imw}{0.45\linewidth}
+	\renewcommand{\imw}{0.3\linewidth}
 	
 	\begin{subfigure}{\textwidth}
 		\centering
 		\includegraphics[height=\imh,width=\imw]{images/ET20_FD.png}
 		\includegraphics[height=\imh,width=\imw]{images/ET20_512.png}
+		\includegraphics[height=\imh,width=\imw]{images/ET20_512_2.png}
 		\caption{Electric field }
 		\label{subfig:compT02_E}
 	\end{subfigure}
@@ -871,6 +872,7 @@ The study of the numerical equilibrium and the study of the behavior of the ion 
 		\centering
 		\includegraphics[height=\imh,width=\imw]{images/rhoT20_FD.png}
 		\includegraphics[height=\imh,width=\imw]{images/rhoT20_512.png}
+		\includegraphics[height=\imh,width=\imw]{images/rhoT20_512_2.png}
 		\caption{Density $\rho$}
 		\label{subfig:compT02_rho}
 	\end{subfigure}
@@ -879,6 +881,7 @@ The study of the numerical equilibrium and the study of the behavior of the ion 
 		\centering
 		\includegraphics[height=\imh,width=\imw]{images/fiT20_FD.png}
 		\includegraphics[height=\imh,width=\imw]{images/fiT20_512.png}
+		\includegraphics[height=\imh,width=\imw]{images/fiT20_512_2.png}
 		\caption{Ion distribution function}
 		\label{subfig:compT02_ion}
 	\end{subfigure}
@@ -886,10 +889,11 @@ The study of the numerical equilibrium and the study of the behavior of the ion 
 		\centering
 		\includegraphics[height=\imh,width=\imw]{images/feT20_FD.png}
 		\includegraphics[height=\imh,width=\imw]{images/feT20_512.png}
+		\includegraphics[height=\imh,width=\imw]{images/feT20_512_2.png}
 		\caption{Electron distribution function}
 		\label{subfig:compT02_electron}
 	\end{subfigure}
-	\caption{Comparison between finite differences (left) and semi-Lagrangian  (right) at $T=20$. The Semi-Lagrangian code uses parameters of Run0.
+	\caption{Comparison between finite differences (left) and semi-Lagrangian  (middle and right) at $T=20$. The Semi-Lagrangian code uses parameters of Run0 (middle $E(t,0)=0$, right $\int_{-1}^1E(t,x)dx=0$)
 	%, with $N_x=512,\ N_{v_e}=N_{v_i}=513$ for both codes. %For the semi-Lagrangian code, we use $\Delta t=0.00025$, $[-60,60]$ for $v_e$ and  $[-50,50]$ for $v_i$. The ion density is zoomed for $v_i\in [-5,5]$
 	}
 	\label{fig:compT20}
@@ -1117,6 +1121,59 @@ The study of the numerical equilibrium and the study of the behavior of the ion 
 	}
 	\label{fig:comp_temps2}
 \end{figure}  
+
+\begin{figure}
+	\centering
+	\newcommand{\rootSL}{../code_SL/}
+%	\newcommand{\rootFD}{../../DynamicElectricSheath.jl/data/two_species/}
+	\newcommand{\rootFD}{../temp_res_DF/}
+	\newcommand{\dirSL}{run_comp_long_time_2sp_Nx1000_Nvi2001_Nve2001_Nt100000}
+	\newcommand{\dirFD}{run_comp_long_time_2sp_Nx200_Nv400_Nt2500000}
+	
+	\renewcommand{\imh}{0.24\textheight}
+	\renewcommand{\imw}{0.45\linewidth}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=\imw]{images/ET20_run5af.png}
+		\includegraphics[height=\imh,width=\imw]{images/ET20_run5af_2.png}
+		\caption{Electric field}
+		%\mysubcaption{The maximum of $\rho$ for the (DF) code is equal to 39.983965094090.}
+		%\label{subfig:compT200_E_rho}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=\imw]{images/rhoT20_run5af.png}
+		\includegraphics[height=\imh,width=\imw]{images/rhoT20_run5af_2.png}
+		\caption{Density $\rho$}
+		%\mysubcaption{The maximum of $\rho$ for the (DF) code is equal to 39.983965094090.}
+		%\label{subfig:compT200_E_rho}
+	\end{subfigure}
+	
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=\imw]{images/fiT20_run5af.png}
+		\includegraphics[height=\imh,width=\imw]{images/fiT20_run5af_2.png}
+		\caption{Ion distribution function} 
+		%\label{subfig:compT200_ion}
+	\end{subfigure}
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[height=\imh,width=\imw]{images/feT20_run5af.png}
+		\includegraphics[height=\imh,width=\imw]{images/feT20_run5af_2.png}
+		\caption{Electron distribution function}
+		%\label{subfig:compT200_electron}
+	\end{subfigure}
+	\caption{Comparison of semi-Lagrangian codes: $E(t,0)=0$ (left) and $\int_{-1}^1E(t,x)dx=0$ (right).
+	 $\Delta t=0.025$. $N_x=256, N_{v_e}=N_{v_i}=1023$.}
+	%for different discretizations. Run1:  $N_x=256,\ N_{v_i}=2049$ (left); Run2: $N_x=1024,\ N_{v_i}=4097$ (right) at $T=20$.
+	%Other numerical parameters are $N_{v_e}=8193$ and $\Delta t = 0.00025$. We have used $[-60,60]$ for $v_e$ and  $[-50,50]$ for $v_i$.
+	%The ion density is zoomed for $v_i\in [-5,5]$
+	%}
+	\label{fig:comp_E0_intE0}
+\end{figure}  
+
+
 
 \bibliographystyle{alpha}
 \bibliography{CEMRACS.bib}
