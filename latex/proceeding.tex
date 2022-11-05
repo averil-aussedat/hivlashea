@@ -39,8 +39,7 @@
 \author{
 	Valentin Ayot\footnote{Institut de Math\'ematiques, CNRS, UMR 5251, Universit\'e de Bordeaux, France. \texttt{valentin.ayot@u-bordeaux.fr}}, 
 	\ Mehdi Badsi\footnote{Laboratoire de Math\'ematiques Jean Leray, UMR 6629, Nantes Universit\'e, France. \texttt{mehdi.badsi@univ-nantes.fr}},
-	\ Yann Barsamian\footnote{\'Ecole europ\'eenne de Bruxelles 1, Belgique, \url{yann.barsamian@teacher.eursc.eu}, \orcidlink{0000-0001-6602-0547}}, %Universit\'e libre de Bruxelles, Belgique.
-	% \texttt{yann.barsamian@gmail.com}}, 
+	\ Yann Barsamian\footnote{\'Ecole europ\'eenne de Bruxelles 1, Belgique, \url{yann.barsamian@teacher.eursc.eu}, \orcidlink{0000-0001-6602-0547}}, 
 	\ Ana\"is Crestetto\footnote{Laboratoire de Math\'ematiques Jean Leray, UMR 6629, Nantes Universit\'e, France. \texttt{anais.crestetto@univ-nantes.fr}},\\
 	\ Nicolas Crouseilles\footnote{Inria (Mingus team), IRMAR UMR 6625 and ENS Rennes, Univ Rennes, France. \texttt{nicolas.crouseilles@inria.fr}},
 	\ Michel Mehrenberger\footnote{I2M, CMI, UMR 7373, Aix-Marseille Universit\'e, France. \texttt{michel.mehrenberger@univ-amu.fr}},
@@ -199,9 +198,9 @@ In the sequel, we will denote $\rho (t,x) \coloneqq \rho_i (t,x) - \rho_e(t,x)$,
 
 The evolution of the densities is modelled by the Vlasov-Poisson equations. Let $\varphi : \R^+ \times [-1,1] \mapsto \R$ denote the electric potential, then we consider the following model satisfied by $(f_e, f_e, \varphi)$ 
 \mysubeq{eq:unsta_model}{
-	\partial_t f_i + v \partial_x f_i - \partial_x \varphi \, \partial_v f_i &= \nu f_e, && (t,x,v) \in \R_{*}^{+} \times ]-1,1[ \times \R, \label{eq:unsta_model_fi} \\
-	\partial_t f_e + v \partial_x f_e + \frac{\partial_x \varphi }{\mu}\, \partial_v f_e &= 0, \quad\quad && (t,x,v) \in \R_{*}^{+} \times ]-1,1[ \times \R, \label{eq:unsta_model_fe} \\
-	- \lambda^2 \partial^2_{xx} \varphi &= \rho (t,x), && (t,x) \in \R^{+} \times ]-1,1[. \label{eq:unsta_model_phi}
+	\partial_t f_i + v \partial_x f_i - \partial_x \varphi \, \partial_v f_i &= \nu f_e, && (t,x,v) \in \R_{*}^{+} \times (-1,1) \times \R, \label{eq:unsta_model_fi} \\
+	\partial_t f_e + v \partial_x f_e + \frac{\partial_x \varphi }{\mu}\, \partial_v f_e &= 0, \quad\quad && (t,x,v) \in \R_{*}^{+} \times (-1,1) \times \R, \label{eq:unsta_model_fe} \\
+	- \lambda^2 \partial^2_{xx} \varphi &= \rho (t,x), && (t,x) \in \R^{+} \times (-1,1). \label{eq:unsta_model_phi}
 }
 The physical parameters $\nu$, $\mu$ and $\lambda$ have the following meaning:
 \begin{itemize}
@@ -212,7 +211,7 @@ of ions in presence of electrons.
 \end{itemize}
 In the sequel, we may use the electric field $E(t,x) \coloneqq - \partial_x \varphi(t,x)$ in place of the potential. Then, the second-order Poisson equation rewrites as 
 \begin{align}
-	\lambda^2 \partial_x E (t,x) = \rho(t,x), \quad \quad (t,x) \in \R^{+} \times ]-1,1[. \label{eq:unsta_model_E}
+	\lambda^2 \partial_x E (t,x) = \rho(t,x), \quad \quad (t,x) \in \R^{+} \times (-1,1). \label{eq:unsta_model_E}
 \end{align}
 
 \begin{remarque}
@@ -228,7 +227,7 @@ In the sequel, we may use the electric field $E(t,x) \coloneqq - \partial_x \var
 
 The densities $f_i$ and $f_e$ are subject to initial and boundary conditions, given by
 \mysubeq{eq:unsta_model_bc}{
-	f_{s}(0,x,v) &\coloneqq f_{s}^0(x,v), && (x,v) \in ]-1,1[ \times \R, \label{eq:init} \\
+	f_{s}(0,x,v) &\coloneqq f_{s}^0(x,v), && (x,v) \in (-1,1) \times \R, \label{eq:init} \\
 	f_{s}(t,x=\pm 1,\pm v < 0) &\coloneqq 0,  && t \in \R^+_*. \label{eq:fie_bc}
 }
 The homogeneous boundary condition \cref{eq:fie_bc} stems from the non-emitting wall model: the boundary absorbs particles without any reflection. This loss of particles is compensated by the ionization source term in the right hand side of \eqref{eq:unsta_model_fi}. 
@@ -246,7 +245,7 @@ We will look for \emph{symmetric solutions} for \cref{eq:unsta_model}, i.e. solu
 	\varphi(t,x) = \varphi (t,-x) \quad \quad (t,x) \in \R^+ \times [-1,1].
 \end{align}
 
-By derivation with respect to $x \in ]-1,1[$, we immediately obtain 
+By derivation with respect to $x \in (-1,1)$, we immediately obtain 
 \begin{align*}
 	\partial_x \varphi(t,x) = - \partial_x \varphi (t,-x), \quad \text{i.e.} \quad E(t,x) = - E(t,-x).
 \end{align*}
@@ -299,7 +298,7 @@ and considering the difference between the $v$-integration of the Vlasov equatio
 \end{align*}
 leads to (using $E=-\partial_x \varphi$) 
 \begin{align*}
-	\partial_x (\lambda^2\partial_t E + J) = \nu \rho_e, \quad \forall x\in ]-1, 1[. 	
+	\partial_x (\lambda^2\partial_t E + J) = \nu \rho_e, \quad \forall x\in (-1, 1). 	
 \end{align*}
 Integrating now over $x\in[-1, 1]$ leads to 
 \begin{align}\label{eq:ampere_integ}
@@ -339,7 +338,7 @@ Let us now consider the boundary condition \cref{eq:ampere_bc_phi}. The spatial 
 	E(t,x) = 
 	\begin{cases}
 	E(t,\phantom{-}1) - \int_{x\phantom{-}}^{1} \rho(t,y) dy =  C_{+}(t) - \int_{x\phantom{-}}^1 \int_{v\in\R} [f_i(t,y,v) - f_e(t,y,v)] dv dy & x \in [0,1] \\
-	E(t,-1) + \int_{-1}^x \rho(t,y) dy = C_{-}(t) + \int_{-1}^x \int_{v\in\R} [f_i(t,y,v) - f_e(t,y,v)] dv dy & x \in [-1,0[ 
+	E(t,-1) + \int_{-1}^x \rho(t,y) dy = C_{-}(t) + \int_{-1}^x \int_{v\in\R} [f_i(t,y,v) - f_e(t,y,v)] dv dy & x \in [-1,0)
 	\end{cases}
 \end{align}
 Note that here, the electric field may "jump" at $x=0$. Both expressions may be approximated by quadrature formulas. 
@@ -449,7 +448,7 @@ The use of the decentered boundary condition requires a discretization of \cref{
 %The full model \cref{eq:unsta_model} includes multi-dimensional advection equations for $f_{i,e}$, supplemented with well-placed boundary conditions \cref{eq:fie_bc}. However, the main algorithm uses a splitting method that relies on 1D advection solvers. Therefore, we may first
 Let us focus on the elementary advection equation with constant speed $a>0$
 \begin{align*}
-	\partial_t f (t,x) + a \partial_x f(t,x) = 0, \quad f(t,-1) = 0, \quad \forall (t,x) \in \R^+_* \times ]-1,1[.
+	\partial_t f (t,x) + a \partial_x f(t,x) = 0, \quad f(t,-1) = 0, \quad \forall (t,x) \in \R^+_* \times (-1,1).
 \end{align*}
 Let $(x_j)_{j\in\llbracket0,J\rrbracket}$ be a space mesh of step $\Delta x \coloneqq 2/J$, and $(t_n)_{n\in\llbracket 0,N \rrbracket}$ be a time mesh of step $\Delta t \coloneqq T/N$.
 We follow the work of \cite{coulombelNeumannNumericalBoundary2020, boutinHighOrderNumerical2021}, and consider a semi-Lagrangian scheme defined as
@@ -522,8 +521,8 @@ We rely on the work of \cite{malkovNonstationaryAntonovSelfgravitating2020} to p
 %{\textcolor{red}{(NC: pourquoi 'stationary' ?)}} 
 model describing the density of particles $f = f(t,x,v)$, and the potential $\varphi=\varphi(t,x)$:
 \mysubeq{eq:one_species_model}{
-	\partial_t f + v \partial_x f  - \partial_x \varphi \partial_v f &= 0, && (t,x,v) \in \R^+_* \times ]-1,1[ \times \mathbb{R}, \label{sta_1sp_f} \\
-	\partial^2_{xx} \varphi &= \int_{v\in\mathbb{R}} f dv, && (t,x) \in \R^+ \times ]-1,1[. \label{sta_phi}
+	\partial_t f + v \partial_x f  - \partial_x \varphi \partial_v f &= 0, && (t,x,v) \in \R^+_* \times (-1,1) \times \mathbb{R}, \label{sta_1sp_f} \\
+	\partial^2_{xx} \varphi &= \int_{v\in\mathbb{R}} f dv, && (t,x) \in \R^+ \times (-1,1). \label{sta_phi}
 }
 The initial and boundary conditions are given by 
 \mysubeq{eq:one_species_model_bc}{
