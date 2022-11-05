@@ -39,9 +39,9 @@ sources = [["runs_parameters",[":"],[":"],sep,comment]]
 
 columns = [
     "Run", tablecolumn(0, "%s"), 
-    "$N_x$", tablecolumn(1, "%d"), 
-    "$N_{v_i}$", tablecolumn(2, "%d"), 
-    "$N_{v_e}$", tablecolumn(3, "%d"), 
+    "$N_x$", tablecolumn(1, "%d", alignement="r"), 
+    "$N_{v_i}$", tablecolumn(2, "%d", alignement="r"), 
+    "$N_{v_e}$", tablecolumn(3, "%d", alignement="r"), 
     "$\Delta t$", tablecolumn(4, "%f"), 
 ]
 
