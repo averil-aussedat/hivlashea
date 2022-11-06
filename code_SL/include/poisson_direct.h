@@ -325,13 +325,16 @@ void update_E_from_rho_and_current_1d (int N, double dx, double lambda, double* 
     for (i=1; i<=N; ++i) {
     	val = factor * (rho[i-1] + rho[i]);
         E[i] = E[i-1] + val;
-        C += val;
+        C += 0.5*dx*(E[i-1]+E[i]);//val;
     }
     C = -C/L;
     for (i=0; i<=N; ++i) {
         E[i] += C;
     }
-
+//     val = 0.;
+// 	for(i=1;i<=N;i++)
+// 		val+=0.5*dx*(E[i]+E[i-1]);
+// 	printf("intE=%1.20lg\n",val);	
 }
 
 #endif // ifndef SELA_VP_1D1V_CART_POISSON_DIRECT

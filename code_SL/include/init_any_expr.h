@@ -721,7 +721,8 @@ void fun_1d1v_beam(PC_tree_t conf, parallel_stuff* par_variables,
 void fun_1d1v_malkov(PC_tree_t conf, parallel_stuff* par_variables,
         double* array1, double* array2, char* fun_name) {
     double res;
-    double rho0, z0, alpha2, a, ap,res0; // parameters
+    double rho0, z0, alpha2, a, ap,res0,deltax,deltav,maxf; // parameters
+    int numx,numv;
     double z, u;      // variables
     
     // Getting the parameters values from the yaml file.
@@ -755,23 +756,68 @@ void fun_1d1v_malkov(PC_tree_t conf, parallel_stuff* par_variables,
     } else {
         ERROR_MESSAGE("#Error in function %s: missing the 'res0' field.\n", fun_name);
     }
-    
+    if (PC_get(conf, ".numx")) {
+        PC_int(PC_get(conf, ".numx"), &numx);
+    } else {
+        ERROR_MESSAGE("#Error in function %s: missing the 'numx' field.\n", fun_name);
+    }
+    if (PC_get(conf, ".numv")) {
+        PC_int(PC_get(conf, ".numv"), &numv);
+    } else {
+        ERROR_MESSAGE("#Error in function %s: missing the 'numv' field.\n", fun_name);
+    }
+    if (PC_get(conf, ".deltax")) {
+        PC_double(PC_get(conf, ".deltax"), &deltax);
+    } else {
+        ERROR_MESSAGE("#Error in function %s: missing the 'deltax' field.\n", fun_name);
+    }
+    if (PC_get(conf, ".deltav")) {
+        PC_double(PC_get(conf, ".deltav"), &deltav);
+    } else {
+        ERROR_MESSAGE("#Error in function %s: missing the 'deltav' field.\n", fun_name);
+    }
+     if (PC_get(conf, ".maxf")) {
+        PC_double(PC_get(conf, ".maxf"), &maxf);
+    } else {
+        ERROR_MESSAGE("#Error in function %s: missing the 'maxf' field.\n", fun_name);
+    }
+   
     par_variables->is_par_x = true;
     local_to_global_2d(par_variables, 0, 0);
     for (int i = 0; i < par_variables->size_x_par_x; i++) {
         for (int j = 0; j < par_variables->size_v_par_x; j++) {
-            z = array1[i + par_variables->global_indices[0]];
-            z = 0.;
-            u = array2[j + par_variables->global_indices[1]];
-            res = alpha2*(z0*z0-z*z/(a*a))-a*a*(u-(ap/a)*z)*(u-(ap/a)*z);
-            if(res>res0){
-            	res = pow(res,-0.5);
-            }else{
-            	res = 0.;
+        	double res_int = 0.;
+        	double dint_x = deltax/(double)numx;
+        	double dint_v = deltav/(double)numv;
+        	
+        	if(deltax<0){
+        		dint_x = (array1[1]-array1[0])/(double)numx;
+        		deltax = array1[1]-array1[0];
+        	}
+        	if(deltav<0){
+        		dint_v = (array2[1]-array2[0])/(double)numv;
+        		deltav = array2[1]-array2[0];
+        	}
+            for(int ii=0;ii<numx;ii++){
+            	for(int jj=0;jj<numv;jj++){
+            		z = array1[i + par_variables->global_indices[0]];
+            		z +=-0.5*deltax+((double)ii+0.5)*dint_x;
+            		//z = 0.;
+            		u = array2[j + par_variables->global_indices[1]];
+            		u +=-0.5*deltav+((double)jj+0.5)*dint_v;
+            		
+            		res = alpha2*(z0*z0-z*z/(a*a))-a*a*(u-(ap/a)*z)*(u-(ap/a)*z);
+            		if(res>res0){
+            			res = min(pow(res,-0.5),maxf);
+            		}else{
+            			res = 0.;
+            		}
+            		res = (rho0/M_PI)*res;
+            		res_int += res;
+            	}
             }
-            res = (rho0/M_PI)*res;
             //res = (1. + eps * cos(mode * x)) * exp(-v * v / 2.) / sqrt(2. * M_PI);
-            par_variables->f_parallel_in_x[i][j] = res;
+            par_variables->f_parallel_in_x[i][j] = res_int*(1.0/(double)numx)*(1.0/(double)numv);
         }
     }
 }
