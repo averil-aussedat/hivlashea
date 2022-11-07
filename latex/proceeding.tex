@@ -343,6 +343,8 @@ Let us now consider the boundary condition \cref{eq:ampere_bc_phi}. The spatial 
 \end{align}
 Note that here, the electric field may "jump" at $x=0$. Both expressions may be approximated by quadrature formulas. 
 
+{\red{Instead of imposing $E(t,0)=0$, we can impose $\int_{-1}^1E(t,x)dx=0$ or even $E(t,1)=-E(t,-1)$.}}
+
 \subsection{Finite Differences (FD)}
 
 Define a numerical computation domain $\Omega \coloneqq [-1,1] \times [-\overline{V},\overline{V}]$, with a large enough maximum speed $\overline{V}$. Let $(x_j, v_k)^{j\in\llbracket0,J\rrbracket}_{k\in\llbracket0,K\rrbracket}$ be a cartesian grid of $\Omega$ of step $(\Delta x, \Delta v)$. We discretize the advection equations on the subgrid $(x_j, v_k)^{j\in\llbracket1,J-1\rrbracket}_{k\in\llbracket1,K-1\rrbracket}$ by an explicit Euler scheme in time, and the upwind scheme in space:
@@ -571,20 +573,27 @@ It is numerically relevant to extend the Malkov solution \cref{eq:Malkov_solutio
 
 %\begin{figure}[H]
 	\input{ltf_Malkov_DF}
-	\input{ltf_Malkov_SL}
+%%	\input{ltf_Malkov_SL}
 %\end{figure}
+
+
+Results for the semi-Lagrangian code are given on Figure \ref{fig:SLresult1sp}. On each cell, instead of doing a single point evaluation, we use a quadrature to compute an average value on a centered rectangle around the point value
+(of size $\Delta x \times \Delta v$). We evaluate the error on the electric field for different. We clearly see that the schemes converges at initial time and saturates to time discretization error for $T=1$. Then, dividing the time step by two (resp. by four), we observe that the error is divided by around $4$ (resp $16$), which illustrates the second order in time of the Strang splitting. The test is quite difficult (the function goes to infinity on one side and then is equal to zero on the other side) 
+and many points have to be used to clearly see the convergence.
+ 
 
 
 \begin{figure}
 	\centering
 	\renewcommand{\imh}{0.45\linewidth}
 	\begin{tabular}{cc}
-	\includegraphics[width=\imh]{images/malkov_SL1.pdf} & \includegraphics[width=\imh]{images/malkov_SL2.pdf} \\
-	\includegraphics[width=\imh]{images/malkov_SL3.pdf} & \includegraphics[width=\imh]{images/malkov_SL4.pdf}
+	\includegraphics[width=\imh]{images/malkov_SL1.png} & \includegraphics[width=\imh]{images/malkov_SL2.png} \\
+	\includegraphics[width=\imh]{images/malkov_SL3.png} & \includegraphics[width=\imh]{images/malkov_SL4.png}
 	\end{tabular}
 	\caption{SL code for one species case. Electric field error for $x\in [-1,1]$, at initial time (top left); at time $T=1$, for $\Delta t=0.1$ (top right); at time $T=1$, for $\Delta t=0.05$ (bottom left); at time $T=1$: error of electric field for $\Delta t=0.1$,
 	$4$ times error of electric field for $\Delta t=0.05$, $16$ times error of electric field for $\Delta t=0.05$. We use $N\in \{16,32,64,128,256,512,1024\}$ cells in each direction. For each cell we compute the average value of $f$
 	at initial time using $N$ points in each direction.}
+	\label{fig:SLresult1sp}
 \end{figure}
 
 \subsection{Two species case} % and comparison between (SL) and (FD)}
@@ -877,7 +886,7 @@ The study of the numerical equilibrium and the study of the behavior of the ion 
 		\centering
 		\includegraphics[height=\imh,width=\imw]{images/ET20_FD.png}
 		\includegraphics[height=\imh,width=\imw]{images/ET20_512.png}
-		\includegraphics[height=\imh,width=\imw]{images/ET20_512_2.png}
+		\includegraphics[height=\imh,width=\imw]{images/ET20_512_3.png}
 		\caption{Electric field }
 		\label{subfig:compT02_E}
 	\end{subfigure}
@@ -886,7 +895,7 @@ The study of the numerical equilibrium and the study of the behavior of the ion 
 		\centering
 		\includegraphics[height=\imh,width=\imw]{images/rhoT20_FD.png}
 		\includegraphics[height=\imh,width=\imw]{images/rhoT20_512.png}
-		\includegraphics[height=\imh,width=\imw]{images/rhoT20_512_2.png}
+		\includegraphics[height=\imh,width=\imw]{images/rhoT20_512_3.png}
 		\caption{Density $\rho$}
 		\label{subfig:compT02_rho}
 	\end{subfigure}
@@ -895,7 +904,7 @@ The study of the numerical equilibrium and the study of the behavior of the ion 
 		\centering
 		\includegraphics[height=\imh,width=\imw]{images/fiT20_FD.png}
 		\includegraphics[height=\imh,width=\imw]{images/fiT20_512.png}
-		\includegraphics[height=\imh,width=\imw]{images/fiT20_512_2.png}
+		\includegraphics[height=\imh,width=\imw]{images/fiT20_512_3.png}
 		\caption{Ion distribution function}
 		\label{subfig:compT02_ion}
 	\end{subfigure}
@@ -903,7 +912,7 @@ The study of the numerical equilibrium and the study of the behavior of the ion 
 		\centering
 		\includegraphics[height=\imh,width=\imw]{images/feT20_FD.png}
 		\includegraphics[height=\imh,width=\imw]{images/feT20_512.png}
-		\includegraphics[height=\imh,width=\imw]{images/feT20_512_2.png}
+		\includegraphics[height=\imh,width=\imw]{images/feT20_512_3.png}
 		\caption{Electron distribution function}
 		\label{subfig:compT02_electron}
 	\end{subfigure}
@@ -1145,12 +1154,13 @@ The study of the numerical equilibrium and the study of the behavior of the ion 
 	\newcommand{\dirFD}{run_comp_long_time_2sp_Nx200_Nv400_Nt2500000}
 	
 	\renewcommand{\imh}{0.24\textheight}
-	\renewcommand{\imw}{0.45\linewidth}
+	\renewcommand{\imw}{0.3\linewidth}
 	
 	\begin{subfigure}{\textwidth}
 		\centering
 		\includegraphics[height=\imh,width=\imw]{images/ET20_run5af.png}
 		\includegraphics[height=\imh,width=\imw]{images/ET20_run5af_2.png}
+		\includegraphics[height=\imh,width=\imw]{images/ET20_run5af_3.png}
 		\caption{Electric field}
 		%\mysubcaption{The maximum of $\rho$ for the (DF) code is equal to 39.983965094090.}
 		%\label{subfig:compT200_E_rho}
@@ -1159,6 +1169,7 @@ The study of the numerical equilibrium and the study of the behavior of the ion 
 		\centering
 		\includegraphics[height=\imh,width=\imw]{images/rhoT20_run5af.png}
 		\includegraphics[height=\imh,width=\imw]{images/rhoT20_run5af_2.png}
+		\includegraphics[height=\imh,width=\imw]{images/rhoT20_run5af_3.png}
 		\caption{Density $\rho$}
 		%\mysubcaption{The maximum of $\rho$ for the (DF) code is equal to 39.983965094090.}
 		%\label{subfig:compT200_E_rho}
@@ -1168,6 +1179,7 @@ The study of the numerical equilibrium and the study of the behavior of the ion 
 		\centering
 		\includegraphics[height=\imh,width=\imw]{images/fiT20_run5af.png}
 		\includegraphics[height=\imh,width=\imw]{images/fiT20_run5af_2.png}
+		\includegraphics[height=\imh,width=\imw]{images/fiT20_run5af_3.png}
 		\caption{Ion distribution function} 
 		%\label{subfig:compT200_ion}
 	\end{subfigure}
@@ -1175,10 +1187,11 @@ The study of the numerical equilibrium and the study of the behavior of the ion 
 		\centering
 		\includegraphics[height=\imh,width=\imw]{images/feT20_run5af.png}
 		\includegraphics[height=\imh,width=\imw]{images/feT20_run5af_2.png}
+		\includegraphics[height=\imh,width=\imw]{images/feT20_run5af_3.png}
 		\caption{Electron distribution function}
 		%\label{subfig:compT200_electron}
 	\end{subfigure}
-	\caption{Comparison of semi-Lagrangian codes: $E(t,0)=0$ (left) and $\int_{-1}^1E(t,x)dx=0$ (right).
+	\caption{Comparison of semi-Lagrangian codes: $E(t,0)=0$ (left), $E(t,1)=E(t,-1)$ (middle) and $\int_{-1}^1E(t,x)dx=0$ (right).
 	 $\Delta t=0.025$. $N_x=256, N_{v_e}=N_{v_i}=1023$.}
 	%for different discretizations. Run1:  $N_x=256,\ N_{v_i}=2049$ (left); Run2: $N_x=1024,\ N_{v_i}=4097$ (right) at $T=20$.
 	%Other numerical parameters are $N_{v_e}=8193$ and $\Delta t = 0.00025$. We have used $[-60,60]$ for $v_e$ and  $[-50,50]$ for $v_i$.
