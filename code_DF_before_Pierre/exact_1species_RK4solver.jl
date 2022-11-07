@@ -50,3 +50,11 @@ function rk4solver(T,alpha,rho0,z0,y10,y20)
 
     return aT,apT
 end
+#=
+rho0=1.
+z0=1.
+alpha=sqrt(0.98)
+a=1.08
+ap=0.
+println(rk4solver(0.5,alpha,rho0,z0,a,ap))
+=#

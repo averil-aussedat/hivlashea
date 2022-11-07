@@ -1,5 +1,4 @@
 """
-
 Two-species Vlasov-Poisson solver on [-1,1] \\times \\RR using
  
  with :
@@ -21,7 +20,6 @@ Two-species Vlasov-Poisson solver on [-1,1] \\times \\RR using
  
  Author : Mehdi BASDI. 
  Date : 27/07/2022.
-
  Translation in Julia : Pierre Navaro & Averil Prost.
  Date : 05/08/2022.
  
@@ -52,17 +50,17 @@ include("initial_data_2.jl")  # constant mu and analytic initializations
 # functions fi_0, fe_0, E0 
 
 # Physical parameters
-const nu = 2.#0.0; # Collision frequency
-const lambda = 0.1#1;#0.5; # Debye length
+const nu = 0. # 0.2 #0.0; # Collision frequency
+const lambda = 1. #0.1 #1;#0.5; # Debye length
 
 # Discretization parameters
-const Nx = 512 #512;#24;#1024;#301; # Number of points of the space mesh
-const Nv = 513 #513;#24;#1024#500; # Number of points of the speed mesh
-const xmin = -1.# -1.5#-1.0; # lower bound space mesh
-const xmax = 1.#1.5#1.0; # upper bound space mesh
+const Nx = 16#2048#2048#512 #512;#24;#1024;#301; # Number of points of the space mesh
+const Nv = 2049#2049#2049#513 #513;#24;#1024#500; # Number of points of the speed mesh
+const xmin = -1. #-1. # -1.5#-1.0; # lower bound space mesh
+const xmax = 1. #1. #1.5#1.0; # upper bound space mesh
 # The grid in velocity corresponds to the electronic one which contains the support of boths ions and electron density function
-const vmin = -5.0 / sqrt(mu)# -2.#-10.#-5.0 / sqrt(mu); # lower bound speed mesh
-const vmax = 5.0 / sqrt(mu)#2.#10.#5.0 / sqrt(mu); # upper bound speed mesh
+const vmin = -2. #-5.0 / sqrt(abs(mu))# -2.#-10.#-5.0 / sqrt(mu); # lower bound speed mesh
+const vmax = 2. #5.0 / sqrt(abs(mu))#2.#10.#5.0 / sqrt(mu); # upper bound speed mesh
 const dx = (xmax - xmin) / Nx; # space step
 const dv = (vmax - vmin) / Nv; # speed step
 const CFL_x = 0.5 * dx / vmax;
@@ -70,7 +68,7 @@ const CFL_v = abs(mu) * dv / 10;
 
 # Solver and other functionality choices
 const init_file=0 # =0: initialization thanks to analytic expression, =1: initialization from file
-const field_solver=1 # =0: Ampere solver, =1: Poisson solver E(Nx/2=0), =2: Poisson solver with current
+const field_solver=3 # =0: Ampere solver, =1: Poisson solver E(Nx/2=0), =2: Poisson solver with current, =3: Poisson solver moy(E)=0
 # testcases are implemented in file initial_data.jl :
 # 0: full 2-species, 1: cst 1-species validation, 2: time variable 1-species validation
 const animate=0 # =0: no gif animation, =1: gif animation
@@ -86,7 +84,7 @@ const fislice = floor(Int, Nv):ceil(Int, Nv) # ions will be plotted on these col
 function main(T)
 
     # Iteration number and time step respecting CFL
-    Nt = (floor(Int, T / min(CFL_x, CFL_v)) + 1) # 'Int' argument for int output
+    Nt =(floor(Int, T / min(CFL_x, CFL_v)) + 1) # 'Int' argument for int output
     dt = T / Nt
     
     println("Welcome in main.")
@@ -106,8 +104,8 @@ function main(T)
     #############################################################
     # Initialisation with analytic expression or datas from files
     # Initialisation from analytical expression (and array declaration)
-    EE = E0(xx)         # electric field (has to be initialized for Ampere solver)
-    EEtemp = E0(xx)
+    EE = E_0(xx)         # electric field (has to be initialized for Ampere solver)
+    EEtemp = E_0(xx)
     fi = fi_0(xx, vv)    # ion density 
     fe = fe_0(xx, vv)    # electron density
     rho = 0.0 * xx        # charge density (will be computed later)
@@ -191,6 +189,8 @@ function main(T)
     fe[end, :] .*= 0.0 # speed distribution is almost 0 
     fe[:, begin] .*= 0.0
     fe[:, end] .*= 0.0 # non-emmiting wall
+
+    
 
     # plots at time 0
     title = @sprintf(" at t=%7.3f", t)
@@ -276,8 +276,8 @@ function main(T)
                 println("Warning!!! 0 is not a mesh point...")
             end
 
-        else
-        # third way of computing EE update electric field with Poisson equation and E(Nx/2) fixed to 0
+        elseif field_solver==2
+        # third way of computing EE update electric field with Poisson equation and current approach
         # --> we get E at time n
             @views J_l = dv * sum(vv .* (fi[begin, :] - fe[begin, :]))
             @views J_r = dv * sum(vv .* (fi[end, :] - fe[end, :]))
@@ -304,6 +304,27 @@ function main(T)
                 EE[i] = (1/(2*lambda*lambda)) * (mass_rho_minus - mass_rho_plus) + 0.5 * (E_xmax + E_xmin)
             end
 
+        else
+        # fourth way of computing EE: update electric field with  Poisson equation and moy(EE)=0
+        # --> we get E at time n
+            EE[1]=0.
+            C=0.
+            for i in 2:Nx+1
+                EE[i]=EE[i-1]+ 0.5 * dx / (lambda*lambda) * (rho[i] + rho[i-1])
+                C=C+0.5*dx*(EE[i]+EE[i-1])
+            end
+
+            for i in 1:Nx+1
+                EE[i]=EE[i]-C/(xmax-xmin)
+            end
+            
+            #=
+            C=0.
+            for i in 2:Nx+1
+                C=C+0.5*dx*(EE[i]+EE[i-1])
+            end
+            println(C)
+            =#
         end
         ####################################
  
@@ -317,7 +338,6 @@ function main(T)
 			open("jlimages/rho_$iplot.txt", "w") do io
     			writedlm(io, [xx rho EE])
 			end
-
 
             #contourf(xx[2:end-1],vv[fislice],fi[begin+1:end-1,fislice]',colormap=thecmap,title="Ions"*title,xlabel="x",ylabel="v",linewidth=0)
             contourf(xx[2:end-1],vv[2:end-1],fi[begin+1:end-1,begin+1:end-1]',colormap=thecmap,title="Ions"*title,xlabel="x",ylabel="v",linewidth=0)
@@ -358,6 +378,8 @@ function main(T)
             EE_plus = min.(EE, 0.0)
             EE_minus = max.(EE, 0.0)
         end
+
+        
 
         # time evolution
         @views fi[2:Nx, 2:Nv] .+= (
@@ -413,10 +435,15 @@ function main(T)
 
         # L1 norm on electric field
         L1sum=0.
-        for i in 1:Nx-1
-            L1sum=L1sum+dx*abs(Eex[i]-EE[i])
+        L1sum2D=0.
+        for i in 1:Nx
+            #L1sum=L1sum+dx*abs(Eex[i]-EE[i])^2
+            L1sum=L1sum+dx*abs(EEtemp[i]-EE[i])^2
+            for j in 1:Nv
+                L1sum2D=L1sum2D+dx*dv*abs(feex[i,j]-fe[i,j])^2
+            end
         end
-        println("dt, dx, dv, L1 error on E ",dt, " ", dx, " ", dv, " ",L1sum)
+        println("dt, dx, dv, L1 error on E, on fe ",dt, " ", dx, " ", dv, " ",sqrt(L1sum), " ", sqrt(L1sum2D))
     end
 
     # Datas saved in files, ready to be read again
@@ -443,9 +470,8 @@ end # try-catch
 
 ####################################
 # Final time choice and call to main
-T = 0.2 #1.#1.#0.1; # Time horizon
+T = 0.1 #3.62456#0.5 #0.2 #1.#1.#0.1; # Time horizon
 
 #@time rho_results, fe_init, fi_init, fe, fi = main(T)
 @time main(T)
 ####################################
-

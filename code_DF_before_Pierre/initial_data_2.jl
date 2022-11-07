@@ -17,7 +17,7 @@ E0(x) = 0.0*x; # to be checked before using Ampere solver
 
 #############
 # testcase=1: full 2-species masked maxwellian case
-
+#=
 const testcase=1
 const mu = 0.01#0.5
 mask(x;d=0.1,xl=-0.1,xr=0.1) = 0.5*(tanh((x-xl)/d)-tanh((x-xr)/d))
@@ -25,16 +25,14 @@ fe_0(x, v) = mask.(x) .* sqrt(abs(mu)).*exp.(-0.5 * abs(mu) .* (v').^2)./sqrt(2*
 fi_0(x, v) = mask.(x) .* exp.(-0.5  .* (v').^2)./sqrt(2*pi);
 E0(x) = 0.0*x; # to be checked before using Ampere solver
 # end testcase=1
-
+=#
 
 #############
 # testcase=2: constant 1-species validation (paper Malkov-Kudryavtsev)
-#=
+
 const testcase=2
 const mu = -1.
-
 fi_0(x,v)=zeros((size(x,1),size(v,1)))
-
 rho0=1.
 z0=1.
 alpha=1.
@@ -53,8 +51,6 @@ function fe_0(xx,vv)
     end
     return fe
 end
-
-
 function E_0(xx)
     E=zeros(size(xx))
     for i in 1:Nx
@@ -68,26 +64,23 @@ function E_0(xx)
     end
     return E
 end  
-
 E_ex(x)=E_0(x)
+fe_ex(x,v)=fe_0(x,v)
 # end testcase=2
-=#
+
 
 #############
 # testcase=3: time variable 1-species validation (paper Malkov-Kudryavtsev)
 #=
+include("exact_1species_RK4solver.jl")
 const testcase=3
 const mu = -1.
-
 fi_0(x,v)=zeros((size(x,1),size(v,1)))
-
 rho0=1.
 z0=1.
 alpha=sqrt(0.98)
-
 a=1.08
 ap=0.
-
 function fe_0(xx,vv)    
     Nx = size(xx,1)
     Nv = size(vv,1)
@@ -101,7 +94,6 @@ function fe_0(xx,vv)
     end
     return fe
 end
-
 function E_0(xx)
      E=zeros(size(xx))
     for i in 1:Nx
@@ -115,13 +107,10 @@ function E_0(xx)
     end
     return E
 end
-
 # values of a and ap=dt_a at final time given by a python RK4 solver
 # WARNING!!! values depend on final time
 #aT=0.9889868233720464#T=10#0.9160923237643877#T=20#0.9405182218848853#T=5#0.9889868233720464#T=1
 #apT=-0.14237509909915097#T=10#0.016234206996915204#T=20#-0.10619953933896482#T=5#-0.14237509909915097#T=1
-
-
 function E_ex(xx)
     # values of a and ap=dt_a at final time given by a python RK4 solver
     # WARNING!!! values depend on final time
@@ -138,7 +127,6 @@ function E_ex(xx)
     end
     return E
 end
-
 function fe_ex(xx,vv)
     aT,apT=rk4solver(T,alpha,rho0,z0,a,ap)
     Nx = size(xx,1)
@@ -155,12 +143,6 @@ function fe_ex(xx,vv)
     end
     return feex
 end
-
 # end testcase=3
 =#
-
-
-
-
-
 
