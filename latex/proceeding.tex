@@ -574,6 +574,19 @@ It is numerically relevant to extend the Malkov solution \cref{eq:Malkov_solutio
 	\input{ltf_Malkov_SL}
 %\end{figure}
 
+
+\begin{figure}
+	\centering
+	\renewcommand{\imh}{0.45\linewidth}
+	\begin{tabular}{cc}
+	\includegraphics[width=\imh]{images/malkov_SL1.pdf} & \includegraphics[width=\imh]{images/malkov_SL2.pdf} \\
+	\includegraphics[width=\imh]{images/malkov_SL3.pdf} & \includegraphics[width=\imh]{images/malkov_SL4.pdf}
+	\end{tabular}
+	\caption{SL code for one species case. Electric field error for $x\in [-1,1]$, at initial time (top left); at time $T=1$, for $\Delta t=0.1$ (top right); at time $T=1$, for $\Delta t=0.05$ (bottom left); at time $T=1$: error of electric field for $\Delta t=0.1$,
+	$4$ times error of electric field for $\Delta t=0.05$, $16$ times error of electric field for $\Delta t=0.05$. We use $N\in \{16,32,64,128,256,512,1024\}$ cells in each direction. For each cell we compute the average value of $f$
+	at initial time using $N$ points in each direction.}
+\end{figure}
+
 \subsection{Two species case} % and comparison between (SL) and (FD)}
 In this part, we focus on the two-species model \eqref{eq:unsta_model} 
 and in the sequel, we use the following physical parameters:
