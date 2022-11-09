@@ -162,21 +162,18 @@ Plasma sheaths are particularly challenging to simulate for several reasons. In 
 the plasma parameters (temperature or density) develop steep gradients. Due to their different mass, 
 electrons and ions have a very different behaviour close to the boundary, and a two-species model is required 
 to describe the formation of the sheath. Moreover, kinetic models are necessary to capture the velocity 
-effect of the particles (see \cite{bourneNonUniformSplinesSemiLagrangian2022}), and we have to deal with 
+effect of the particles (see \cite{riemannBohmCriterionSheath1991}), and we have to deal with % old cite : \cite{bourneNonUniformSplinesSemiLagrangian2022}
 different scales to account for each species.  Hence, we are considering in this work 
 a two-species Vlasov model to run simulations of the plasma sheath. 
 
 Recent works are dedicated to the non homogeneous equilibrium sheath, both on the mathematical side and on the numerical side \cite{badsiCollisionalSheathSolutions2021, badsiStableFixedPoint2021, despresMinimizationFormulationBikinetic2016}. 
 %We refer to  \cite{bourneNonUniformSplinesSemiLagrangian} for a recent work on the subject.
-% manfredi2014 -> couletteEulerianVlasovCode2014 (??) 
 Regarding the dynamical approaches, one refers to \cite{couletteEulerianVlasovCode2014,bourneNonUniformSplinesSemiLagrangian2022} 
 or \cite{badsiNumericalStabilityPlasma2018} for which this study is a follow-up. 
 In the latter work, we studied the behaviour of the numerical solution of the Vlasov equation, initialized with a sheath
 homogeneous equilibrium. In this work, our purpose is to investigate numerically the formation of a sheath, 
-% Alvarez_Laguna_2020 -> alvarez-lagunaPlasmasheathTransitionMultifluid2020  (??)
 when we include ionization in the model, inspired by the recent work
 \cite{alvarezlagunaAsymptoticPreservingWellbalanced2020}
-% \cite{alvarez-lagunaPlasmasheathTransitionMultifluid2020} 
 where a fluid model 
 is proposed.   
 
@@ -197,13 +194,13 @@ the numerical methods are described in \cref{sec:nummethods} and \cref{sec:numre
 
 \paragraph{The model}
 
-Let $t\in\mathbb{R}^+$ denotes the time variable, $x\in [-1,1]$ denotes the spatial variable in a normalized one-dimensional domain, and $v\in\mathbb{R}$ denotes the speed variable. The distribution of species is described through their density in the phase space, denoted by $f_i : (t,x,v) \in \R^+ \times [-1,1]\times \R \mapsto \R$ for the ions, and $f_e : (t,x,v) \in \R^+ \times [-1,1]\times \R \mapsto \R$ for the electrons. To these kinetic quantities, we add the spatial densities $\rho_{i,e}$ and currents $J_{i,e}$, defined by
+Let $t\in\mathbb{R}^+$ denote the time variable, $x\in [-1,1]$ denote the spatial variable in a normalized one-dimensional domain, and $v\in\mathbb{R}$ denote the speed variable. Each species is described through their density in the phase space, denoted by $f_i : (t,x,v) \in \R^+ \times [-1,1]\times \R \mapsto \R$ for the ions, and $f_e : (t,x,v) \in \R^+ \times [-1,1]\times \R \mapsto \R$ for the electrons. Macroscopic quantities will be needed in the modelling, so that we consider the densities $\rho_{i,e}$ and currents $J_{i,e}$ defined by
 \begin{align}\label{eq:def_ni_ne}
 	\rho_{i,e} (t,x) \coloneqq \int_{v\in\R} f_{i,e} (t,x,v) dv, \quad\text{and}\quad J_{i,e} (t,x) \coloneqq \int_{v\in\R} v f_{i,e} (t,x,v) dv. 
 \end{align}
 In the sequel, we will denote $\rho (t,x) \coloneqq \rho_i (t,x) - \rho_e(t,x)$, and $J(t,x) \coloneqq J_i(t,x) - J_e(t,x)$.
 
-The evolution of the densities is modelled by the Vlasov-Poisson equations. Let $\varphi : (t,x) \in \R^+ \times [-1,1] \mapsto \R$ denote the electric potential, then we consider the following model satisfied by $(f_i, f_e, \varphi)$ 
+Phase space densities are assumed to obey the Vlasov equation where the force term is the self-consistent electrostatic potential $\varphi$ which obeys the Poisson equation. In short, the system writes
 \mysubeq{eq:unsta_model}{
 	\partial_t f_i + v \partial_x f_i - \partial_x \varphi \, \partial_v f_i &= \nu f_e, && (t,x,v) \in \R_{*}^{+} \times (-1,1) \times \R, \label{eq:unsta_model_fi} \\
 	\partial_t f_e + v \partial_x f_e + \frac{\partial_x \varphi }{\mu}\, \partial_v f_e &= 0, \quad\quad && (t,x,v) \in \R_{*}^{+} \times (-1,1) \times \R, \label{eq:unsta_model_fe} \\
@@ -216,13 +213,13 @@ of ions in presence of electrons.
 \item $\mu \coloneqq m_e / m_i$ is the mass ratio between electrons and ions.
 \item $\lambda > 0$ is the Debye length.
 \end{itemize}
-In the sequel, we may use the electric field $E(t,x) \coloneqq - \partial_x \varphi(t,x)$ in place of the potential. Then, the second-order Poisson equation rewrites as 
+In the sequel, we may use the electric field $E(t,x) \coloneqq - \partial_x \varphi(t,x)$ in stead of the potential. Then, the second-order Poisson equation rewrites as 
 \begin{align}
 	\lambda^2 \partial_x E (t,x) = \rho(t,x), \quad \quad (t,x) \in \R^{+} \times (-1,1). \label{eq:unsta_model_E}
 \end{align}
 
 \begin{remarque}
-	To reduce the notations, we will use $f_s$, $s\in\{i,e\}$ to denote both the electronic and ionic distributions. The Vlasov equations \cref{eq:unsta_model_fi,eq:unsta_model_fe} rewrite 
+	To reduce the notations, we will use $f_s$, $s\in\{i,e\}$ to denote either the ionic or the electronic distribution. The Vlasov equations \cref{eq:unsta_model_fi,eq:unsta_model_fe} rewrite 
 	\begin{align*}
 		\partial_t f_s + v \partial_x f_s - c_s \partial_x \varphi \partial_v f_s = S_s,
 	\end{align*}
@@ -235,11 +232,11 @@ In the sequel, we may use the electric field $E(t,x) \coloneqq - \partial_x \var
 The densities $f_i$ and $f_e$ are subject to initial and boundary conditions, given by
 \mysubeq{eq:unsta_model_bc}{
 	f_{s}(0,x,v) &\coloneqq f_{s}^0(x,v), && (x,v) \in (-1,1) \times \R, \label{eq:init} \\
-	f_{s}(t,x=\pm 1,\pm v < 0) &\coloneqq 0,  && t \in \R^+_*. \label{eq:fie_bc}
+	f_{s}(t,x=1,v < 0) = f_{s}(t,x=-1,v > 0) &\coloneqq 0,  && t \in \R^+_*. \label{eq:fie_bc}
 }
-The homogeneous boundary condition \cref{eq:fie_bc} stems from the non-emitting wall model: the boundary absorbs particles without any reflection. This loss of particles is compensated by the ionization source term in the right hand side of \eqref{eq:unsta_model_fi}. 
+The homogeneous boundary condition \cref{eq:fie_bc} stems from the non-emitting wall model: the boundary absorbs particles without any reflection. This loss of ionic particles is compensated by the ionization source term in the right hand side of \eqref{eq:unsta_model_fi}. For the electrons, it is expected that the most energetic ones are absorbed by the wall, while the others are confined in the core. 
 
-To completely describe the model, we still need to provide boundary conditions for the Poisson problem \cref{eq:unsta_model_phi}. A first one is given by the choice of a reference potential
+To completely describe the model, we still need to provide boundary conditions for the Poisson problem \cref{eq:unsta_model_phi}. A first one is given by the choice of a reference potential in the plasma core (at $x=0$)
 \begin{align}
 	\varphi(t,0) = 0, \quad \quad \forall t \in \R^+. \label{eq:phi_nul_0}
 \end{align}
@@ -247,7 +244,7 @@ To derive a second boundary condition, we introduce a fundamental symmetry assum
 
 \paragraph{Symmetries}
 
-We will look for \emph{symmetric solutions} for \cref{eq:unsta_model}, i.e. solutions satisfying 
+We will look for a regular (say $\mathcal{C}^2$) symmetric potential
 \begin{align}\label{eq:phi_is_pair}
 	\varphi(t,x) = \varphi (t,-x), \quad \quad (t,x) \in \R^+ \times [-1,1].
 \end{align}
@@ -288,7 +285,7 @@ In fact, assuming \cref{eq:phi_is_pair}, the other quantities of the system also
  \begin{align}\label{eq:phi_bc_neumann}
  	\partial_x \varphi (t,0) = 0 \quad \text{or equivalently} \quad E(t,0) = 0
  \end{align}
- to close the Poisson equation \cref{eq:unsta_model_phi}. However, this relies on the assumption that $E$ is continuous at $x=0$, and it is not clear whether any initial condition leads to a stationary state with such a regular electric field. We may avoid this constraint by deriving another Neumann condition, given on the boundary $x=\pm 1$.
+ to close the Poisson equation \cref{eq:unsta_model_phi}. However, this relies on the assumption that $E$ is continuous at $x=0$, and it is not clear whether any initial condition leads to a stationary state with such a regular electric field. We may avoid this constraint by deriving another Neumann condition on the potential which seems to us more physical.
  
 % Let us consider the following Neumann boundary condition:
 % \begin{align}
@@ -320,10 +317,10 @@ and using the symmetries $E(t,1)=-E(t, -1)$ and  $J(t,1)=-J(t, -1)$, it comes
 \begin{align}\label{eq:ampere_bc}
 	\lambda^2\partial_t E(t, \pm 1) + J(t, \pm 1)  = \pm \frac{\nu}{2} \int_{-1}^1 \rho_e (t, x)dx.
 \end{align}
-Time integration gives a condition of the form $E(t,\pm 1) = C_{\pm}(t)$, where %$\partial_x\varphi(t,\pm 1) = C_{\pm}(t)$, where
-\begin{align}\label{eq:ampere_bc_phi}
-	E(t,\pm 1) = C_{\pm} (t) \coloneqq E(0,\pm1) - \frac{1}{\lambda^2} \int_0^t J (s, \pm1) ds \pm \frac{\nu}{2 \lambda^2}\int_0^t  \int_{-1}^1 \rho_e (s, x) dx ds. 
-\end{align}
+%Time integration gives a condition of the form $E(t,\pm 1) = C_{\pm}(t)$, where %$\partial_x\varphi(t,\pm 1) = C_{\pm}(t)$, where
+%\begin{align}\label{eq:ampere_bc_phi}
+%	E(t,\pm 1) = C_{\pm} (t) \coloneqq E(0,\pm1) - \frac{1}{\lambda^2} \int_0^t J (s, \pm1) ds \pm \frac{\nu}{2 \lambda^2}\int_0^t  \int_{-1}^1 \rho_e (s, x) dx ds. 
+%\end{align}
 This more elaborate boundary condition could allow for discontinuities at $x=0$. Notice that the values $E(t,\pm 1)$ now depends on the initial value $E(0,\pm1)$, whereas the centered boundary condition \cref{eq:phi_bc_neumann} does not rely on the initial state. 
 %\textcolor{red}{NC : ne vaut-il pas mieux definir la constante par rapport au champ $E$ plutot que par rapport au potentiel $\varphi$ dont on ne sert plus ?}
 
@@ -340,18 +337,20 @@ First, we consider the centered Neumann boundary condition \cref{eq:phi_bc_neuma
 	E(t,x) = 0 + \textcolor{red}{\frac{1}{\lambda^2}} \int_0^x \rho(t,y) dy = \textcolor{red}{\frac{1}{\lambda^2}}\int_0^x \int_{v\in\R} [f_i(t,y,v) - f_e(t,y,v)] dv dy.
 \end{align}
 
-{\red{ \begin{remarque}\label{rk:bc} Instead of imposing $E(t,0)=0$, we can impose $\int_{-1}^1E(t,x)dx=0$ or even $E(t,1)=-E(t,-1)$. Then we compute (\ref{eq:integral_representation_E_sym}) up to a constant and adjust the constant \textit{a posteriori} to verify the chosen constraint.\end{remarque}}}
+\begin{remarque}\label{rk:bc} 
+	Instead of imposing $E(t,0)=0$, we can impose $\int_{-1}^1E(t,x)dx=0$ or even $E(t,1)=-E(t,-1)$. Then we compute (\ref{eq:integral_representation_E_sym}) up to a constant and adjust the constant \textit{a posteriori} to verify the chosen constraint.
+\end{remarque}
 
 
 Let us now consider the boundary condition \cref{eq:ampere_bc_phi}. The spatial domain $[-1,1]$ is split into its positive and negative parts, and integrating \cref{eq:unsta_model_E} gives
 \begin{align}\label{eq:integral_representation_E_naturalbc}
 	E(t,x) = 
 	\begin{cases}
-	E(t,\phantom{-}1) - \textcolor{red}{\frac{1}{\lambda^2}}\int_{x\phantom{-}}^{1} \rho(t,y) dy =  C_{+}(t) - \textcolor{red}{\frac{1}{\lambda^2}}\int_{x\phantom{-}}^1 \int_{v\in\R} [f_i(t,y,v) - f_e(t,y,v)] dv dy, & x \in [0,1], \\
-	E(t,-1) + \textcolor{red}{\frac{1}{\lambda^2}}\int_{-1}^x \rho(t,y) dy = C_{-}(t) + \textcolor{red}{\frac{1}{\lambda^2}}\int_{-1}^x \int_{v\in\R} [f_i(t,y,v) - f_e(t,y,v)] dv dy, & x \in [-1,0).
+	E(t,\phantom{-}1) - \frac{1}{\lambda^2}\int_{x\phantom{-}}^{1} \rho(t,y) dy =  C_{+}(t) - \frac{1}{\lambda^2}\int_{x\phantom{-}}^1 \int_{v\in\R} [f_i(t,y,v) - f_e(t,y,v)] dv dy, & x \in [0,1], \\
+	E(t,-1) + \frac{1}{\lambda^2}\int_{-1}^x \rho(t,y) dy = C_{-}(t) + \frac{1}{\lambda^2}\int_{-1}^x \int_{v\in\R} [f_i(t,y,v) - f_e(t,y,v)] dv dy, & x \in [-1,0).
 	\end{cases}
 \end{align}
-Note that here, the electric field may "jump" at $x=0$. Both expressions may be approximated by quadrature formulas. 
+%Note that here, the electric field may "jump" at $x=0$. Both expressions may be approximated by quadrature formulas. 
 
 
 \subsection{Finite Differences (FD)}\label{ssec:FDscheme}
@@ -620,7 +619,7 @@ In Figure \ref{fig:DF_fe_and_bc} Left, we plot electronic distribution function 
 
 
 Results for the semi-Lagrangian code are given on Figure \ref{fig:SLresult1sp}. On each cell, instead of doing a single point evaluation, we use a quadrature to compute an average value on a centered rectangle around the point value
-(of size $\Delta x \times \Delta v$). We evaluate the error on the electric field for different \textcolor{red}{Anais: manque des mots... values of $N_x=N_v=N$?}. We clearly see that the scheme converges at initial time and saturates to time discretization error for $T=1$. Then, dividing the time step by two (resp. by four), we observe that the error is divided by around $4$ (resp. $16$), which illustrates the second order in time of the Strang splitting. The test is quite difficult (the function goes to infinity on one side and then is equal to zero on the other side) 
+(of size $\Delta x \times \Delta v$). We evaluate the error on the electric field for different \textcolor{red}{Anais: manque des mots... values of $N_x=N_v=N$?}. We see that the scheme converges at initial time and saturates to time discretization error for $T=1$. Then, dividing the time step by two (resp. by four), we observe that the error is divided by around $4$ (resp. $16$), which illustrates the second order in time of the Strang splitting. The test is quite difficult (the function goes to infinity on one side and then is equal to zero on the other side) 
 and many points have to be used to clearly see the convergence.
  
 
@@ -652,6 +651,7 @@ In order to satisfy the boundary conditions, we multiply $f_{i,e}$ by a mask, de
 \begin{align*}
 	\text{mask}(x,v) \coloneqq \frac{1}{2} \left(\tanh\left(\frac{x - (-0.8)}{0.1}\right) - \tanh\left(\frac{x - 0.8}{0.1}\right)\right).
 \end{align*}
+{\color{purple}If the boundary condition is not satisfied, the sharp profile at the boundary may induce spurious oscillations in the Lagrange interpolation during the first steps of the simulation.} 
 
 \Cref{fig:init_cond} illustrates the resulting initial conditions.
 \begin{figure}
@@ -855,10 +855,10 @@ On the contrary, the SL scheme gives much better results (in comparison with ref
 
 \paragraph{Looking for a reference solution} %Numerical results for the SL code for different discretizations}
 
-It is not easy to find a reference solution, as we look for long time solution, and the Vlasov equation is prone to filamentation. We have here also the problem that electrons and ions have different time scales, which implies that short time steps have to be used in order to be able to follow the dynamics (even if we use here a semi-Lagrangian scheme, whose time step is not restricted by the strong CFL condition
+It is not easy to find a reference solution, as we look for long time solution, and the ionization parameter needs to be adjusted to ensure the stationarity of the solution. The space scale must be able to capture thin structures, as the Vlasov equation is prone to filamentation. We have here also the problem that electrons and ions have different time scales, which implies that short time steps have to be used in order to be able to follow the dynamics (even if we use here a semi-Lagrangian scheme, whose time step is not restricted by the strong CFL condition
 of the finite difference scheme).
 
-It is interesting to notice that we can have converged solutions for a fixed time step, taking for example $\Delta t = 0.0025$ (or even $\Delta t =0.025$), but the corresponding solution is then not (at all) converged in time
+It is interesting to notice that we can have converged solutions in space for a fixed time step, taking for example $\Delta t = 0.0025$ (or even $\Delta t =0.025$), but the corresponding solution is then not (at all) converged in time
 (results are shown on Figure \ref{fig:comp_temps2}; we can remark that the results on charge density can be quite different; looking at the electron distribution function, we see some shifting
 of the solution, and even more changes for $\Delta t =0.025$). 
 
@@ -1252,7 +1252,7 @@ The study of the numerical equilibrium and the study of the behaviour of the ion
 		\caption{Electron distribution function}
 		%\label{subfig:compT200_electron}
 	\end{subfigure}
-	\caption{Comparison of semi-Lagrangian codes: $E(t,0)=0$ (left), $E(t,1)=E(t,-1)$ (middle) and $\int_{-1}^1E(t,x)dx=0$ (right).
+	\caption{Comparison of semi-Lagrangian codes: $E(t,0)=0$ (left), $E(t,1)=-E(t,-1)$ (middle) and $\int_{-1}^1E(t,x)dx=0$ (right).
 	 $\Delta t=0.025$. $N_x=256, N_{v_e}=N_{v_i}=1023$.}
 	%for different discretizations. Run1:  $N_x=256,\ N_{v_i}=2049$ (left); Run2: $N_x=1024,\ N_{v_i}=4097$ (right) at $T=20$.
 	%Other numerical parameters are $N_{v_e}=8193$ and $\Delta t = 0.00025$. We have used $[-60,60]$ for $v_e$ and  $[-50,50]$ for $v_i$.
@@ -1264,7 +1264,7 @@ The study of the numerical equilibrium and the study of the behaviour of the ion
 
 \section{Conclusion}
 
-This work discussed the development of a semi-Lagrangian scheme for the numerical simulation of a two-species plasma model involving sheath. Specific treatment of the boundary conditions have been proposed. For comparisons, a 1st-order finite difference scheme has been implemented. Both schemes are first validated on a one-species testcase for which an analytic solution is known. Then we obtained simulations for the full two-species case.
+This work discussed the development of a semi-Lagrangian scheme for the numerical simulation of a two-species plasma model involving sheath. Specific treatment of the boundary conditions have been proposed. For comparison, a 1st-order finite difference scheme has been implemented. Both schemes are first validated on a one-species test case for which an analytic solution is known. Then we obtained simulations for the full two-species case.
 
 We obtain first promising results that encourage us to go further in the study of this semi-Lagrangian scheme coupled with boundary conditions. Long-time behaviour is a difficult question for which it would be very interesting to have a reference solution, given by the stationary problem. This is however out of the scope of this work.
 
