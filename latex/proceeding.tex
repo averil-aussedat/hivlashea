@@ -333,7 +333,7 @@ Notice that the values $E(t,\pm 1)$ now depends on the initial value $E(0,\pm1)$
 In this section, the numerical methods used to approximate the system \cref{eq:unsta_model} are described. 
 First, we focus on the Poisson equation and  then, two numerical methods are presented for the Vlasov part. 
 
-\subsection{Poisson equation}
+\subsection{Poisson equation}\label{ssec:poisson}
  The Poisson problem \cref{eq:unsta_model_phi} is solved with integral representations of the variable $E$.
 First, we consider the centered Neumann boundary condition \cref{eq:phi_bc_neumann}. Then, integrating the Poisson equation \cref{eq:unsta_model_E} over $[0,x]$ yields
 \begin{align}\label{eq:integral_representation_E_sym}
@@ -599,14 +599,16 @@ This stationary test first let us validate the Finite Difference scheme presente
 \end{figure}
 
 
-In Figure \ref{fig:DF_fe_and_bc} Left, we plot electronic distribution function at time 0.1, obtained with a refined mesh $N_x=2048$, $N_v=2049$. This highlights the diffusion of the solution. The plot on the right aims at comparing three approaches for the computation of electric field. Imposing $E(t,x=0)=0$ as proposed in (\ref{eq:phi_bc_neumann}) or $\int E(t,x)dx=0$ as discussed in Remark \ref{rk:bc} leads to two similar solutions, that are exact on $x=0$ due to the properties of this validation one-species case. Now, computing $E$ from current thanks to (\ref{eq:ampere_bc_phi})-(\ref{eq:integral_representation_E_naturalbc}) leads to an exact solution on boundaries $x=-1$, $x=1$ but a jump in $x=0$. Even if exact solution is continuous in $x=0$ in this case, it is not always the case in physically relevant applications. The third approach is less restrictive but first and second approaches are interesting in the present case.
+In Figure \ref{fig:DF_fe_and_bc} 
+%left, we plot electronic distribution function at time 0.1, obtained with a refined mesh $N_x=2048$, $N_v=2049$. This highlights the diffusion of the solution. The plot on the right 
+we aim at comparing the three approaches for the computation of electric field presented in Subsection \ref{ssec:poisson}. Imposing $E(t,x=0)=0$ as proposed in (\ref{eq:phi_bc_neumann}) or $\int E(t,x)dx=0$ as discussed in Remark \ref{rk:bc} leads to two similar solutions, that are exact at $x=0$ due to the properties of this  case. Now, computing $E$ from (\ref{eq:ampere_bc_phi})-(\ref{eq:integral_representation_E_naturalbc}) leads to an exact solution on boundaries $x=-1$, $x=1$ but a jump in $x=0$. Even if the exact solution is continuous in $x=0$, it is not always the case in physically relevant applications. %The third approach is less restrictive but first and second approaches are interesting in the present case.
 
 \begin{figure}
 	\centering
 	\renewcommand{\imh}{0.33\linewidth}
-	\includegraphics[width=0.48\textwidth]{images/fe_acstcase_T01_Nx2048_Nv2049_domain1.png}
+	%\includegraphics[width=0.48\textwidth]{images/fe_acstcase_T01_Nx2048_Nv2049_domain1.png}
 	\includegraphics[width=0.48\textwidth]{images/diff_E_3bc_acstcase.png}
-	\caption{FD code for one species case. Parameters $N_x=2048$, $N_v=2049$, time 0.1. Left: $f_e$ in phase-space domain. Right: computed minus exact $E$ as a function of $x$ with three approaches (imposing $E(t,x=0)=0$, imposing $\int E(t,x)dx=0$, computing $E(t,x)$ from $J$ with (\ref{eq:integral_representation_E_naturalbc})).}
+	\caption{FD code for one species case. Parameters $N_x=2048$, $N_v=2049$, time 0.1. Computed minus exact $E$ as a function of $x$ with three approaches (imposing $E(t,x=0)=0$, imposing $\int E(t,x)dx=0$, computing $E(t,x)$ from $J$ with (\ref{eq:integral_representation_E_naturalbc})).}
 	\label{fig:DF_fe_and_bc}
 \end{figure}
 
@@ -625,8 +627,10 @@ In Figure \ref{fig:DF_fe_and_bc} Left, we plot electronic distribution function 
 
 
 Results for the semi-Lagrangian code are given on Figure \ref{fig:SLresult1sp}. On each cell, instead of doing a single point evaluation, we use a quadrature to compute an average value on a centered rectangle around the point value
-(of size $\Delta x \times \Delta v$). We evaluate the error on the electric field for different \textcolor{red}{Anais: manque des mots... values of $N_x=N_v=N$?}. We see that the scheme converges at initial time and saturates to time discretization error for $T=1$. Then, dividing the time step by two (resp. by four), we observe that the error is divided by around $4$ (resp. $16$), which illustrates the second order in time of the Strang splitting. The test is quite difficult (the function goes to infinity on one side and then is equal to zero on the other side) 
-and many points have to be used to clearly see the convergence.
+(of size $\Delta x \times \Delta v$) \textcolor{red}{AC and NC : on ne comprend pas trop cette phrase}. We evaluate the error on the electric field for different values of $N_x=N_v=N$. We see on the left figure that the scheme converges when $N$ increases at initial time.
+% and saturates to time discretization error for $T=1$. 
+Then, on the right figure, we plot the error on the electric field at $T=1$. Dividing the time step by two (resp. by four), we observe that the error is divided by around $4$ (resp. $16$), which illustrates the second order in time of the Strang splitting. The test is quite difficult (the function goes to infinity on one side and then is equal to zero on the other side) 
+and large values of $N$ have to be used to clearly see the convergence.
  
 
 
@@ -634,10 +638,13 @@ and many points have to be used to clearly see the convergence.
 	\centering
 	\renewcommand{\imh}{0.45\linewidth}
 	\begin{tabular}{cc}
-	\includegraphics[width=\imh]{images/malkov_SL1.png} & \includegraphics[width=\imh]{images/malkov_SL2.png} \\
-	\includegraphics[width=\imh]{images/malkov_SL3.png} & \includegraphics[width=\imh]{images/malkov_SL4.png}
+	\includegraphics[width=\imh]{images/malkov_SL1.png} & %\includegraphics[width=\imh]{images/malkov_SL2.png} \\
+	%\includegraphics[width=\imh]{images/malkov_SL3.png} & 
+	\includegraphics[width=\imh]{images/malkov_SL4.png}
 	\end{tabular}
-	\caption{SL code for one species case. Electric field error for $x\in [-1,1]$, at initial time (top left); at time $T=1$, for $\Delta t=0.1$ (top right); at time $T=1$, for $\Delta t=0.05$ (bottom left); at time $T=1$: error of electric field for $\Delta t=0.1$,
+	\caption{SL code for one species case. Left: Electric field error for $x\in [-1,1]$, at initial time. 
+	%at time $T=1$, for $\Delta t=0.1$ (top right); at time $T=1$, for $\Delta t=0.05$ (bottom left); 
+	Right: at time $T=1$, error of electric field for $\Delta t=0.1$,
 	$4$ times error of electric field for $\Delta t=0.05$, $16$ times error of electric field for $\Delta t=0.05$. We use $N\in \{16,32,64,128,256,512,1024\}$ cells in each direction. For each cell we compute the average value of $f$
 	at initial time using $N$ points in each direction.}
 	\label{fig:SLresult1sp}
@@ -645,7 +652,7 @@ and many points have to be used to clearly see the convergence.
 
 \subsection{Two species case} % and comparison between (SL) and (FD)}
 In this part, we focus on the two-species model \eqref{eq:unsta_model} 
-and in the sequel, we use the following physical parameters:
+and use the following physical parameters:
 \begin{align}\label{eq:param_simu}
 	\lambda = \frac{1}{2}, \quad \mu = \frac{1}{100}, \quad\text{and}\quad \nu = 20.
 \end{align}
@@ -1058,7 +1065,7 @@ $(N_x,N_{v_i})=(1024,4097)$, as we can see on Figure \ref{fig:comp_phasespace} (
 		\caption{Electron distribution function}
 		%\label{subfig:compT200_electron}
 	\end{subfigure}
-	\caption{Comparison of semi-Lagrangian codes: parameter of Run1 (left) and parameters of Run2 (right).}
+	\caption{Comparison of semi-Lagrangian code: parameters of Run1 (left column) and parameters of Run2 (right column).}
 	%for different discretizations. Run1:  $N_x=256,\ N_{v_i}=2049$ (left); Run2: $N_x=1024,\ N_{v_i}=4097$ (right) at $T=20$.
 	%Other numerical parameters are $N_{v_e}=8193$ and $\Delta t = 0.00025$. We have used $[-60,60]$ for $v_e$ and  $[-50,50]$ for $v_i$.
 	%The ion density is zoomed for $v_i\in [-5,5]$
@@ -1093,7 +1100,10 @@ We have used an odd number of points in order to prevent from having $0$ as a me
 
 The study of the numerical equilibrium and the study of the behaviour of the ion density around $(0,0)$, which is quite complex at equilibrium, are not tackled here and are out of the scope of this work.
 
-\textcolor{red}{Commentaire pour figure \ref{fig:comp_E0_intE0}}
+
+In Figure \ref{fig:comp_E0_intE0}, we compare the solutions given by the semi-Lagrangian code when three different boundary conditions for the Poisson solver are used. At the numerical level, we see that the first one $E(t,0) = 0$ yields a loss of symmetry in the solution while the two others preserve it. At a physical level, we observe that the electric field is monotone increasing  and consequently low energetic electrons (see Figure (d)) are essentially confined while ions are prone  to be accelerated and lost at the wall (see Figure (c)).
+
+%\textcolor{red}{Commentaire pour figure \ref{fig:comp_E0_intE0}}
 
 
 %\begin{figure}
@@ -1258,7 +1268,7 @@ The study of the numerical equilibrium and the study of the behaviour of the ion
 		\caption{Electron distribution function}
 		%\label{subfig:compT200_electron}
 	\end{subfigure}
-	\caption{Comparison of semi-Lagrangian codes: $E(t,0)=0$ (left), $E(t,1)=-E(t,-1)$ (middle) and $\int_{-1}^1E(t,x)dx=0$ (right).
+	\caption{Comparison of the numerical approximation of the Poisson equation in the semi-Lagrangian code: $E(t,0)=0$ (left column), $E(t,1)=-E(t,-1)$ (middle column) and $\int_{-1}^1E(t,x)dx=0$ (right column). 
 	 $\Delta t=0.025$. $N_x=256, N_{v_e}=N_{v_i}=1023$.}
 	%for different discretizations. Run1:  $N_x=256,\ N_{v_i}=2049$ (left); Run2: $N_x=1024,\ N_{v_i}=4097$ (right) at $T=20$.
 	%Other numerical parameters are $N_{v_e}=8193$ and $\Delta t = 0.00025$. We have used $[-60,60]$ for $v_e$ and  $[-50,50]$ for $v_i$.
