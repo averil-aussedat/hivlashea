@@ -213,7 +213,7 @@ of ions in presence of electrons.
 \item $\mu \coloneqq m_e / m_i$ is the mass ratio between electrons and ions.
 \item $\lambda > 0$ is the Debye length.
 \end{itemize}
-In the sequel, we may use the electric field $E(t,x) \coloneqq - \partial_x \varphi(t,x)$ in stead of the potential. Then, the second-order Poisson equation rewrites as 
+In the sequel, we may use the electric field $E(t,x) \coloneqq - \partial_x \varphi(t,x)$ instead of the potential. Then, the Poisson equation rewrites as 
 \begin{align}
 	\lambda^2 \partial_x E (t,x) = \rho(t,x), \quad \quad (t,x) \in \R^{+} \times (-1,1). \label{eq:unsta_model_E}
 \end{align}
@@ -240,11 +240,12 @@ To completely describe the model, we still need to provide boundary conditions f
 \begin{align}
 	\varphi(t,0) = 0, \quad \quad \forall t \in \R^+. \label{eq:phi_nul_0}
 \end{align}
-To derive a second boundary condition, we introduce a fundamental symmetry assumption.
+To derive a second boundary condition, we introduce a symmetry assumption.
 
 \paragraph{Symmetries}
 
-We will look for a regular (say $\mathcal{C}^2$) symmetric potential
+We will look for a %regular (say $\mathcal{C}^2$) 
+symmetric potential
 \begin{align}\label{eq:phi_is_pair}
 	\varphi(t,x) = \varphi (t,-x), \quad \quad (t,x) \in \R^+ \times [-1,1].
 \end{align}
@@ -285,7 +286,7 @@ In fact, assuming \cref{eq:phi_is_pair}, the other quantities of the system also
  \begin{align}\label{eq:phi_bc_neumann}
  	\partial_x \varphi (t,0) = 0 \quad \text{or equivalently} \quad E(t,0) = 0
  \end{align}
- to close the Poisson equation \cref{eq:unsta_model_phi}. However, this relies on the assumption that $E$ is continuous at $x=0$, and it is not clear whether any initial condition leads to a stationary state with such a regular electric field. We may avoid this constraint by deriving another Neumann condition on the potential which seems to us more physical.
+ to close the Poisson equation \cref{eq:unsta_model_phi}. However, this relies on the assumption that $E$ is continuous at $x=0$, and it is not clear whether any initial condition leads to a stationary state with such a regular electric field. We may avoid this constraint by deriving another Neumann condition (at $x=\pm1$) on the potential which seems to us more physical.
  
 % Let us consider the following Neumann boundary condition:
 % \begin{align}
@@ -317,11 +318,13 @@ and using the symmetries $E(t,1)=-E(t, -1)$ and  $J(t,1)=-J(t, -1)$, it comes
 \begin{align}\label{eq:ampere_bc}
 	\lambda^2\partial_t E(t, \pm 1) + J(t, \pm 1)  = \pm \frac{\nu}{2} \int_{-1}^1 \rho_e (t, x)dx.
 \end{align}
-%Time integration gives a condition of the form $E(t,\pm 1) = C_{\pm}(t)$, where %$\partial_x\varphi(t,\pm 1) = C_{\pm}(t)$, where
-%\begin{align}\label{eq:ampere_bc_phi}
-%	E(t,\pm 1) = C_{\pm} (t) \coloneqq E(0,\pm1) - \frac{1}{\lambda^2} \int_0^t J (s, \pm1) ds \pm \frac{\nu}{2 \lambda^2}\int_0^t  \int_{-1}^1 \rho_e (s, x) dx ds. 
-%\end{align}
-This more elaborate boundary condition could allow for discontinuities at $x=0$. Notice that the values $E(t,\pm 1)$ now depends on the initial value $E(0,\pm1)$, whereas the centered boundary condition \cref{eq:phi_bc_neumann} does not rely on the initial state. 
+Time integration gives a condition of the form $E(t,\pm 1) = C_{\pm}(t)$, where %$\partial_x\varphi(t,\pm 1) = C_{\pm}(t)$, where
+\begin{align}\label{eq:ampere_bc_phi}
+	E(t,\pm 1) = C_{\pm} (t) \coloneqq E(0,\pm1) - \frac{1}{\lambda^2} \int_0^t J (s, \pm1) ds \pm \frac{\nu}{2 \lambda^2}\int_0^t  \int_{-1}^1 \rho_e (s, x) dx ds. 
+\end{align}
+This more elaborate 
+boundary condition could allow for discontinuities at $x=0$. 
+Notice that the values $E(t,\pm 1)$ now depends on the initial value $E(0,\pm1)$, whereas the centered boundary condition \cref{eq:phi_bc_neumann} does not rely on the initial state. 
 %\textcolor{red}{NC : ne vaut-il pas mieux definir la constante par rapport au champ $E$ plutot que par rapport au potentiel $\varphi$ dont on ne sert plus ?}
 
 %In the sequel, we chose to consider the centered boundary condition \cref{eq:phi_bc_neumann}.
@@ -334,11 +337,11 @@ First, we focus on the Poisson equation and  then, two numerical methods are pre
  The Poisson problem \cref{eq:unsta_model_phi} is solved with integral representations of the variable $E$.
 First, we consider the centered Neumann boundary condition \cref{eq:phi_bc_neumann}. Then, integrating the Poisson equation \cref{eq:unsta_model_E} over $[0,x]$ yields
 \begin{align}\label{eq:integral_representation_E_sym}
-	E(t,x) = 0 + \textcolor{red}{\frac{1}{\lambda^2}} \int_0^x \rho(t,y) dy = \textcolor{red}{\frac{1}{\lambda^2}}\int_0^x \int_{v\in\R} [f_i(t,y,v) - f_e(t,y,v)] dv dy.
+	E(t,x) = 0 + {\frac{1}{\lambda^2}} \int_0^x \rho(t,y) dy = {\frac{1}{\lambda^2}}\int_0^x \int_{v\in\R} [f_i(t,y,v) - f_e(t,y,v)] dv dy.
 \end{align}
 
 \begin{remarque}\label{rk:bc} 
-	Instead of imposing $E(t,0)=0$, we can impose $\int_{-1}^1E(t,x)dx=0$ or even $E(t,1)=-E(t,-1)$. Then we compute (\ref{eq:integral_representation_E_sym}) up to a constant and adjust the constant \textit{a posteriori} to verify the chosen constraint.
+	Instead of imposing $E(t,0)=0$, we can impose $\int_{-1}^1E(t,x)dx=0$ (coming from the symmetry of $\varphi$ \eqref{eq:phi_is_pair}) or even $E(t,1)=-E(t,-1)$. Then we compute (\ref{eq:integral_representation_E_sym}) up to a constant and adjust the constant \textit{a posteriori} to verify the chosen constraint.
 \end{remarque}
 
 
@@ -350,7 +353,10 @@ Let us now consider the boundary condition \cref{eq:ampere_bc_phi}. The spatial 
 	E(t,-1) + \frac{1}{\lambda^2}\int_{-1}^x \rho(t,y) dy = C_{-}(t) + \frac{1}{\lambda^2}\int_{-1}^x \int_{v\in\R} [f_i(t,y,v) - f_e(t,y,v)] dv dy, & x \in [-1,0).
 	\end{cases}
 \end{align}
+
 %Note that here, the electric field may "jump" at $x=0$. Both expressions may be approximated by quadrature formulas. 
+Moreover, $C_\pm$ is computed at the required time by integrating \eqref{eq:ampere_bc}, between two consecutive time steps.
+For the integrals under consideration (in space, velocity and time), we will approximate them by the trapezoidal method. 
 
 
 \subsection{Finite Differences (FD)}\label{ssec:FDscheme}
