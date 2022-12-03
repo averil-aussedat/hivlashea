@@ -185,6 +185,7 @@ to define inflow and outflow ghost points according to the order of the Lagrange
 
 The paper is organized as follows: in \cref{sec:model}, we introduce the two-species Vlasov-Poisson system with boundary,  
 the numerical methods are described in \cref{sec:nummethods} and \cref{sec:numresults} is devoted to numerical results. 
+{\color{blue} The different codes are available respectively on \href{https://github.com/JuliaVlasov/DynamicElectricSheath.jl}{https://github.com/JuliaVlasov/DynamicElectricSheath.jl} for the Finite Difference solver, and on \href{https://github.com/averil-prost/HiVlaSheaSL}{https://github.com/averil-prost/HiVlaSheaSL} for the Semi-Lagrangian solver. }
 
 %The difference of speed between both species is numerically challenging, since a wide range of velocities is needed to correctly model the evolution of electrons, but accuracy is required on low velocities to capture the ions. When using mesh-based approaches, it is tempting to use adapted velocity meshes for the different species. This requires the choice of an interpolation procedure: several possibilities are found in the literature, as uniform cubic splines in the GYSELA code \cite{grandgirard5DGyrokineticFull2016} and extension to non-uniform splines in \cite{bourneNonUniformSplinesSemiLagrangian}, or high-order polynomial interpolation \cite{badsiStableFixedPoint2021}. We will follow the latter method.
 %
