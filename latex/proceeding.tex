@@ -185,7 +185,7 @@ to define inflow and outflow ghost points according to the order of the Lagrange
 
 The paper is organized as follows: in \cref{sec:model}, we introduce the two-species Vlasov-Poisson system with boundary,  
 the numerical methods are described in \cref{sec:nummethods} and \cref{sec:numresults} is devoted to numerical results. 
-{\color{blue} The different codes are available respectively on \href{https://github.com/JuliaVlasov/DynamicElectricSheath.jl}{https://github.com/JuliaVlasov/DynamicElectricSheath.jl} for the Finite Difference solver, and on \href{https://github.com/averil-prost/HiVlaSheaSL}{https://github.com/averil-prost/HiVlaSheaSL} for the Semi-Lagrangian solver. }
+The different codes are available respectively on \href{https://github.com/JuliaVlasov/DynamicElectricSheath.jl}{https://github.com/JuliaVlasov/DynamicElectricSheath.jl} for the Finite Difference solver, and on \href{https://github.com/averil-prost/HiVlaSheaSL}{https://github.com/averil-prost/HiVlaSheaSL} for the Semi-Lagrangian solver. 
 
 %The difference of speed between both species is numerically challenging, since a wide range of velocities is needed to correctly model the evolution of electrons, but accuracy is required on low velocities to capture the ions. When using mesh-based approaches, it is tempting to use adapted velocity meshes for the different species. This requires the choice of an interpolation procedure: several possibilities are found in the literature, as uniform cubic splines in the GYSELA code \cite{grandgirard5DGyrokineticFull2016} and extension to non-uniform splines in \cite{bourneNonUniformSplinesSemiLagrangian}, or high-order polynomial interpolation \cite{badsiStableFixedPoint2021}. We will follow the latter method.
 %
@@ -627,8 +627,10 @@ we aim at comparing the three approaches for the computation of electric field p
 \paragraph{Validation of the SL scheme}
 
 
-Results for the semi-Lagrangian code are given on Figure \ref{fig:SLresult1sp}. On each cell, instead of doing a single point evaluation, we use a quadrature to compute an average value on a centered rectangle around the point value
-(of size $\Delta x \times \Delta v$) \textcolor{red}{AC and NC : on ne comprend pas trop cette phrase}. We evaluate the error on the electric field for different values of $N_x=N_v=N$. We see on the left figure that the scheme converges when $N$ increases at initial time.
+Results for the semi-Lagrangian code are given on Figure \ref{fig:SLresult1sp}. Instead of evaluating the numerical solution on a point $(x,v)$, we use a quadrature to approximate its average on the cell of size $(\Delta x, \Delta v)$ centered in $(x,v)$. 
+%On each cell, instead of doing a single point evaluation, we use a quadrature to compute an average value on a centered rectangle around the point value
+%(of size $\Delta x \times \Delta v$) \textcolor{red}{AC and NC : on ne comprend pas trop cette phrase}. 
+We evaluate the error on the electric field for different values of $N_x=N_v=N$. We see on the left figure that the scheme converges when $N$ increases at initial time.
 % and saturates to time discretization error for $T=1$. 
 Then, on the right figure, we plot the error on the electric field at $T=1$. Dividing the time step by two (resp. by four), we observe that the error is divided by around $4$ (resp. $16$), which illustrates the second order in time of the Strang splitting. The test is quite difficult (the function goes to infinity on one side and then is equal to zero on the other side) 
 and large values of $N$ have to be used to clearly see the convergence.
@@ -665,8 +667,7 @@ In order to satisfy the boundary conditions, we multiply $f_{i,e}$ by a mask, de
 \begin{align*}
 	\text{mask}(x,v) \coloneqq \frac{1}{2} \left(\tanh\left(\frac{x - (-0.8)}{0.1}\right) - \tanh\left(\frac{x - 0.8}{0.1}\right)\right).
 \end{align*}
-{\color{purple}If the boundary condition is not satisfied, the sharp profile at the boundary may induce spurious oscillations in the Lagrange interpolation during the first steps of the simulation.} 
-
+If the boundary condition is not satisfied, the sharp profile at the boundary may induce spurious oscillations in the Lagrange interpolation during the first steps of the simulation.
 \Cref{fig:init_cond} illustrates the resulting initial conditions.
 \begin{figure}
 	\centering
@@ -676,7 +677,6 @@ In order to satisfy the boundary conditions, we multiply $f_{i,e}$ by a mask, de
 	\caption{Initial conditions $f_i^0$ (left) and $f_e^0$ (right).}
 	\label{fig:init_cond}
 \end{figure}
-
 
 The simulations run over the spatial domain $x \in [-1,1]$. The semi-Lagrangian (SL) code computes the electron velocities on $v_e \in [-60, 60]$, and ion velocities on $v_i \in [-50, 50]$. The finite differences (FD) code uses the same mesh for ions and electrons, chosen as $v\in[-60,60]$. To simplify the comparison, visualisations of $f_i$ are restricted to the coordinates $f_{i,j,k}$ such that $v_k \in [-5,5]$.
 For the finite differences code, we use $N_x=512$, $N_{v_e}=N_{v_i}=513$; the time step is computed in order to satisfy the CFL condition; a further time step is used for terminating to the final time $T$.  
