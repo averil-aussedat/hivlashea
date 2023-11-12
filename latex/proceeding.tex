@@ -137,8 +137,12 @@
 	This article is a report of the CEMRACS 2022 project, called HIVLASHEA, standing for "{\bf Hi}gh order methods for {\bf Vla}sov-Poisson models for {\bf shea}ths".
 	A two-species Vlasov-Poisson model is described together with some numerical simulations, permitting to exhibit the formation of a plasma sheath. 
 	The numerical simulations are performed with two different methods: a first order classical finite difference (FD) scheme and a high order semi-Lagrangian (SL) scheme with Strang splitting; for the latter one, the implementation
-	of (non-periodic) boundary conditions is discussed. 
-	The codes are first evaluated on a one-species case, where an analytical solution is known. For the two-species case, cross comparisons and the influence of the numerical parameters for the SL method are performed in order to have an idea of a reference numerical simulation.
+	of (non-periodic) boundary conditions is discussed and different solvers for the electric field are compared.  
+	The codes are first evaluated on a one-species case, where an analytical solution is known. \textcolor{red}{For the two-species case, 
+	cross-comparisons are performed and the numerical convergence of the SL method is investigated. The use of high order method 
+	is emphasized in this context. The (parallel) SL code turns out to be a robust tool to provide reliable numerical approximations of sheath stationary solution 
+	with realistic physical parameters.  }
+	% 	cross comparisons and the influence of the numerical parameters for the SL method are performed in order to have an idea of a reference numerical simulation.
 }
 
 \highlight{Aknowledgements}{
@@ -153,35 +157,41 @@
 }
 
 \section*{Introduction}
-
-Plasmas are neutral at the equilibrium in a sufficiently large domain. However, near a boundary, a charge imbalance may be observed in a thin layer called \emph{sheath}.
+\textcolor{red}{Plasmas have a natural tendency of remaining electrically neutral.}
+%Plasmas are neutral at the equilibrium in a sufficiently large domain. 
+However, near a boundary, a charge imbalance may be observed in a thin layer called \emph{sheath}.
 This phenomenon stems from the interaction of ions and electrons with the boundary media (a cold metallic wall, for instance). Both species will be absorbed by the wall, but with a rate proportional to their speed. Since the electrons are moving %several order of magnitude 
 faster than the ions, a positively charged layer (the \emph{Debye sheath}) forms near the boundary. 
 
 Plasma sheaths are particularly challenging to simulate for several reasons. In this region, 
 the plasma parameters (temperature or density) develop steep gradients. Due to their different mass, 
 electrons and ions have a very different behaviour close to the boundary, and a two-species model is required 
-to describe the formation of the sheath. Moreover, kinetic models are necessary to capture the velocity 
+to \textcolor{red}{dynamically} describe the formation of the sheath. Moreover, kinetic models are necessary to capture the velocity 
 effect of the particles (see \cite{riemannBohmCriterionSheath1991}), and we have to deal with % old cite : \cite{bourneNonUniformSplinesSemiLagrangian2022}
 different scales to account for each species.  Hence, we are considering in this work 
-a two-species Vlasov model to run simulations of the plasma sheath. 
+a two-species Vlasov model to run \textcolor{red}{time dependent} simulations of the plasma sheath. 
 
-Recent works are dedicated to the non homogeneous equilibrium sheath, both on the mathematical side and on the numerical side \cite{badsiCollisionalSheathSolutions2021, badsiStableFixedPoint2021, despresMinimizationFormulationBikinetic2016}. 
+Recent works are dedicated to the non homogeneous equilibrium sheath, both on the mathematical side and on the numerical side \cite{despresMinimizationFormulationBikinetic2016, badsiCollisionalSheathSolutions2021, badsiStableFixedPoint2021}. 
 %We refer to  \cite{bourneNonUniformSplinesSemiLagrangian} for a recent work on the subject.
 Regarding the dynamical approaches, one refers to \cite{couletteEulerianVlasovCode2014,bourneNonUniformSplinesSemiLagrangian2022} 
 or \cite{badsiNumericalStabilityPlasma2018} for which this study is a follow-up. 
-In the latter work, we studied the behaviour of the numerical solution of the Vlasov equation, initialized with a sheath
-homogeneous equilibrium. In this work, our purpose is to investigate numerically the formation of a sheath, 
-when we include ionization in the model, inspired by the recent work
-\cite{alvarezlagunaAsymptoticPreservingWellbalanced2020}
-where a fluid model 
-is proposed.   
+In the latter work, \textcolor{red}{the behaviour of the numerical solution of the Vlasov equation is studied}, initialized with a sheath
+homogeneous equilibrium. In this work, our purpose is to investigate numerically the formation of a sheath,  
+when we include \textcolor{red}{a kinetic ionization term} in the model, inspired by the recent work
+\cite{alvarezlagunaAsymptoticPreservingWellbalanced2020} where a fluid model is proposed.    
+\textcolor{red}{Indeed, in \cite{alvarezlagunaAsymptoticPreservingWellbalanced2020}, ionization reactions are taken into account through a 
+source term and the corresponding kinetic interpretation is considered in our Vlasov model. }
 
-Then, we are concerned by the numerical approximation of the two-species Vlasov model including ionization and boundary. 
+Thus, we are concerned by the numerical approximation of the two-species Vlasov model including ionization and boundary conditions.  
 To do so, we propose a high order semi-Lagrangian method combined with a time splitting method. 
-The presence of boundaries requires specific adaptation to define correctly the semi-Lagrangian method close to the boundary. 
+The presence of boundaries requires specific adaptation to define correctly the \textcolor{red}{high order} 
+semi-Lagrangian method close to the boundary. 
 We adapt the strategies developed in \cite{coulombelNeumannNumericalBoundary2020, boutinHighOrderNumerical2021} 
 to define inflow and outflow ghost points according to the order of the Lagrange interpolation used in the semi-Lagrangian method.  
+\textcolor{red}{Using this strategy, a very good stability and robustness is observed for some (non necessarily physically relevant) 
+values of mass ratio and normalized Debye length), which enables to investigate the numerical 
+convergence of the numerical solution using parallel simulations. 
+Moreover, different versions of Poisson equations (including boundary conditions) are compared and discussed.  } 
 
 The paper is organized as follows: in \cref{sec:model}, we introduce the two-species Vlasov-Poisson system with boundary,  
 the numerical methods are described in \cref{sec:nummethods} and \cref{sec:numresults} is devoted to numerical results. 
@@ -195,7 +205,7 @@ The different codes are available respectively on \href{https://github.com/Julia
 
 \paragraph{The model}
 
-Let $t\in\mathbb{R}^+$ denote the time variable, $x\in [-1,1]$ denote the spatial variable in a normalized one-dimensional domain, and $v\in\mathbb{R}$ denote the speed variable. Each species is described through their density in the phase space, denoted by $f_i : (t,x,v) \in \R^+ \times [-1,1]\times \R \mapsto \R$ for the ions, and $f_e : (t,x,v) \in \R^+ \times [-1,1]\times \R \mapsto \R$ for the electrons. Macroscopic quantities will be needed in the modelling, so that we consider the densities $\rho_{i,e}$ and currents $J_{i,e}$ defined by
+Let $t\in\mathbb{R}^+$ denote the time variable, $x\in [-1,1]$ denote the spatial variable in a normalized one-dimensional domain, and $v\in\mathbb{R}$ denote the speed variable. Each species is described through its density in the phase space, denoted by $f_i : (t,x,v) \in \R^+ \times [-1,1]\times \R \mapsto \R$ for the ions, and $f_e : (t,x,v) \in \R^+ \times [-1,1]\times \R \mapsto \R$ for the electrons. Macroscopic quantities will be needed in the modelling, so that we consider the densities $\rho_{i,e}$ and currents $J_{i,e}$ defined by
 \begin{align}\label{eq:def_ni_ne}
 	\rho_{i,e} (t,x) \coloneqq \int_{v\in\R} f_{i,e} (t,x,v) dv, \quad\text{and}\quad J_{i,e} (t,x) \coloneqq \int_{v\in\R} v f_{i,e} (t,x,v) dv. 
 \end{align}
@@ -282,7 +292,8 @@ In fact, assuming \cref{eq:phi_is_pair}, the other quantities of the system also
  \end{remarque}
  
  \paragraph{Boundary conditions}
- 
+ \textcolor{red}{Je pense qu'il faudrait clarifier un peu cette partie pour qu'on voit bien les differentes conditions au bord 
+ utilisees dans la partie numerique. }\\
  If the potential $\varphi$ is regular, the symmetry assumption gives us $E(t,0) = - E(t,0)$, and we may use the centered Neumann boundary condition
  \begin{align}\label{eq:phi_bc_neumann}
  	\partial_x \varphi (t,0) = 0 \quad \text{or equivalently} \quad E(t,0) = 0
@@ -325,7 +336,7 @@ Time integration gives a condition of the form $E(t,\pm 1) = C_{\pm}(t)$, where 
 \end{align}
 This more elaborate 
 boundary condition could allow for discontinuities at $x=0$. 
-Notice that the values $E(t,\pm 1)$ now depends on the initial value $E(0,\pm1)$, whereas the centered boundary condition \cref{eq:phi_bc_neumann} does not rely on the initial state. 
+Notice that the values $E(t,\pm 1)$ now depends on the initial value $E(0,\pm1)$, whereas the centered boundary condition \cref{eq:phi_bc_neumann} does not rely on the initial state. \textcolor{red}{Let us quote \cite{manfredi_devaux} in which the same strategy is used. }
 %\textcolor{red}{NC : ne vaut-il pas mieux definir la constante par rapport au champ $E$ plutot que par rapport au potentiel $\varphi$ dont on ne sert plus ?}
 
 %In the sequel, we chose to consider the centered boundary condition \cref{eq:phi_bc_neumann}.
@@ -348,10 +359,10 @@ First, we consider the centered Neumann boundary condition \cref{eq:phi_bc_neuma
 
 Let us now consider the boundary condition \cref{eq:ampere_bc_phi}. The spatial domain $[-1,1]$ is split into its positive and negative parts, and integrating \cref{eq:unsta_model_E} gives
 \begin{align}\label{eq:integral_representation_E_naturalbc}
-	E(t,x) = 
+	E(t,x) \!=\! 
 	\begin{cases}
-	E(t,\phantom{-}1) - \frac{1}{\lambda^2}\int_{x\phantom{-}}^{1} \rho(t,y) dy =  C_{+}(t) - \frac{1}{\lambda^2}\int_{x\phantom{-}}^1 \int_{v\in\R} [f_i(t,y,v) - f_e(t,y,v)] dv dy, & x \in [0,1], \\
-	E(t,-1) + \frac{1}{\lambda^2}\int_{-1}^x \rho(t,y) dy = C_{-}(t) + \frac{1}{\lambda^2}\int_{-1}^x \int_{v\in\R} [f_i(t,y,v) - f_e(t,y,v)] dv dy, & x \in [-1,0).
+	E(t,\phantom{-}1) - \frac{1}{\lambda^2}\int_{x\phantom{-}}^{1} \!\rho(t,y) dy =  C_{+}(t) - \frac{1}{\lambda^2}\int_{x\phantom{-}}^1\! \int_{v\in\R} [f_i(t,y,v) \!-\! f_e(t,y,v)] dv dy, & x \in [0,1], \\
+	E(t,-1) + \frac{1}{\lambda^2}\int_{-1}^x  \!\rho(t,y) dy = C_{-}(t) + \frac{1}{\lambda^2}\int_{-1}^x \!\int_{v\in\R} [f_i(t,y,v) \!-\! f_e(t,y,v)] dv dy, & x \in [-1,0).
 	\end{cases}
 \end{align}
 
@@ -366,7 +377,7 @@ Define a numerical computational domain $\Omega \coloneqq [-1,1] \times [-\overl
 \begin{align}\label{eq:FDscheme}
 	\frac{f_{s,j,k}^{n+1} - f_{s,j,k}^{n}}{\Delta t} + D^-_{j,k} f_s^n \vv{v_k\\c_s E_j^n}_{+} +D^+_{j,k} f_s^n \vv{v_k\\c_s E_j^n}_{-} = S_{s,j,k}^n,
 \end{align}
-where $a_+ = \max(a,0)$ and $a_{-} = \min(a,0)$ are respectively the coordwise positive and negative parts, and the uncentered finite differences are defined as
+where $a_+ = \max(a,0)$ and $a_{-} = \min(a,0)$ are respectively the element-wise positive and negative parts, and the uncentered finite differences are defined as
 \begin{align*}
 	D^{\pm}_{j,k} f \coloneqq \pm \left(\frac{f_{j\pm 1,k} - f_{j,k}}{\Delta x}, \frac{f_{j,k\pm 1} - f_{j,k}}{\Delta v}\right).
 \end{align*}
@@ -379,7 +390,7 @@ The values of $f_{s,j,k}^n$ on the boundary ($j=0, J$ and $k=0, K$) are taken as
 
 %With these approximations, we may compute the electric field $E$ by a quadrature approximation of the integral representation \todo{either} \cref{eq:integral_representation_E_sym} \todo{or} \cref{eq:integral_representation_E_naturalbc}.
 
-\noindent The upwind scheme is known to be diffusive, and stable under the CFL condition 
+\noindent \textcolor{red}{The upwind scheme is stable under the CFL condition} %The upwind scheme is known to be diffusive, and stable under the CFL condition 
 \begin{align*}
 	1 - \max_{k} |v_k| \frac{\Delta t}{\Delta x} - |c_s| \max_{j} |E^n_j| \frac{\Delta t}{\Delta v} \geqslant 0, \quad \forall s \in \{i,e\}\text{ and } n \in \llbracket1,N\rrbracket.
 \end{align*}
@@ -581,14 +592,14 @@ It is numerically relevant to extend the Malkov solution \cref{eq:Malkov_solutio
 	\renewcommand{\imh}{0.33\linewidth}
 	\includegraphics[trim = 50 10 55 30, clip, height=\imh]{images/malkov_solution_Ee}
 	\includegraphics[trim = 100 10 60 30, clip, height=\imh]{images/malkov_solution_fe}
-	\caption{Malkov solutions \cref{eq:Malkov_solution_ext} on $[-1.5,1.5]\times[-2,2]$. Left: electric field $E$. Right: density $f$.}
-	\mysubcaption{The electric field is extended outside of $[-1,1]$ by a constant. The density $f$ is represented in the domain $[-1.5,1.5]\times[-2,2]$, and truncated to 10.}
+	\caption{Malkov solutions \cref{eq:Malkov_solution_ext} on $[-1.5,1.5]\times[-2,2]$. \textcolor{red}{Left: electric field $E=-\partial_x \varphi$ (extended outside $[-1, 1]$ by a constant). Right: $\min(f(t=0, x, v), 10)$ with $(x,v) \in [-1.5,1.5]\times[-2,2]$}.}
+%	\mysubcaption{The electric field is extended outside of $[-1,1]$ by a constant. The density $f$ is represented in the domain $[-1.5,1.5]\times[-2,2]$, and truncated to 10.}
 	\label{fig:malkov_solutions}
 \end{figure}
 
-\paragraph{Validation of the FD scheme}
+\paragraph{Validation of the FD scheme. }
 
-This stationary test first let us validate the Finite Difference scheme presented in Subsection \ref{ssec:FDscheme} associated to the boundary condition (\ref{eq:phi_bc_neumann}) for the electric field (computed by (\ref{eq:integral_representation_E_sym})). Considering (x,v)-domain $[-1,1]\times[-2,2]$, we compute the $L^2$-errors on electric field at time 0.1. Figure \ref{fig:DFerrors} presents the error as a function of $\Delta x$ for different fixed values of $N_v=K+1$ (on the left) and as a function of $\Delta v$ for different fixed values of $N_x=J+1$ (on the right). Time step $\Delta t$ is computed thanks to the CFL condition (\ref{eq:CFL}), $K$ (resp. $J$) being chosen such that $\Delta t$ is fixed along each curve. In both plots (presented in log-log scale), we recover convergence of rate 1, as expected, until a saturation is reached.
+This stationary test first let us validate the Finite Difference scheme presented in Subsection \ref{ssec:FDscheme} associated to the boundary condition (\ref{eq:phi_bc_neumann}) for the electric field (computed by (\ref{eq:integral_representation_E_sym})). Considering $(x,v)$-domain $[-1,1]\times[-2,2]$, we compute the $L^2$-errors on electric field at time 0.1. Figure \ref{fig:DFerrors} presents the error as a function of $\Delta x$ for different fixed values of $N_v=K+1$ (on the left) and as a function of $\Delta v$ for different fixed values of $N_x=J+1$ (on the right). Time step $\Delta t$ is computed thanks to the CFL condition (\ref{eq:CFL}), $K$ (resp. $J$) being chosen such that $\Delta t$ is fixed along each curve. In both plots (presented in log-log scale), we recover convergence of rate 1, as expected, until a saturation is reached.
 
 \begin{figure}
 	\centering
@@ -609,7 +620,7 @@ we aim at comparing the three approaches for the computation of electric field p
 	\renewcommand{\imh}{0.33\linewidth}
 	%\includegraphics[width=0.48\textwidth]{images/fe_acstcase_T01_Nx2048_Nv2049_domain1.png}
 	\includegraphics[width=0.48\textwidth]{images/diff_E_3bc_acstcase.png}
-	\caption{FD code for one species case. Parameters $N_x=2048$, $N_v=2049$, time 0.1. Computed minus exact $E$ as a function of $x$ with three approaches (imposing $E(t,x=0)=0$, imposing $\int E(t,x)dx=0$, computing $E(t,x)$ from $J$ with (\ref{eq:integral_representation_E_naturalbc})).}
+	\caption{FD code for one species case. \textcolor{red}{(NC) error of the electric field as a function of $x\in [-1,1]$ at time $T=0.1$ using  $N_x=2048, N_v=2049$, with the three different approaches discussed in Remark \ref{rk:bc} (imposing $E(t,x=0)=0$, imposing $\int E(t,x)dx=0$, computing $E(t,x)$ from $J$ with (\ref{eq:integral_representation_E_naturalbc})).} \\   Parameters $N_x=2048$, $N_v=2049$, at time $T=0.1$. Computed minus exact $E$ as a function of $x$ with three approaches (imposing $E(t,x=0)=0$, imposing $\int E(t,x)dx=0$, computing $E(t,x)$ from $J$ with (\ref{eq:integral_representation_E_naturalbc})).}
 	\label{fig:DF_fe_and_bc}
 \end{figure}
 
@@ -627,13 +638,16 @@ we aim at comparing the three approaches for the computation of electric field p
 \paragraph{Validation of the SL scheme}
 
 
-Results for the semi-Lagrangian code are given on Figure \ref{fig:SLresult1sp}. Instead of evaluating the numerical solution on a point $(x,v)$, we use a quadrature to approximate its average on the cell of size $(\Delta x, \Delta v)$ centered in $(x,v)$. 
+Results for the semi-Lagrangian code are given on Figure \ref{fig:SLresult1sp}. Instead of evaluating the numerical solution on a point $(x,v)$, we use a quadrature to approximate its average on the cell of size $(\Delta x, \Delta v)$ centered in $(x,v)$.  
+\textcolor{red}{To avoid the singularity in \eqref{eq:Malkov_solution}, a finite volume interpretation of the unknown is used so that we do not 
+have to evaluate $f$ but instead consider its average on a cell of size $(\Delta x, \Delta v)$.} \textcolor{purple}{(c'est vraiment \c{c}a qui est fait ? \`a pr\'eciser)}
 %On each cell, instead of doing a single point evaluation, we use a quadrature to compute an average value on a centered rectangle around the point value
 %(of size $\Delta x \times \Delta v$) \textcolor{red}{AC and NC : on ne comprend pas trop cette phrase}. 
-We evaluate the error on the electric field for different values of $N_x=N_v=N$. We see on the left figure that the scheme converges when $N$ increases at initial time.
+We evaluate the error on the electric field for different values of $N_x=N_v=N$. We see on the left figure that the scheme converges when $N$ increases at  time $T=0$.
 % and saturates to time discretization error for $T=1$. 
-Then, on the right figure, we plot the error on the electric field at $T=1$. Dividing the time step by two (resp. by four), we observe that the error is divided by around $4$ (resp. $16$), which illustrates the second order in time of the Strang splitting. The test is quite difficult (the function goes to infinity on one side and then is equal to zero on the other side) 
-and large values of $N$ have to be used to clearly see the convergence.
+Then, on the right figure, we plot the error on the electric field at $T=1$. Dividing the time step by two (resp. by four), we observe that the error is divided by around $4$ (resp. $16$), which illustrates the second order in time of the Strang splitting. \textcolor{red}{(NC) Let us remark that 
+the test turns out to be quite difficult, in particular since the function goes to infinity on one side and then is equal to zero on the other side, 
+which requires large values of $N$ to clearly see the convergence.}
  
 
 
@@ -645,11 +659,13 @@ and large values of $N$ have to be used to clearly see the convergence.
 	%\includegraphics[width=\imh]{images/malkov_SL3.png} & 
 	\includegraphics[width=\imh]{images/malkov_SL4.png}
 	\end{tabular}
-	\caption{SL code for one species case. Left: Electric field error for $x\in [-1,1]$, at initial time. 
+	\caption{SL code for one species case. \textcolor{red}{Left: error of the electric field as a function of $x\in [-1,1]$, at  time $T=0$ 
+	using $N\in \{16,32,64,128,256,512,1024\}$ cells in each direction. 
 	%at time $T=1$, for $\Delta t=0.1$ (top right); at time $T=1$, for $\Delta t=0.05$ (bottom left); 
-	Right: at time $T=1$, error of electric field for $\Delta t=0.1$,
-	$4$ times error of electric field for $\Delta t=0.05$, $16$ times error of electric field for $\Delta t=0.05$. We use $N\in \{16,32,64,128,256,512,1024\}$ cells in each direction. For each cell we compute the average value of $f$
-	at initial time using $N$ points in each direction.}
+	Right: error of the electric field as a function of $x\in[-1,1]$, at time $T=1$, for different time steps ($\Delta t=0.1, 0.05, 0.025$) 
+	and for different meshes ($N=512, 1024$ cells in each direction). }}
+%	$4$ times error of electric field for $\Delta t=0.05$, $16$ times error of electric field for $\Delta t=0.05$. We use  For each cell we compute the average value of $f$
+%	at initial time using $N$ points in each direction.}
 	\label{fig:SLresult1sp}
 \end{figure}
 
@@ -678,7 +694,9 @@ If the boundary condition is not satisfied, the sharp profile at the boundary ma
 	\label{fig:init_cond}
 \end{figure}
 
-The simulations run over the spatial domain $x \in [-1,1]$. The semi-Lagrangian (SL) code computes the electron velocities on $v_e \in [-60, 60]$, and ion velocities on $v_i \in [-50, 50]$. The finite differences (FD) code uses the same mesh for ions and electrons, chosen as $v\in[-60,60]$. To simplify the comparison, visualisations of $f_i$ are restricted to the coordinates $f_{i,j,k}$ such that $v_k \in [-5,5]$.
+The simulations run over the spatial domain $x \in [-1,1]$. The semi-Lagrangian (SL) code computes the electron velocities on $v_e \in [-60, 60]$, and ion velocities on $v_i \in [-50, 50]$. The finite differences (FD) code uses the same mesh for ions and electrons, chosen as $v\in[-60,60]$. To simplify the comparison, visualisations of $f_i$ are restricted to the coordinates $f_{i,j,k}$ such that $v_k \in [-5,5]$. \textcolor{red}{Note that 
+this choice of velocity grids are required to take into account the ionization term in \eqref{eq:unsta_model} which couples the ion and electron 
+distribution functions $f_i$ and $f_e$. }
 For the finite differences code, we use $N_x=512$, $N_{v_e}=N_{v_i}=513$; the time step is computed in order to satisfy the CFL condition; a further time step is used for terminating to the final time $T$.  
 For the semi-Lagrangian code, we will use
 
@@ -699,8 +717,10 @@ As diagnostics, we represent the electric field $E$, the charge density $\rho=\r
 \paragraph{Short time}
 
 We first look at the results for short times: $T=0.1$ (Figure \ref{fig:compT01}) and $T=0.2$ (Figure \ref{fig:compT02}). For the semi-Lagrangian code, we use the parameters of Run2, which gives a reference solution.
-We see that the results are very similar with the FD code for $T=0.1$, which permits to validate the results by cross comparisons. For $T=0.2$, differences begin to appear; the sharp profile of $f_e$ is not well
-reproduced by the FD scheme which has also a coarser mesh. We can see also the differences on the charge density.
+We see that the results are very similar with the FD code for $T=0.1$, which permits to validate the results by cross comparisons. For $T=0.2$, differences begin to appear; the sharp profile of $f_e$ is not well reproduced by the FD scheme  \textcolor{red}{since it 
+is first order accurate and uses a coarser mesh whereas the high order SL enables to capture the thin structures developed by $f_e$. 
+Moreover, even if the global shape of the densities $\rho$ are similar, some differences can be observed at $x\approx \pm 0.8$. }  
+%We can see also the differences on the charge density. 
 
 %The same simulation at time $T=0.1$ shows a greater divergence between both methods. The electric field does not have the same extremal values, and the comparison of $\rho$ reveals a difference of variations. The approximations of the ion density $f_i$ seem quite similar, but the shape of the electric density $f_e$ differs: the semi-lagrangian code produces sharper approximation and a more elongated profile.
 
@@ -799,8 +819,14 @@ reproduced by the FD scheme which has also a coarser mesh. We can see also the d
 
 Now, we turn to the long-term simulations, with $T=20$, on Figure \ref{fig:compT20}.  %Here, we free the semi-Lagrangian code from the artificial CFL condition imposed for fair comparisons. \Cref{fig:compT200} illustrates the behavior of both codes on long time, with parameters given by \cref{eq:param_simu}. 
 %
-The finite difference code suffers from numerical diffusion, and the approximations of $f_i$ and $f_e$ are very damped. Electric field and charge density are really different.
-On the contrary, the SL scheme gives much better results (in comparison with refined runs, as we will see later), while it uses the same number of points. We can distinguish a little degradation of the symmetry, by looking at the charge density.
+\textcolor{red}{Let us remark that the meshes are the same for both SL and FD (Run0). At that time $T=20$, 
+the finite difference code clearly suffers from numerical diffusion due its first order accuarcy: 
+the approximations of $f_i$ and $f_e$ are very damped, 
+the electric field and charge density are really different from the ones obtained by the SL scheme. 
+Indeed, the SL scheme gives much better results (in comparison with refined runs, as we will see later), 
+while it uses the same number of points ($N_x=N_v=512$).  
+Note that for the SL code, we also compare two Poisson solvers, which gives very close results. }
+ We can distinguish a little degradation of the symmetry, by looking at the charge density.
 %almost everywhere reduced to 0. %The point $(x=0,v=0)$ stands out, since it is an equilibrium point: the value $f_e(t,0,0)$ is constant with respect to $t$ (both in the continuous model, and in the discrete model provided $(x=0,v=0)$ belongs to the mesh), and 
 %\begin{align*}
 %	\partial_t f_i (t,0,0) = f_e(t,0,0),  \quad \text{so that} \quad f_i(t,0,0) = f_i(0,0,0) + t f_e(0,0,0).
@@ -1020,7 +1046,7 @@ increases).
 
 
 We choose to use a very fine discretization in velocity for the electrons by taking $N_{v_e}=8193$ (some results, not shown, with $N_{v_e}=16385$ have lead to indistinguishable results).
-We then make vary $N_x$ and $N_{v_i}$; we remark that $N_x$ can be quite lower and $N_{v_i}$ a little lower also, as we have similar results taking $(N_x,N_{v_i})=(256,2049)$ and 
+\textcolor{red}{We then vary} $N_x$ and $N_{v_i}$; we remark that $N_x$ can be quite lower and $N_{v_i}$ a little lower also, as we have similar results taking $(N_x,N_{v_i})=(256,2049)$ and 
 $(N_x,N_{v_i})=(1024,4097)$, as we can see on Figure \ref{fig:comp_phasespace} (the first one is more diffusive which is coherent). 
 
 
@@ -1095,7 +1121,7 @@ $(N_x,N_{v_i})=(1024,4097)$, as we can see on Figure \ref{fig:comp_phasespace} (
 %and filaments appear. Note that we have to take quite small time steps, as we have chosen $\mu=1/100$, which makes the study more difficult, but it is nearer to more physically relevant parameters. 
 %We have chosen also a high number for $N_{v_e}$; this permits to better keep the symmetry, without imposing it a priori (which is in fact possible, by a symmetrization of $\rho$).
 
-We remark also that the spatial interpolation does not lead to unstable results, which can occur sometimes when extrapolation is used (see \cite{badsiNumericalStabilityPlasma2018}). 
+We \textcolor{red}{observe} also that the spatial interpolation does not lead to unstable results, which can occur sometimes when extrapolation is used (see \cite{badsiNumericalStabilityPlasma2018}). 
 To our understanding, this is due to the fact that interpolation of nontrivial functions happens only on the outflow boundary, and any oscillation is evacuated immediately without propagation in the computational domain. 
 We have used an odd number of points in order to prevent from having $0$ as a mesh point, which would lead to increase of the value at constant rate, in the ionization step.
 
@@ -1281,9 +1307,22 @@ In Figure \ref{fig:comp_E0_intE0}, we compare the solutions given by the semi-La
 
 \section{Conclusion}
 
-This work discussed the development of a semi-Lagrangian scheme for the numerical simulation of a two-species plasma model involving sheath. Specific treatment of the boundary conditions have been proposed. For comparison, a 1st-order finite difference scheme has been implemented. Both schemes are first validated on a one-species test case for which an analytic solution is known. Then we obtained simulations for the full two-species case.
+This work discussed the development of a semi-Lagrangian scheme for the numerical simulation of a two-species plasma model involving sheath. Specific treatment of the boundary conditions have been proposed. For comparison, a first order finite difference scheme has been implemented. Both schemes are first validated on a one-species test case for which an analytic solution is known. Then we obtained simulations for the full two-species case. 
 
-We obtain first promising results that encourage us to go further in the study of this semi-Lagrangian scheme coupled with boundary conditions. Long-time behaviour is a difficult question for which it would be very interesting to have a reference solution, given by the stationary problem. This is however out of the scope of this work.
+\textcolor{red}{
+Promising results on the formation of sheath solution are obtained 
+which encourage us  to go further in the study of this semi-Lagrangian scheme coupled with boundary conditions. 
+The robustness of the parallel SL code enables to investigate the numerical convergence of the sheath solution. 
+The SL code turns out to be a good tool to study stationary sheath solution even if the long-time behaviour 
+of the solution to \eqref{eq:unsta_model} is a difficult question for which it would be very interesting to have a reference solution, given by the stationary problem. This is however out of the scope of this work.}
+
+
+
+%We obtain first promising results that encourage us to go further in the study of this semi-Lagrangian scheme coupled with boundary conditions. \textcolor{red}{For the two-species case, 
+%	cross-comparisons are performed and the numerical convergence of the SL method is investigated. 
+%	The (parallel) SL code turns out to be robust and is able to provide reliable numerical approximations of sheath stationary solution 
+%	with realistic physical parameters.  }
+%Long-time behaviour is a difficult question for which it would be very interesting to have a reference solution, given by the stationary problem. This is however out of the scope of this work.
 
 
 \bibliographystyle{alpha}

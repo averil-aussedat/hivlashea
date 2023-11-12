@@ -1,0 +1,224 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[top=20pt,left=60pt,right=60pt]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{physics}
+\usepackage{xcolor}
+\usepackage{graphicx}
+%\usepackage{cite}
+
+\newtheorem{definition}{Definition}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollaire}{Corollaire}
+\newtheorem{remark}{Remark}
+
+\title{Answers to review report of the paper\\
+\textbf{High order numerical methods for Vlasov-Poisson models of plasma sheaths}}
+\author{V. Ayot et al}
+\date{\today}
+
+%\input{macro.tex}
+
+\begin{document}
+\maketitle
+\Large
+
+The authors  wish to thank the referees for their report which helps us to improve the paper. Below, we discuss all the corrections (in blue in the revised version) suggested by the referees.
+
+\section{Remarks of referee 1}
+
+\begin{enumerate}
+    \item \textcolor{blue}{The choice of the different boundary conditions must be more justified in terms of physics. }\\
+The boundary conditions we are using are commonly employed in the literature on the simulation of plasma sheaths, 
+for example in the paper by Devaux-Manfredi [DM08].   \\%, Guclu-Christlieb-Hichton, ...). \textcolor{red}{Completer} \\ 
+{\small Les conditions aux bords que l'on utilise me semblent assez naturelles et equivalentes au niveau continu; je ne vois pas trop ou la physique intervient a ce niveau.
+Mais peut-etre que je me trompe (je ne suis pas tres physicien, il y a peut-etre quelque chose qui m'echappe)
+En regardant aussi par rapport a l'autre reviewer, je pense qu?il faut bien detailler et comprendre deja au niveau continu.}
+    \item \textcolor{blue}{p6 : It is written that "The code works in parallel using MPI". I really don't see where MPI can add anything to the 2D code proposed here. }\\ 
+    We are not sure to understand the question of the referee. Indeed, some simulations using a large number of points are performed 
+    ($N_x=512$, $N_{v_i}=8192$ and $N_{v_e}=16385$) which of course leads to quite long simulations and the use of MPI obviously 
+    enables to get the results in a shorter time, even in 2D. \\
+    {\small Le code parallele en MPI est un des moyens de faire des simulations de reference plus rapidement.
+Il y a par exemple un run avec $N_x=512$ et $N_{v_e}=N_{v_i}=8192$; par ailleurs toutes les simulations effectuees ne sont pas presentees
+(cf p14, il est mentionne une simulation avec $N_{v_e}=16385$)}
+    \item \textcolor{blue}{p7 - caption of figure 1: What does it means "truncated to 10 ?". }\\
+    This sentence simply means that the plot of $f(t, x, v)$ is replaced by $\min(f(t, x, v), 10)$ to ease the reading. The caption of Figure 1 has been modified. \\
+    {\small Si $f(x,v)>10$, on remplace $f(x,v)$ par $10$. }
+    \item \textcolor{blue}{p8 - "Validation of the SL scheme" section :}
+\begin{enumerate}
+\item \textcolor{blue}{Can you explain why in the case of the SL scheme the solution is not evaluated at the points but at the centre of the cells with an additional quadrature ?}\\
+In spite of the fact the stationary solution (3.3) is integrable, it is not defined at the grid points $(x_i, v_j)$ satisfying $x_i^2+v_j^2=1$ 
+so we instead consider the center of the cells (or staggered grid) through a finite volume interpretation to avoid this stiffness. 
+Regarding the quadrature, this convention corresponds to the trapezoidal rule.  A sentence has been added in the revised version. \\
+%Dans (3.3), on ne peut pas evaluer en la singularite donc on decale le maillage et on peut faire la quadrature car la fonction est integrable. \\
+%{\small la fonction tend vers l'infini, mais reste int\'egrable. }
+\item  \textcolor{blue}{Not sure that the discussion to explain how to compute a scheme order is mandatory here.}\\
+According to the reviewer comments, we reformulate the caption of Figure 4. Let us remark the comments of Figure 4 
+are kept since the way the error is presented is a bit unusual and thus requires some additional explanations. \\ 
+{\small La figure 4 a droite ne represente pas l'ordre de maniere habituelle; on a prefere rajouter ces quelques lignes pour + de clarte}
+\end{enumerate}
+    \item \textcolor{blue}{As a general comment for section 2, I don't see the interest of the tests performed with FD method here if no discussion and comparison with the SL scheme is added. }\\ 
+    Since there is no test in Section 2, the reviewer may refer to Section 3.1 in which some validations of the FD and the SL methods 
+    are performed on the one species test. It is true that no comparison are performed  but since this test has a exact solution, 
+    it enables us to validate the convergence of both numerical approaches independently before tackling the more complex two species problem. \\
+    {\small Section 2, il n'y a pas de tests.
+Section 3.2, des commentaires sont donnes apres. Peut-etre que le reviewer veut parler de la section 3.1?
+Si c'est le cas, l'interet de la section 3.1 est d'avoir une solution de reference. On peut donc comparer SL a la solution de reference et FD a la solution de reference.
+Le but est de s'assurer que les deux methodes convergent bien lorsque l'on connait une solution de reference, avant de passer a un cas plus complexe.}
+    \item \textcolor{blue}{p8 - section 3.2 : $\mu = 1/100$ is at least an order of magnitude higher than the realistic values. The choice of this value must be motivated and the robustness of the proposed scheme should be tested with more realistic values.} \\
+    Of course, more realistic values might be considered, but this would require more refined mesh which would require 
+    to run additional heavy tests (to check the convergence for example). We think this value $\mu=10^{-2}$ is sufficient 
+    to observe the different behavior for ions and electrons, which may serve as benchmark for other numerical scheme. \\
+    {\small Nous avons considere que cette valeur permet deja de bien donner un comportement different entre les ions et les electrons. Nous avons deja voulu faire des simulations convergees dans ce cas
+avant de mettre des valeurs plus realistes. Nous pourrions refaire des simulations avec un $\mu$ 10 fois plus petit, mais cela demanderait de tout refaire et cela prendrait beaucoup de temps
+de trouver les parametres qui donnent la convergence et qui seraient plus grands. Nous voulons aussi donner des exemples qui sont plus faciles a traiter, permettant de reproduire des resultats plus rapidement. 
+Pour l'instant, nous prefererions donc ne pas avoir a refaire les simulations.}
+    \item \textcolor{blue}{p10 : I am very surprised by the choice of the maximum velocity values :}
+    \begin{enumerate}
+\item \textcolor{blue}{ why do you choose different values for ion and electron in the case of the SL scheme
+and not for the FD scheme ?} \\
+The FD code is not optimized as the SL code and for simplicity in the programming step, 
+it is sufficient to consider the same (large enough) velocity domain for both electrons and ions. \\
+{\small Le code FD est surtout un code de validation et n'a pas vocation a etre competitif; on a voulu rester simple sur ce code; en prenant un Domain suffisamment grand pour els elections et les ions,
+Avec suffisamment de points, il n'est pas necessaire de choisir un domaine different pour les ions et les electrons.}
+\item \textcolor{blue}{If you can choose different values for the ion and electron why do you choose a such big value for ions. Looking at figure 5 (left) it seems clear that the distribution function is already null for $v_i > 5$.}\\
+Like the referee, we also thought that it was possible to consider smaller velocity domain for the ions. However, due to the 
+ionization term $\nu f_e$ in (1.2a), it is not since $f_i$ is not equal to zero even for large velocity and this has to be taken into account. 
+A sentence has been added p10. \\
+{\small Effectivement, au depart, on pensait que l?on pouvait faire cela. Neanmoins, on s'est rendu compte que l'ionisation 
+(le terme $\nu f_e$) fait que $f_i$ n'est pas completement nul et a son importance pour la simulation.}
+\end{enumerate}
+    \item \textcolor{blue}{p10: Concerning the number of points:}
+    \begin{enumerate}
+    \item \textcolor{blue}{Why do you choose $N_x=512$, $N_v=513$ for the FD scheme and you choose more points
+for the SL scheme?}\\ 
+Thank you for this question. Actually, since the FD code is not parallelized, considering refined meshes is very costly. 
+Moreover, since the FD code is based of an explicit treatment of the transport term, a stringent CFL has to be respected, making the 
+runs very costly, even with $N_x=512$, $N_v=513$. On the contrary, the SL code does not present this drawback and 
+refined meshes can be considered. \\
+{\small Il est difficile de prendre + de points pour le schema FD, car cela prend beaucoup de temps (il y a par ailleurs une condition CFL).}
+\item \textcolor{blue}{Why do you finally choose Run2 as a reference and not another Run0. A discussion
+on the results for the different cases should at least be added.}\\ 
+\textcolor{red}{Je ne comprends pas bien : des comparisons entre Run0-SL et Run0-FD sont faites en Figure 8 sur des temps longs 
+($T=20$) alors que sur les resultats dans Figures 6-7 en temps court ($T=0.1, 0.2$) comparent Run2-SL avec Run0-FD, ce qui n'est pas 
+vraiment en faveur de FD. C'est \c{c}a qu'il questionne ?} \\ 
+{\small Run2 est + converge que Run0; donc si on le compare a Run0-FD et que cela donne la meme chose, cela voudra dire que Run0-FD est converge, independamment du nombre de points (Ce qui n'est pas le cas, si on compare avec run0).  
+Nous pourrons rajouter des explications sur les resultats.}
+\end{enumerate}
+    \item \textcolor{blue}{p11 - Figure 6: The plots, as presented, only give a qualitative comparison. For all row, please show on the same plot the difference between both methods to give a more
+qualitative comparison. This comment also applies to all the following figures.}\\
+The goal of Figures 6 is to illustrate that qualitatively, the results are  in good agreement. In particular, we found interesting to show that 
+for relatively short time ($t\leq 0.1)$, the two methods gives very close results, which is not the case for larger time. 
+We do not think plotting the difference between FD and SL results will be constructive. Moreover, let us remark that 
+the numerical parameters are not the same, so that some errors may affect the diagnostics. \\ %\textcolor{red}{Rajouter commentaires dans le papier}\\ 
+{\small Le but de la figure 6 est de voir que les resultats sont qualitativement proches. On pourrait effectivement calculer la difference pour avoir des valeurs + quantitatives, mais cela donnera des figues plus petites.
+Ce qui nous semblait important c'etait justement de donner qqch juste de visuel et de voir que pour $T=0.1$ on ne voit pas encore de differences.
+Il ne faut pas oublier non plus que le nombre de points n'est pas le meme. }
+    \item \textcolor{blue}{On figures 7 and 8 the results are not at all the same between FD and SL. Why? It is
+essential to comment on these results.} \\
+The results presented in Figures 7 correspond to $T=0.2$ whereas those of Figure 8 correspond to $T=20$. 
+We actually choose this way to present the comparison to illustrate the fact that for short time $t\leq 0.1$, 
+the two methods are in very good agreement whereas for 'large' times, it is not the case any more and the FD method 
+turns out to be not converged after $t\approx 0.2$. Some explanations are given in the paragraph called "Short time" p10. \\
+{\small La methode FD n'est plus convergee des le temps $T=0.2$; c'est justement le but de voir jusqu'a quel temps on est converge "visuellement". Nous donnons deja des explications section "short time".}
+    \item \textcolor{blue}{As a general comment, the results all over the paper need to be analysed and
+commented on more seriously. }\\
+As suggested by the reviewer, additional comments have been added in the revised version (Short time and Long time paragraphs p10-11). \\
+{\small Peut-etre faut il rajouter des commentaires pour que ce soit plus explicite et clair; neanmoins, il y a deja des explications aussi dans "Looking for a reference solution" p14. }
+    \item \textcolor{blue}{The number of references to other works is poor and must be increased. }\\
+ \textcolor{red}{Rajouter qq references. Mehdi ?}\\ 
+    \item \textcolor{blue}{Finally, I definitely need to be convinced by something new in this work. If the case, this
+should be emphasized both in the abstract and in the conclusion. }\\
+Our goal was to propose high numerical techniques to approximate the solution of a two-species problem involving boundary conditions. 
+However, the use of high order methods requires some strategies that a first order method does not need (typically for the boundary). 
+Moreover, several methods have been compared for the numerical treatment of the Poisson equation. 
+Hence, without any reference solution, it is not easy to validate these different techniques.  We think the SL code 
+that has been developed is a good tool to investigate stationary sheath solutions that are known to be difficult to capture.  
+As suggested by the referee, the abstract and conclusions have been modified. \\
+     {\small A mon avis, le but etait d'arriver a avoir une solution de reference numerique sur un modele original; ce qui est possible grace a un schema SL effectivement assez classique; 
+le schema FD donne tres rapidement des resultats tres differents (a partir de T=0.2). il est interessant de voir que les
+conditions au bord implementees ne donnent pas d'instabilite, contrairement a un travail precedent [BMN18]. Il est  aussi interessant de voir quels choix sont preferables comme conditions aux bords imposees sur Poisson (Figure 12).}
+\end{enumerate}
+
+\bigskip 
+
+\section{Remarks of referee 2}
+
+\begin{enumerate}
+    \item \textcolor{blue}{What is the objective of the project regarding the different boundary conditions:
+To compare them, or to find one which gives satisfactory results ?
+And what is the final assessment of the authors regarding their objective ? }\\ 
+Using high order methods to approximate transport problems with boundary conditions requires some dedicated strategies. 
+Recently, some theoretical works proposed some ways to keep high order accuracy even at the boundary and our goal 
+was to test them in the two-species Vlasov context. \\
+Regarding the boundary conditions for the Poisson equation, our goal was to compare them and investigate the better one 
+in terms of stability and accuracy (see Figure 3 for FD and Figure 12 for SL). 
+        \item \textcolor{blue}{it would be useful to summarize at the end of Section 1 which boundary conditions will actually be used in the numerical scheme: (1.5), (1.8), (1.11)? }\\
+    In Figure 3 (resp. Figure 12), the three approaches are compared in the FD case (resp. SL case).     \textcolor{red}{Quelle methode est utilisee dans les gros tests SL ?  A part dans Figure 12 ou il y a les 3 qui sont comparees, je ne trouve pas l'information. }
+    \item \textcolor{blue}{same remark for the formulas for $E$ given in Section 2. In particular,
+since (2.1) modified according to Remark 2.1 and (2.2) are both derived from the symmetry assumption and they both involve a constant that depends on time, are these formulas equivalent ?} \\ 
+\textcolor{red}{En relisant, ce n'est pas tres clair pour moi entre les solvers de Poisson ((2.1) ou (2.2)) et les conditions au bord 
+((1.11), (1.8) ou $E(t, x=-1)=-E(t, x=1)$. Un des arguments pour favoriser une option plutot qu'une autre est la symetrie par rapport a zero, c'est ca ?   }
+    \item \textcolor{blue}{In the FD and SL schemes the authors should be clearer about which formulas are used.
+In the FD scheme this is not written, and in the SL scheme the authors write that
+the Poisson equation is solved using (2.1), and later that only (1.8) will be used:
+does that mean via (2.1) ? With or without the modification suggested by Remark 2.1 ? }
+\textcolor{red}{Meme question que 2-3.}
+\item \textcolor{blue}{I also have a question about the ionization term: Could the authors comment on how
+it is derived ? For densities which vanish close to the domain boundaries,
+(1.2) does not preserve the total charge $\iint (f_e + f_i) dx dv$, which seems unphysical.
+Could the authors discuss this lack of total charge conservation ?
+On p14 it is further written that the ionization parameter needs to be adjusted to ensure the
+stationarity of the solution: this should probably be explained in Section 1. }\\ 
+\textcolor{red}{Dans [ALPM+20], ils parlent de termes decrivant les 'ionization reactions' mais sans plus de detail... Je me souviens qu'on avait evoque l'influence du parametre $\nu$ }
+\item \textcolor{blue}{Finally the authors should comment on how well their numerical results model a non-neutral sheath. Since here the normalized Debye length is $\lambda/2$, the sheath
+occupies a large portion (probably all) of the computational domain.
+Looking at Figure 8 one sees indeed a larger charge at distance $\lambda/2$ from the boundaries (although the charge is positive everywhere, which is probably
+caused by the non-conservative ionization term): are these results satisfactory ?}\\ 
+Regarding the two-species model, we can guarantee that the high order numerical method converges when the numerical parameters 
+go to zero towards a solution (which can be supposed unique) of the problem. In this sense, the results we obtained are satisfactory. 
+More tests would be required (considering smaller $\lambda$ or $\mu$) to check if the solution is satisfactory from a physical point of view. 
+\end{enumerate}
+
+\underline{Minor comments:}
+\begin{enumerate}
+    \item \textcolor{blue}{p1: the last sentence of the abstract is obscure.}  \\
+    The last sentence of the abstract has been modified. 
+%    \textcolor{red}{For the two-species case, cross comparisons and the influence of the numerical parameters for the SL method are performed in order to have an idea of a reference numerical simulation. $\to$ For the two-species case, cross comparisons between FD and SL are performed on the one side and on the other side, the numerical convergence of the SL method is investigated to capture a reference solution.}
+        \item \textcolor{blue}{p1: Introduction: what is "a sufficiently large domain" ? }\\ 
+This sentence has been changed. 
+%       \textcolor{red}{Plasmas are neutral at the equilibrium in a sufficiently large domain. $\to$ Plasmas have a natural tendency of remaining electrically neutral. }
+        \item \textcolor{blue}{again in the introduction, it would be useful to specify which parameters (mass ratio and normalized Debye length) will be used in the numerical experiments, in particular if they are realistic or not.} \\
+       As suggested by the referee, we added a sentence saying that the mass ratio and normalized Debye length are non necessarily physically relevant. % \textcolor{red}{Je ne vois pas l'interet mais pourquoi pas... }
+        \item \textcolor{blue}{p2: When several references are cited together, chronological order should be preferred.} \\ 
+  We would like to warmly thank the reviewer for his careful reading.        
+        \item \textcolor{blue}{p2: "we studied": does this cover all the authors of the current article ?}\\
+No, it is not. We changed the sentence. 
+        \item \textcolor{blue}{p2: "Then, we are concerned" $\to$ "Thus, ... "}\\ 
+Thank you. We changed. 
+        \item \textcolor{blue}{p2: "their density" $\to$ "its density".} \\
+        Thank you. We changed. 
+        \item \textcolor{blue}{p5: what is "a large enough maximum speed" ? }\\ 
+        As usual in Eulerian Vlasov simulations, a grid in velocity has to be considered and a maximum value of $v$ has to be fixed 
+        to ensure the unknown is correctly represented in the interval. The sentence has been modified. \\
+        \textcolor{red}{Dans le papier: with a large enough maximum speed $\bar{V} \to$  with $\bar{V}$ large enough so that the unknown are well represented in 
+        $[-\bar{V}, \bar{V}]$. }
+        \item \textcolor{blue}{p5: in eq (2.3), how is $E^n_j$ defined ? also, I guess scalar products are missing. }\\ 
+$E^n_j$ is supposed to be an approximation of $E(t^n, x_j)$ from one of the three strategies proposed in Section 2.  \textcolor{red}{A preciser selon les reponses aux questions 2-3.} 
+\\
+Actually, there is no missing scalar product since the vector notations in (2.3) are chosen in such a way we do not need.  
+\item \textcolor{blue}{p5: "coordwise" $\to$ "element-wise" ?}\\
+        Thank you. We changed. 
+\item \textcolor{blue}{p5: "The upwind scheme is known to be ...": please cite a relevant reference. }\\ 
+      Thank you. We changed the sentence: \textcolor{red}{ The upwind scheme is known to be diffusive, and stable under the CFL condition $\to$ The upwind scheme is stable under the CFL condition}. 
+\item \textcolor{blue}{p14: "we then make vary" $\to$ "we then vary" / "we remark" $\to$ "we observe". }\\
+       Thank you. We changed. 
+\end{enumerate}
+
+%\bibliographystyle{abbrv}
+%\bibliography{biblio}
+\end{document}
