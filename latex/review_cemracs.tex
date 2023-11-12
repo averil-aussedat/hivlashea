@@ -5,6 +5,7 @@
 \usepackage{amssymb}
 \usepackage{amsthm}
 \usepackage{physics}
+\usepackage{enumitem}
 \usepackage{xcolor}
 \usepackage{graphicx}
 %\usepackage{cite}
@@ -28,6 +29,13 @@
 \Large
 
 The authors  wish to thank the referees for their report which helps us to improve the paper. Below, we discuss all the corrections (in blue in the revised version) suggested by the referees.
+
+\textcolor{teal}{Guide des corrections: 
+\begin{itemize}
+\item En {\color{red}rouge}, les remarques de Nicolas
+\item En {\color{black}\small noir police \texttt{small}}, les remarques de Michel
+\item En \textbf{teal}, les remarques d'Averil
+\end{itemize}}
 
 \section{Remarks of referee 1}
 
@@ -108,6 +116,7 @@ on the results for the different cases should at least be added.}\\
 vraiment en faveur de FD. C'est \c{c}a qu'il questionne ?} \\ 
 {\small Run2 est + converge que Run0; donc si on le compare a Run0-FD et que cela donne la meme chose, cela voudra dire que Run0-FD est converge, independamment du nombre de points (Ce qui n'est pas le cas, si on compare avec run0).  
 Nous pourrons rajouter des explications sur les resultats.}
+\textcolor{teal}{Paragraphe "short time" modifié pour clarifier que le but à ce niveau n'est pas de comparer DF/SL, mais de montrer l'évolution de DF au regard d'une solution de référence.}
 \end{enumerate}
     \item \textcolor{blue}{p11 - Figure 6: The plots, as presented, only give a qualitative comparison. For all row, please show on the same plot the difference between both methods to give a more
 qualitative comparison. This comment also applies to all the following figures.}\\
@@ -158,16 +167,43 @@ was to test them in the two-species Vlasov context. \\
 Regarding the boundary conditions for the Poisson equation, our goal was to compare them and investigate the better one 
 in terms of stability and accuracy (see Figure 3 for FD and Figure 12 for SL). 
         \item \textcolor{blue}{it would be useful to summarize at the end of Section 1 which boundary conditions will actually be used in the numerical scheme: (1.5), (1.8), (1.11)? }\\
-    In Figure 3 (resp. Figure 12), the three approaches are compared in the FD case (resp. SL case).     \textcolor{red}{Quelle methode est utilisee dans les gros tests SL ?  A part dans Figure 12 ou il y a les 3 qui sont comparees, je ne trouve pas l'information. }
+    The different approaches are compared at different stages of the paper. Section 1 and the discussions of the results have been clarified. \textcolor{red}{Quelle methode est utilisee dans les gros tests SL ?  A part dans Figure 12 ou il y a les 3 qui sont comparees, je ne trouve pas l'information. }
+    \textcolor{teal}{État des lieux des conditions au bord~: en tout, il y en a 4 différentes dans le papier. 
+    \begin{enumerate}[label={(\alph*)}]
+    \item\label{cond:Et0} La condition $E(t,0) = 0$ (1.8),
+    \item\label{cond:sym} La condition $E(t,-1) = - E(t,1)$ (évoquée dans la remarque 2.1), 
+    \item\label{cond:int} La condition $\int_{x=-1}^{1} E(t,x) dx = 0$ (évoquée dans la remarque 2.1), 
+    \item\label{cond:elb} La condition plus élaborée du calcul avec $J$ (1.11), qui donne le solveur (2.2).
+    \end{enumerate}
+    L'équation (1.5) évoquée dans la question n'est pas une condition au bord sur $E$, mais la normalisation de $\varphi$ en $0$. Les comparaisons numériques sont faites à deux endroits~: d'abord dans la validation du schéma DF (Section 3.1), où sont comparées \ref{cond:Et0}, \ref{cond:int} et \ref{cond:elb} (Figure 3). La conclusion de la comparaison ici est que \ref{cond:Et0} et \ref{cond:int} sont équivalentes, tandis que \ref{cond:elb} mène à un champ $E$ discontinu en 0. L'autre comparaison est sur les "gros runs"~: Figure 8 apparaissent \ref{cond:Et0} et \ref{cond:int}, qui donnent des résultats équivalents, et Figure 12 apparaissent \ref{cond:Et0}, \ref{cond:sym} et \ref{cond:int}, avec des résultats pratiquement indiscernables. Après avoir constaté ça, on était partis par défaut sur \ref{cond:int} dans les gros calculs. De mémoire, \ref{cond:elb} avait été abandonnée à cause de la discontinuité. 
+    }
     \item \textcolor{blue}{same remark for the formulas for $E$ given in Section 2. In particular,
-since (2.1) modified according to Remark 2.1 and (2.2) are both derived from the symmetry assumption and they both involve a constant that depends on time, are these formulas equivalent ?} \\ 
+since (2.1) modified according to Remark 2.1 and (2.2) are both derived from the symmetry assumption and they both involve a constant that depends on time, are these formulas equivalent ?} Solvers (2.1) and (2.2) both yield symmetric solutions, but differ in that (2.2) may produce discontinuities at 0. This point has been clarified in the discussion of Figure 3. \\ 
 \textcolor{red}{En relisant, ce n'est pas tres clair pour moi entre les solvers de Poisson ((2.1) ou (2.2)) et les conditions au bord 
-((1.11), (1.8) ou $E(t, x=-1)=-E(t, x=1)$. Un des arguments pour favoriser une option plutot qu'une autre est la symetrie par rapport a zero, c'est ca ?   }
+((1.11), (1.8) ou $E(t, x=-1)=-E(t, x=1)$. Un des arguments pour favoriser une option plutot qu'une autre est la symetrie par rapport a zero, c'est ca ?   } \textcolor{teal}{(2.1) et (2.2) pas équivalents en ceci que (2.2) n'impose pas de condition de continuité en 0. Le solveur (2.2) n'est utilisé que pour la validation, après quoi il a été abandonné pour cause de non-continuité.}
     \item \textcolor{blue}{In the FD and SL schemes the authors should be clearer about which formulas are used.
 In the FD scheme this is not written, and in the SL scheme the authors write that
 the Poisson equation is solved using (2.1), and later that only (1.8) will be used:
-does that mean via (2.1) ? With or without the modification suggested by Remark 2.1 ? }
-\textcolor{red}{Meme question que 2-3.}
+does that mean via (2.1) ? With or without the modification suggested by Remark 2.1 ? } 
+The comparison of the different boundary conditions in Figure 12 showed that the results are very similar, with a slight loss of symmetry for the condition $E(t,0)=0$. This comparison has been relocated at the beginning of the numerical section for clarification, with the following effect on numerotation: 
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+	\hline
+	Former Figure number & 1-5 & 6-11 & 12 \\
+	\hline
+	New Figure number & unchanged & 7-12 & 6 \\
+	\hline
+\end{tabular}
+\end{center}
+The discussion has been completed to highlight the effective choice  of the condition $\int_{x=-1}^{1} E(t,x) dx = 0$.
+\textcolor{red}{Meme question que 2-3.} \textcolor{teal}{Modifications pour répondre à 2-3-4: 
+\begin{itemize}
+\item Changement de la partie "Boundary conditions" (fin Section 1) pour clarifier les 4 conditions au bord au même endroit. 
+\item Modification de la remarque 2.1 en conséquence. 
+\item Ajout d'une phrase dans la partie 2.2 pour préciser que le terme $E$ sera calculé avec différents solveurs, justement, et les résultats seront comparés.
+\item Clarification de la discussion de la Figure 3 pour mettre en évidence que le solveur (2.2) ne nous satisfait pas. 
+\item Clarification de la discussion de la Figure 12, qui remonte pour être mise \emph{avant} les comparaisons à deux espèces, avec pour effet le choix de la condition \ref{cond:int}. \textbf{Faut-il préciser dans toutes les légendes suivantes le choix de la condition au bord (qui sera le même)~?}
+\end{itemize}}
 \item \textcolor{blue}{I also have a question about the ionization term: Could the authors comment on how
 it is derived ? For densities which vanish close to the domain boundaries,
 (1.2) does not preserve the total charge $\iint (f_e + f_i) dx dv$, which seems unphysical.
@@ -208,7 +244,7 @@ Thank you. We changed.
         \textcolor{red}{Dans le papier: with a large enough maximum speed $\bar{V} \to$  with $\bar{V}$ large enough so that the unknown are well represented in 
         $[-\bar{V}, \bar{V}]$. }
         \item \textcolor{blue}{p5: in eq (2.3), how is $E^n_j$ defined ? also, I guess scalar products are missing. }\\ 
-$E^n_j$ is supposed to be an approximation of $E(t^n, x_j)$ from one of the three strategies proposed in Section 2.  \textcolor{red}{A preciser selon les reponses aux questions 2-3.} 
+$E^n_j$ is supposed to be an approximation of $E(t^n, x_j)$ from one of the three strategies proposed in Section 2.  \textcolor{red}{A preciser selon les reponses aux questions 2-3.} \textcolor{teal}{Voir réponse à la question 4.}
 \\
 Actually, there is no missing scalar product since the vector notations in (2.3) are chosen in such a way we do not need.  
 \item \textcolor{blue}{p5: "coordwise" $\to$ "element-wise" ?}\\
