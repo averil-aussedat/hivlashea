@@ -167,7 +167,7 @@ Plasma sheaths are particularly challenging to simulate for several reasons. In 
 the plasma parameters (temperature or density) develop steep gradients. Due to their different mass, 
 electrons and ions have a very different behaviour close to the boundary, and a two-species model is required 
 to \textcolor{red}{dynamically} describe the formation of the sheath. Moreover, kinetic models are necessary to capture the velocity 
-effect of the particles (see \cite{riemannBohmCriterionSheath1991}), and we have to deal with % old cite : \cite{bourneNonUniformSplinesSemiLagrangian2022}
+effect of the particles (see \cite{riemannBohmCriterionSheath1991, Sun22, cagas2018}), and we have to deal with % old cite : \cite{bourneNonUniformSplinesSemiLagrangian2022}
 different scales to account for each species.  Hence, we are considering in this work 
 a two-species Vlasov model to run \textcolor{red}{time dependent} simulations of the plasma sheath. 
 
@@ -293,19 +293,19 @@ In fact, assuming \cref{eq:phi_is_pair}, the other quantities of the system also
  
  \paragraph{Boundary conditions}
  
-  \textcolor{red}{Je pense qu'il faudrait clarifier un peu cette partie pour qu'on voit bien les differentes conditions au bord 
-  utilisees dans la partie numerique. }\\
- \textcolor{teal}{In this section, we present the different boundary conditions used to compute the electric field $E$ to close the Poisson equation \cref{eq:unsta_model_phi}. The common assumption of all the boundary conditions is the symmetry of the potential $\varphi$. Under the additional assumption that $\varphi$ is regular, there holds the centered Neumann boundary condition}
+%  \textcolor{red}{Je pense qu'il faudrait clarifier un peu cette partie pour qu'on voit bien les differentes conditions au bord   utilisees dans la partie numerique. }\\
+ \textcolor{red}{In this section, we present the different boundary conditions used to compute the electric field $E$ to close the Poisson equation \cref{eq:unsta_model_phi}. The common assumption of all the boundary conditions is the symmetry of the potential $\varphi$. Under the additional assumption that $\varphi$ is regular, there holds the centered Neumann boundary condition}
  \begin{align}\label{eq:phi_bc_neumann}
  	\partial_x \varphi (t,0) = 0 \quad \text{or equivalently} \quad E(t,0) = 0.
  \end{align}
- \textcolor{teal}{
+ \textcolor{red}{
  The symmetry of the field $E$ also naturally lead to the boundary condition 
  \begin{align}\label{eq:phi_bc_dirich}
  	E(t,-1) = - E(t,1),
  \end{align}
  as well as the integral condition
- \begin{align}\label{eq:phi_bc_integ}
+ \begin{align}
+ \label{eq:phi_bc_integ}
  	\int_{x=-1}^1 E(t,x) dx = 0.
  \end{align}
  \Cref{eq:phi_bc_neumann,eq:phi_bc_dirich,eq:phi_bc_integ} will be compared in the numerical section. Notice that \Cref{eq:phi_bc_neumann} assume the continuity of the electric field at 0. In \cite{manfredi_devaux}, a more elaborate boundary condition is derived using the physics of the problem. 
@@ -339,7 +339,7 @@ Time integration gives a condition of the form $E(t,\pm 1) = C_{\pm}(t)$, where 
 \begin{align}\label{eq:phi_bc_ampere}
 	E(t,\pm 1) = C_{\pm} (t) \coloneqq E(0,\pm1) - \frac{1}{\lambda^2} \int_0^t J (s, \pm1) ds \pm \frac{\nu}{2 \lambda^2}\int_0^t  \int_{-1}^1 \rho_e (s, x) dx ds. 
 \end{align}
-Notice that the values $E(t,\pm 1)$ now depends on the initial value $E(0,\pm1)$, whereas the centered boundary condition \cref{eq:phi_bc_neumann} does not rely on the initial state. \textcolor{teal}{Condition \Cref{eq:phi_bc_ampere} is compared below to the simpler boundary conditions \Cref{eq:phi_bc_neumann,eq:phi_bc_integ}.}
+Notice that the values $E(t,\pm 1)$ now depends on the initial value $E(0,\pm1)$, whereas the centered boundary condition \cref{eq:phi_bc_neumann} does not rely on the initial state. \textcolor{red}{Condition \Cref{eq:phi_bc_ampere} is compared below to the simpler boundary conditions \Cref{eq:phi_bc_neumann,eq:phi_bc_integ}.}
 %\textcolor{red}{Let us quote \cite{manfredi_devaux} in which the same strategy is used. }
 %\textcolor{red}{NC : ne vaut-il pas mieux definir la constante par rapport au champ $E$ plutot que par rapport au potentiel $\varphi$ dont on ne sert plus ?}
 
@@ -357,7 +357,7 @@ First, we consider the centered Neumann boundary condition \cref{eq:phi_bc_neuma
 \end{align}
 
 \begin{remarque}\label{rk:bc} 
-	\textcolor{teal}{In order to use the boundary conditions \Cref{eq:phi_bc_dirich} of \Cref{eq:phi_bc_integ}, we compute \Cref{eq:integral_representation_E_sym} with an arbitrary constant  and then adjust \emph{a posteriory} to verify the chosen constraint.}
+	\textcolor{red}{In order to use the boundary conditions \Cref{eq:phi_bc_dirich} of \Cref{eq:phi_bc_integ}, we compute \Cref{eq:integral_representation_E_sym} with an arbitrary constant  and then adjust \emph{a posteriory} to verify the chosen constraint.}
 %	Instead of imposing $E(t,0)=0$, we can impose $\int_{-1}^1E(t,x)dx=0$ (coming from the symmetry of $\varphi$ \eqref{eq:phi_is_pair}) or even $E(t,1)=-E(t,-1)$. Then we compute (\ref{eq:integral_representation_E_sym}) up to a constant and adjust the constant \textit{a posteriori} to verify the chosen constraint.
 \end{remarque}
 
@@ -384,7 +384,7 @@ where $a_+ = \max(a,0)$ and $a_{-} = \min(a,0)$ are respectively the element-wis
 \begin{align*}
 	D^{\pm}_{j,k} f \coloneqq \pm \left(\frac{f_{j\pm 1,k} - f_{j,k}}{\Delta x}, \frac{f_{j,k\pm 1} - f_{j,k}}{\Delta v}\right).
 \end{align*}
-\textcolor{teal}{The term $E_j^n$ in \Cref{eq:FDscheme} is an approximation of the electric field on the grid point $x_j$ at time $t^n$, computed according to \Cref{ssec:poisson}. The different boundary conditions discussed in \Cref{sec:model} lead to different solvers, that will be compared in the numerical section.}
+\textcolor{red}{The term $E_j^n$ in \Cref{eq:FDscheme} is an approximation of the electric field on the grid point $x_j$ at time $t^n$, computed according to \Cref{ssec:poisson}. The different boundary conditions discussed in \Cref{sec:model} lead to different solvers, that will be compared in the numerical section.}
 The values of $f_{s,j,k}^n$ on the boundary ($j=0, J$ and $k=0, K$) are taken as follows:
 \begin{itemize}
 \item the boundary condition \cref{eq:fie_bc} yields $f_{s,j,k}^n = 0$ whenever $x_j=-1, v_k > 0$ or $x_j=1, v_k < 0$,
@@ -610,14 +610,14 @@ This stationary test first let us validate the Finite Difference scheme presente
 	\renewcommand{\imh}{0.33\linewidth}
 	\includegraphics[width=0.48\textwidth]{images/error_E_en_dx_acstcase.png}
 	\includegraphics[width=0.48\textwidth]{images/error_E_en_dv_acstcase.png}
-	\caption{FD code for one species case. $L^2$-errors on electric field at time 0.1, as a function of $\Delta x$ (left) or $\Delta v$ (right).}
+	\caption{FD code for one species case. $L^2$-errors on electric field at time $T=0.1$, as a function of $\Delta x$ (left) or $\Delta v$ (right).}
 	\label{fig:DFerrors}
 \end{figure}
 
 
 In Figure \ref{fig:DF_fe_and_bc} 
 %left, we plot electronic distribution function at time 0.1, obtained with a refined mesh $N_x=2048$, $N_v=2049$. This highlights the diffusion of the solution. The plot on the right 
-we aim at comparing the three approaches for the computation of electric field presented in Subsection \ref{ssec:poisson}. Imposing $E(t,x=0)=0$ as proposed in (\ref{eq:phi_bc_neumann}) or $\int E(t,x)dx=0$ as discussed in Remark \ref{rk:bc} leads to two similar solutions, that are exact at $x=0$ due to the properties of this  case. Now, computing $E$ from (\ref{eq:phi_bc_ampere})-(\ref{eq:integral_representation_E_naturalbc}) leads to an exact solution on boundaries $x=-1$, $x=1$ but a jump in $x=0$. \textcolor{teal}{As the exact solution is continuous at $x=0$, we consider that the solver \Cref{eq:integral_representation_E_naturalbc} using the boundary condition \Cref{eq:phi_bc_ampere} is unsatisfactory from a physical point of view. In the sequel, we drop this solver to focus on the simpler boundary conditions presented in \Cref{sec:model}.}
+we aim at comparing the three approaches for the computation of electric field presented in Subsection \ref{ssec:poisson}. Imposing $E(t,x=0)=0$ as proposed in (\ref{eq:phi_bc_neumann}) or $\int E(t,x)dx=0$ as discussed in Remark \ref{rk:bc} leads to two similar solutions, that are exact at $x=0$ due to the properties of this  case. Now, computing $E$ from (\ref{eq:phi_bc_ampere})-(\ref{eq:integral_representation_E_naturalbc}) leads to an exact solution on boundaries $x=-1$, $x=1$ but a jump in $x=0$. \textcolor{red}{As the exact solution is continuous at $x=0$, we consider that the solver \Cref{eq:integral_representation_E_naturalbc} using the boundary condition \Cref{eq:phi_bc_ampere} is unsatisfactory from a physical point of view. In the sequel, we drop this solver to focus on the simpler boundary conditions presented in \Cref{sec:model}.}
 %Even if the exact solution is continuous in $x=0$, it is not always the case in physically relevant applications. %The third approach is less restrictive but first and second approaches are interesting in the present case.
 
 \begin{figure}
@@ -625,7 +625,8 @@ we aim at comparing the three approaches for the computation of electric field p
 	\renewcommand{\imh}{0.33\linewidth}
 	%\includegraphics[width=0.48\textwidth]{images/fe_acstcase_T01_Nx2048_Nv2049_domain1.png}
 	\includegraphics[width=0.48\textwidth]{images/diff_E_3bc_acstcase.png}
-	\caption{FD code for one species case. \textcolor{red}{(NC) error of the electric field as a function of $x\in [-1,1]$ at time $T=0.1$ using  $N_x=2048, N_v=2049$, with the three different approaches discussed in Remark \ref{rk:bc} (imposing $E(t,x=0)=0$, imposing $\int E(t,x)dx=0$, computing $E(t,x)$ from $J$ with (\ref{eq:integral_representation_E_naturalbc})).} \\   Parameters $N_x=2048$, $N_v=2049$, at time $T=0.1$. Computed minus exact $E$ as a function of $x$ with three approaches (imposing $E(t,x=0)=0$, imposing $\int E(t,x)dx=0$, computing $E(t,x)$ from $J$ with (\ref{eq:integral_representation_E_naturalbc})).}
+	\caption{FD code for one species case. \textcolor{red}{Error of the electric field as a function of $x\in [-1,1]$ at time $T=0.1$ using  $N_x=2048, N_v=2049$, with  three different approaches: the two approaches discussed in Remark \ref{rk:bc} (imposing $E(t,x=0)=0$, imposing $\int_{x=-1}^1 E(t,x)dx=0$)  and the one obtained by computing $E(t,x)$ from $J$ with (\ref{eq:integral_representation_E_naturalbc})).} \\   %Numerical parameters $N_x=2048$, $N_v=2049$, at time $T=0.1$. Computed minus exact $E$ as a function of $x$ with three approaches (imposing $E(t,x=0)=0$, imposing $\int E(t,x)dx=0$, computing $E(t,x)$ from $J$ with (\ref{eq:integral_representation_E_naturalbc})).
+	}
 	\label{fig:DF_fe_and_bc}
 \end{figure}
 
@@ -644,12 +645,13 @@ we aim at comparing the three approaches for the computation of electric field p
 
 Results for the semi-Lagrangian code are given on Figure \ref{fig:SLresult1sp}. Instead of evaluating the numerical solution on a point $(x,v)$, we use a quadrature to approximate its average on the cell of size $(\Delta x, \Delta v)$ centered in $(x,v)$.  
 \textcolor{red}{To avoid the singularity in \eqref{eq:Malkov_solution}, a finite volume interpretation of the unknown is used so that we do not 
-have to evaluate $f$ but instead consider its average on a cell of size $(\Delta x, \Delta v)$.} \textcolor{purple}{(c'est vraiment \c{c}a qui est fait ? \`a pr\'eciser)}
+have to evaluate $f$ but instead consider its average on a cell of size $(\Delta x, \Delta v)$.} 
+%\textcolor{purple}{(c'est vraiment \c{c}a qui est fait ? \`a pr\'eciser)}
 %On each cell, instead of doing a single point evaluation, we use a quadrature to compute an average value on a centered rectangle around the point value
 %(of size $\Delta x \times \Delta v$) \textcolor{red}{AC and NC : on ne comprend pas trop cette phrase}. 
 We evaluate the error on the electric field for different values of $N_x=N_v=N$. We see on the left figure that the scheme converges when $N$ increases at  time $T=0$.
 % and saturates to time discretization error for $T=1$. 
-Then, on the right figure, we plot the error on the electric field at $T=1$. Dividing the time step by two (resp. by four), we observe that the error is divided by around $4$ (resp. $16$), which illustrates the second order in time of the Strang splitting. \textcolor{red}{(NC) Let us remark that 
+Then, on the right figure, we plot the error on the electric field at $T=1$. Dividing the time step by two (resp. by four), we observe that the error is divided by around $4$ (resp. $16$), which illustrates the second order in time of the Strang splitting. \textcolor{red}{Let us remark that 
 the test turns out to be quite difficult, in particular since the function goes to infinity on one side and then is equal to zero on the other side, 
 which requires large values of $N$ to clearly see the convergence.}
 
@@ -678,9 +680,10 @@ and use the following physical parameters:
 	\lambda = \frac{1}{2}, \quad \mu = \frac{1}{100}, \quad\text{and}\quad \nu = 20.
 \end{align}
 The initial conditions are chosen as the thermodynamic equilibrium in an infinite spatial domain, or in a domain with periodic condition. The densities are then given by
-\begin{align*}
+\begin{align}
+\label{init_twospecies}
 	f_{i}^0 (x,v) \coloneqq \frac{\exp\left(- \frac{v^2}{2}\right)}{\sqrt{2\pi}} \quad \text{and} \quad f_{e}^0 (x,v) \coloneqq \sqrt{\mu}\frac{\exp\left(- \mu \frac{v^2}{2}\right)}{\sqrt{2\pi}}.
-\end{align*}
+\end{align}
 In order to satisfy the boundary conditions, we multiply $f_{i,e}$ by a mask, defined as
 \begin{align*}
 	\text{mask}(x,v) \coloneqq \frac{1}{2} \left(\tanh\left(\frac{x - (-0.8)}{0.1}\right) - \tanh\left(\frac{x - 0.8}{0.1}\right)\right).
@@ -692,7 +695,7 @@ If the boundary condition is not satisfied, the sharp profile at the boundary ma
 	\renewcommand{\imh}{0.33\linewidth}
 	\includegraphics[height=\imh]{images/fi_init}
 	\includegraphics[height=\imh]{images/fe_init}
-	\caption{Initial conditions $f_i^0$ (left) and $f_e^0$ (right).}
+	\caption{Initial conditions \eqref{init_twospecies} $f_i^0$ (left) and $f_e^0$ (right).}
 	\label{fig:init_cond}
 \end{figure}
 
@@ -718,9 +721,9 @@ As diagnostics, we represent the electric field $E$, the charge density $\rho=\r
 
 \paragraph{Comparison of boundary conditions}
 
-In Figure \ref{fig:comp_E0_intE0}, we compare the solutions given by the semi-Lagrangian code when \textcolor{teal}{the different boundary conditions \Cref{eq:phi_bc_dirich,eq:phi_bc_integ,eq:phi_bc_neumann} are used. Condition \Cref{eq:phi_bc_ampere} is not included in the comparison, since it way produce unrealistic jumps at $x=0$ (see the discussion of \Cref{fig:DF_fe_and_bc}).}
+In Figure \ref{fig:comp_E0_intE0}, we compare the solutions given by the semi-Lagrangian code for \textcolor{red}{the different boundary conditions \eqref{eq:phi_bc_neumann}, \eqref{eq:phi_bc_dirich} and \eqref{eq:phi_bc_integ} for the Poisson equation. Condition \Cref{eq:phi_bc_ampere} is not included in the comparison, since it may produce unrealistic jumps at $x=0$ (see the discussion of \Cref{fig:DF_fe_and_bc}).}
 %three different boundary conditions for the Poisson solver are used. 
-At the numerical level, we see that the first one $E(t,0) = 0$ yields a loss of symmetry in the solution while the two others preserve it. At a physical level, we observe that the electric field is monotone increasing  and consequently low energetic electrons (see Figure (d)) are essentially confined while ions are prone to be accelerated and lost at the wall (see Figure (c)). \textcolor{teal}{In the sequel, we use the integral boundary condition \Cref{eq:phi_bc_integ}.}
+At the numerical level, we see that the first one $E(t,0) = 0$ yields a loss of symmetry in the solution while the two others preserve it. At a physical level, we observe that the electric field is monotone increasing  and consequently low energetic electrons (see Figure (d)) are essentially confined while ions are prone to be accelerated and lost at the wall (see Figure (c)). \textcolor{red}{In the sequel, we use the integral boundary condition \Cref{eq:phi_bc_integ}.}
 
 %\textcolor{red}{Commentaire pour figure \ref{fig:comp_E0_intE0}}
 
@@ -887,8 +890,9 @@ At the numerical level, we see that the first one $E(t,0) = 0$ yields a loss of 
 		\caption{Electron distribution function}
 		%\label{subfig:compT200_electron}
 	\end{subfigure}
-	\caption{Comparison of the numerical approximation of the Poisson equation in the semi-Lagrangian code: $E(t,0)=0$ (left column), $E(t,1)=-E(t,-1)$ (middle column) and $\int_{-1}^1E(t,x)dx=0$ (right column). 
-	 $\Delta t=0.025$. $N_x=256, N_{v_e}=N_{v_i}=1023$.}
+	\caption{Comparison of the numerical approximation of the Poisson equation in the semi-Lagrangian code: $E(t,0)=0$ (left column), $E(t,1)=-E(t,-1)$ (middle column) and $\int_{-1}^1E(t,x)dx=0$ (right column). First line: electric field $E$; second line: density $\rho$; 
+	third line: ion distribution function $f_i$; fourth line: electron distribution function. 
+		 $\Delta t=0.025$. $N_x=256, N_{v_e}=N_{v_i}=1023$, final time $T=20$. }
 	%for different discretizations. Run1:  $N_x=256,\ N_{v_i}=2049$ (left); Run2: $N_x=1024,\ N_{v_i}=4097$ (right) at $T=20$.
 	%Other numerical parameters are $N_{v_e}=8193$ and $\Delta t = 0.00025$. We have used $[-60,60]$ for $v_e$ and  $[-50,50]$ for $v_i$.
 	%The ion density is zoomed for $v_i\in [-5,5]$
@@ -900,7 +904,7 @@ At the numerical level, we see that the first one $E(t,0) = 0$ yields a loss of 
 
 We first look at the results for short times: $T=0.1$ (Figure \ref{fig:compT01}) and $T=0.2$ (Figure \ref{fig:compT02}). 
 %For the semi-Lagrangian code, we use the parameters of Run2, which gives a reference solution.
-\textcolor{teal}{In order to compare the FD solution with a reference solution, we choose the parameters of Run2 for the Semi-Lagrangian code. Fair comparisons between FD and SL are carried for long-time simulations.}
+\textcolor{red}{In order to compare the FD solution with a reference solution, we choose the parameters of Run2 for the SL code. Fair comparisons between FD and SL are carried for long-time simulations.}
 We see that the results are very similar with the FD code for $T=0.1$, which permits to validate the results by cross comparisons. For $T=0.2$, differences begin to appear; the sharp profile of $f_e$ is not well reproduced by the FD scheme  \textcolor{red}{since it 
 is first order accurate and uses a coarser mesh whereas the high order SL enables to capture the thin structures developed by $f_e$. 
 Moreover, even if the global shape of the densities $\rho$ are similar, some differences can be observed at $x\approx \pm 0.8$. }  
@@ -1155,7 +1159,7 @@ of the solution, and even more changes for $\Delta t =0.025$).
 %	\end{subfigure}
 
 
-	\caption{Density $\rho$ and electron distribution function$f_e$ for time $T=5$; with $\Delta t=0.025$ and $\Delta t = 0.0025$
+	\caption{Density $\rho$ and electron distribution function $f_e$ for time $T=5$, with $\Delta t=0.025$ and $\Delta t = 0.0025$. 
 	 The semi-Lagrangian code is used; coarse mesh on the left and fine mesh on the right.
 	%Run2; electron distribution function is also given, by changing $\Delta t$ to $0.000025$ (right)
 	}
@@ -1221,7 +1225,7 @@ increases).
 	\end{subfigure}
 
 
-	\caption{Density $\rho$ (left) and electron distribution function (middle and right) for time $T\in \{1,2,5,10\}$; 
+	\caption{Density $\rho$ (left) and electron distribution function (middle and right) for time $T\in \{1,2,5,10\}$. 
 	 The semi-Lagrangian code is used with parameters of Run2 (left, middle) and of Run3 (right).
 	%Run2; electron distribution function is also given, by changing $\Delta t$ to $0.000025$ (right)
 	}

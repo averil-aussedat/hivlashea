@@ -28,34 +28,30 @@
 \maketitle
 \Large
 
-The authors  wish to thank the referees for their report which helps us to improve the paper. Below, we discuss all the corrections (in blue in the revised version) suggested by the referees.
+The authors  wish to thank the referees for their report which helps us to improve the paper. Below, we discuss all the corrections (in red in the revised version) suggested by the referees.
 
-\textcolor{teal}{Guide des corrections: 
-\begin{itemize}
-\item En {\color{red}rouge}, les remarques de Nicolas
-\item En {\color{black}\small noir police \texttt{small}}, les remarques de Michel
-\item En \textbf{teal}, les remarques d'Averil
-\end{itemize}}
+%\textcolor{teal}{Guide des corrections: 
+%\begin{itemize}
+%\item En {\color{red}rouge}, les remarques de Nicolas
+%\item En {\color{black}\small noir police \texttt{small}}, les remarques de Michel
+%\item En \textbf{teal}, les remarques d'Averil
+%\end{itemize}}
 
 \section{Remarks of referee 1}
 
 \begin{enumerate}
     \item \textcolor{blue}{The choice of the different boundary conditions must be more justified in terms of physics. }\\
 The boundary conditions we are using are commonly employed in the literature on the simulation of plasma sheaths, 
-for example in the paper by Devaux-Manfredi [DM08].   \\%, Guclu-Christlieb-Hichton, ...). \textcolor{red}{Completer} \\ 
-{\small Les conditions aux bords que l'on utilise me semblent assez naturelles et equivalentes au niveau continu; je ne vois pas trop ou la physique intervient a ce niveau.
-Mais peut-etre que je me trompe (je ne suis pas tres physicien, il y a peut-etre quelque chose qui m'echappe)
-En regardant aussi par rapport a l'autre reviewer, je pense qu?il faut bien detailler et comprendre deja au niveau continu.}
+for example in the paper by Devaux-Manfredi [DM08]. Other related references have been added [SZG+22] and [Cag18].   \\%, Guclu-Christlieb-Hichton, ...). \textcolor{red}{Completer} \\ 
+%{\small Les conditions aux bords que l'on utilise me semblent assez naturelles et equivalentes au niveau continu; je ne vois pas trop ou la physique intervient a ce niveau. Mais peut-etre que je me trompe (je ne suis pas tres physicien, il y a peut-etre quelque chose qui m'echappe) En regardant aussi par rapport a l'autre reviewer, je pense qu?il faut bien detailler et comprendre deja au niveau continu.} 
     \item \textcolor{blue}{p6 : It is written that "The code works in parallel using MPI". I really don't see where MPI can add anything to the 2D code proposed here. }\\ 
     We are not sure to understand the question of the referee. Indeed, some simulations using a large number of points are performed 
     ($N_x=512$, $N_{v_i}=8192$ and $N_{v_e}=16385$) which of course leads to quite long simulations and the use of MPI obviously 
     enables to get the results in a shorter time, even in 2D. \\
-    {\small Le code parallele en MPI est un des moyens de faire des simulations de reference plus rapidement.
-Il y a par exemple un run avec $N_x=512$ et $N_{v_e}=N_{v_i}=8192$; par ailleurs toutes les simulations effectuees ne sont pas presentees
-(cf p14, il est mentionne une simulation avec $N_{v_e}=16385$)}
+%    {\small Le code parallele en MPI est un des moyens de faire des simulations de reference plus rapidement. Il y a par exemple un run avec $N_x=512$ et $N_{v_e}=N_{v_i}=8192$; par ailleurs toutes les simulations effectuees ne sont pas presentees (cf p14, il est mentionne une simulation avec $N_{v_e}=16385$)}
     \item \textcolor{blue}{p7 - caption of figure 1: What does it means "truncated to 10 ?". }\\
     This sentence simply means that the plot of $f(t, x, v)$ is replaced by $\min(f(t, x, v), 10)$ to ease the reading. The caption of Figure 1 has been modified. \\
-    {\small Si $f(x,v)>10$, on remplace $f(x,v)$ par $10$. }
+%    {\small Si $f(x,v)>10$, on remplace $f(x,v)$ par $10$. }
     \item \textcolor{blue}{p8 - "Validation of the SL scheme" section :}
 \begin{enumerate}
 \item \textcolor{blue}{Can you explain why in the case of the SL scheme the solution is not evaluated at the points but at the centre of the cells with an additional quadrature ?}\\
@@ -67,38 +63,30 @@ Regarding the quadrature, this convention corresponds to the trapezoidal rule.  
 \item  \textcolor{blue}{Not sure that the discussion to explain how to compute a scheme order is mandatory here.}\\
 According to the reviewer comments, we reformulate the caption of Figure 4. Let us remark the comments of Figure 4 
 are kept since the way the error is presented is a bit unusual and thus requires some additional explanations. \\ 
-{\small La figure 4 a droite ne represente pas l'ordre de maniere habituelle; on a prefere rajouter ces quelques lignes pour + de clarte}
+%{\small La figure 4 a droite ne represente pas l'ordre de maniere habituelle; on a prefere rajouter ces quelques lignes pour + de clarte}
 \end{enumerate}
     \item \textcolor{blue}{As a general comment for section 2, I don't see the interest of the tests performed with FD method here if no discussion and comparison with the SL scheme is added. }\\ 
     Since there is no test in Section 2, the reviewer may refer to Section 3.1 in which some validations of the FD and the SL methods 
     are performed on the one species test. It is true that no comparison are performed  but since this test has a exact solution, 
     it enables us to validate the convergence of both numerical approaches independently before tackling the more complex two species problem. \\
-    {\small Section 2, il n'y a pas de tests.
-Section 3.2, des commentaires sont donnes apres. Peut-etre que le reviewer veut parler de la section 3.1?
-Si c'est le cas, l'interet de la section 3.1 est d'avoir une solution de reference. On peut donc comparer SL a la solution de reference et FD a la solution de reference.
-Le but est de s'assurer que les deux methodes convergent bien lorsque l'on connait une solution de reference, avant de passer a un cas plus complexe.}
+%    {\small Section 2, il n'y a pas de tests. Section 3.2, des commentaires sont donnes apres. Peut-etre que le reviewer veut parler de la section 3.1? Si c'est le cas, l'interet de la section 3.1 est d'avoir une solution de reference. On peut donc comparer SL a la solution de reference et FD a la solution de reference. Le but est de s'assurer que les deux methodes convergent bien lorsque l'on connait une solution de reference, avant de passer a un cas plus complexe.}
     \item \textcolor{blue}{p8 - section 3.2 : $\mu = 1/100$ is at least an order of magnitude higher than the realistic values. The choice of this value must be motivated and the robustness of the proposed scheme should be tested with more realistic values.} \\
     Of course, more realistic values might be considered, but this would require more refined mesh which would require 
-    to run additional heavy tests (to check the convergence for example). We think this value $\mu=10^{-2}$ is sufficient 
+    to run additional heavy tests (to check the convergence for example). We think this value $\mu=10^{-2}$ is a good compromise and sufficient 
     to observe the different behavior for ions and electrons, which may serve as benchmark for other numerical scheme. \\
-    {\small Nous avons considere que cette valeur permet deja de bien donner un comportement different entre les ions et les electrons. Nous avons deja voulu faire des simulations convergees dans ce cas
-avant de mettre des valeurs plus realistes. Nous pourrions refaire des simulations avec un $\mu$ 10 fois plus petit, mais cela demanderait de tout refaire et cela prendrait beaucoup de temps
-de trouver les parametres qui donnent la convergence et qui seraient plus grands. Nous voulons aussi donner des exemples qui sont plus faciles a traiter, permettant de reproduire des resultats plus rapidement. 
-Pour l'instant, nous prefererions donc ne pas avoir a refaire les simulations.}
+%    {\small Nous avons considere que cette valeur permet deja de bien donner un comportement different entre les ions et les electrons. Nous avons deja voulu faire des simulations convergees dans ce cas avant de mettre des valeurs plus realistes. Nous pourrions refaire des simulations avec un $\mu$ 10 fois plus petit, mais cela demanderait de tout refaire et cela prendrait beaucoup de temps de trouver les parametres qui donnent la convergence et qui seraient plus grands. Nous voulons aussi donner des exemples qui sont plus faciles a traiter, permettant de reproduire des resultats plus rapidement. Pour l'instant, nous prefererions donc ne pas avoir a refaire les simulations.}
     \item \textcolor{blue}{p10 : I am very surprised by the choice of the maximum velocity values :}
     \begin{enumerate}
 \item \textcolor{blue}{ why do you choose different values for ion and electron in the case of the SL scheme
 and not for the FD scheme ?} \\
 The FD code is not optimized as the SL code and for simplicity in the programming step, 
 it is sufficient to consider the same (large enough) velocity domain for both electrons and ions. \\
-{\small Le code FD est surtout un code de validation et n'a pas vocation a etre competitif; on a voulu rester simple sur ce code; en prenant un Domain suffisamment grand pour els elections et les ions,
-Avec suffisamment de points, il n'est pas necessaire de choisir un domaine different pour les ions et les electrons.}
+%{\small Le code FD est surtout un code de validation et n'a pas vocation a etre competitif; on a voulu rester simple sur ce code; en prenant un Domain suffisamment grand pour els elections et les ions, Avec suffisamment de points, il n'est pas necessaire de choisir un domaine different pour les ions et les electrons.}
 \item \textcolor{blue}{If you can choose different values for the ion and electron why do you choose a such big value for ions. Looking at figure 5 (left) it seems clear that the distribution function is already null for $v_i > 5$.}\\
 Like the referee, we also thought that it was possible to consider smaller velocity domain for the ions. However, due to the 
 ionization term $\nu f_e$ in (1.2a), it is not since $f_i$ is not equal to zero even for large velocity and this has to be taken into account. 
 A sentence has been added p10. \\
-{\small Effectivement, au depart, on pensait que l?on pouvait faire cela. Neanmoins, on s'est rendu compte que l'ionisation 
-(le terme $\nu f_e$) fait que $f_i$ n'est pas completement nul et a son importance pour la simulation.}
+%{\small Effectivement, au depart, on pensait que l?on pouvait faire cela. Neanmoins, on s'est rendu compte que l'ionisation (le terme $\nu f_e$) fait que $f_i$ n'est pas completement nul et a son importance pour la simulation.}
 \end{enumerate}
     \item \textcolor{blue}{p10: Concerning the number of points:}
     \begin{enumerate}
@@ -108,15 +96,17 @@ Thank you for this question. Actually, since the FD code is not parallelized, co
 Moreover, since the FD code is based of an explicit treatment of the transport term, a stringent CFL has to be respected, making the 
 runs very costly, even with $N_x=512$, $N_v=513$. On the contrary, the SL code does not present this drawback and 
 refined meshes can be considered. \\
-{\small Il est difficile de prendre + de points pour le schema FD, car cela prend beaucoup de temps (il y a par ailleurs une condition CFL).}
+%{\small Il est difficile de prendre + de points pour le schema FD, car cela prend beaucoup de temps (il y a par ailleurs une condition CFL).}
 \item \textcolor{blue}{Why do you finally choose Run2 as a reference and not another Run0. A discussion
 on the results for the different cases should at least be added.}\\ 
-\textcolor{red}{Je ne comprends pas bien : des comparisons entre Run0-SL et Run0-FD sont faites en Figure 8 sur des temps longs 
-($T=20$) alors que sur les resultats dans Figures 6-7 en temps court ($T=0.1, 0.2$) comparent Run2-SL avec Run0-FD, ce qui n'est pas 
-vraiment en faveur de FD. C'est \c{c}a qu'il questionne ?} \\ 
-{\small Run2 est + converge que Run0; donc si on le compare a Run0-FD et que cela donne la meme chose, cela voudra dire que Run0-FD est converge, independamment du nombre de points (Ce qui n'est pas le cas, si on compare avec run0).  
-Nous pourrons rajouter des explications sur les resultats.}
-\textcolor{teal}{Paragraphe "short time" modifié pour clarifier que le but à ce niveau n'est pas de comparer DF/SL, mais de montrer l'évolution de DF au regard d'une solution de référence.}
+Our goal in this 'Short time' test is not to comparer the FD and SL codes but  rather to illustrate the evolution of the FD solution 
+against a reference solution.  The paragraph 'Short time' has been modified. 
+%\textcolor{red}{Je ne comprends pas bien : des comparisons entre Run0-SL et Run0-FD sont faites en Figure 8 sur des temps longs 
+%($T=20$) alors que sur les resultats dans Figures 6-7 en temps court ($T=0.1, 0.2$) comparent Run2-SL avec Run0-FD, ce qui n'est pas 
+%vraiment en faveur de FD. C'est \c{c}a qu'il questionne ?} \\ 
+%{\small Run2 est + converge que Run0; donc si on le compare a Run0-FD et que cela donne la meme chose, cela voudra dire que Run0-FD est converge, independamment du nombre de points (Ce qui n'est pas le cas, si on compare avec run0).  
+%Nous pourrons rajouter des explications sur les resultats.}
+%\textcolor{teal}{Paragraphe "short time" modifié pour clarifier que le but à ce niveau n'est pas de comparer DF/SL, mais de montrer l'évolution de DF au regard d'une solution de référence.}
 \end{enumerate}
     \item \textcolor{blue}{p11 - Figure 6: The plots, as presented, only give a qualitative comparison. For all row, please show on the same plot the difference between both methods to give a more
 qualitative comparison. This comment also applies to all the following figures.}\\
@@ -124,22 +114,21 @@ The goal of Figures 6 is to illustrate that qualitatively, the results are  in g
 for relatively short time ($t\leq 0.1)$, the two methods gives very close results, which is not the case for larger time. 
 We do not think plotting the difference between FD and SL results will be constructive. Moreover, let us remark that 
 the numerical parameters are not the same, so that some errors may affect the diagnostics. \\ %\textcolor{red}{Rajouter commentaires dans le papier}\\ 
-{\small Le but de la figure 6 est de voir que les resultats sont qualitativement proches. On pourrait effectivement calculer la difference pour avoir des valeurs + quantitatives, mais cela donnera des figues plus petites.
-Ce qui nous semblait important c'etait justement de donner qqch juste de visuel et de voir que pour $T=0.1$ on ne voit pas encore de differences.
-Il ne faut pas oublier non plus que le nombre de points n'est pas le meme. }
+%{\small Le but de la figure 6 est de voir que les resultats sont qualitativement proches. On pourrait effectivement calculer la difference pour avoir des valeurs + quantitatives, mais cela donnera des figues plus petites. Ce qui nous semblait important c'etait justement de donner qqch juste de visuel et de voir que pour $T=0.1$ on ne voit pas encore de differences. Il ne faut pas oublier non plus que le nombre de points n'est pas le meme. }
     \item \textcolor{blue}{On figures 7 and 8 the results are not at all the same between FD and SL. Why? It is
 essential to comment on these results.} \\
 The results presented in Figures 7 correspond to $T=0.2$ whereas those of Figure 8 correspond to $T=20$. 
 We actually choose this way to present the comparison to illustrate the fact that for short time $t\leq 0.1$, 
 the two methods are in very good agreement whereas for 'large' times, it is not the case any more and the FD method 
 turns out to be not converged after $t\approx 0.2$. Some explanations are given in the paragraph called "Short time" p10. \\
-{\small La methode FD n'est plus convergee des le temps $T=0.2$; c'est justement le but de voir jusqu'a quel temps on est converge "visuellement". Nous donnons deja des explications section "short time".}
+%{\small La methode FD n'est plus convergee des le temps $T=0.2$; c'est justement le but de voir jusqu'a quel temps on est converge "visuellement". Nous donnons deja des explications section "short time".}
     \item \textcolor{blue}{As a general comment, the results all over the paper need to be analysed and
 commented on more seriously. }\\
 As suggested by the reviewer, additional comments have been added in the revised version (Short time and Long time paragraphs p10-11). \\
-{\small Peut-etre faut il rajouter des commentaires pour que ce soit plus explicite et clair; neanmoins, il y a deja des explications aussi dans "Looking for a reference solution" p14. }
+%{\small Peut-etre faut il rajouter des commentaires pour que ce soit plus explicite et clair; neanmoins, il y a deja des explications aussi dans "Looking for a reference solution" p14. }
     \item \textcolor{blue}{The number of references to other works is poor and must be increased. }\\
- \textcolor{red}{Rajouter qq references. Mehdi ?}\\ 
+Acoording to the referee comments, additional references have been added. 
+% \textcolor{red}{Rajouter qq references. Mehdi ?}\\ 
     \item \textcolor{blue}{Finally, I definitely need to be convinced by something new in this work. If the case, this
 should be emphasized both in the abstract and in the conclusion. }\\
 Our goal was to propose high numerical techniques to approximate the solution of a two-species problem involving boundary conditions. 
@@ -148,9 +137,7 @@ Moreover, several methods have been compared for the numerical treatment of the 
 Hence, without any reference solution, it is not easy to validate these different techniques.  We think the SL code 
 that has been developed is a good tool to investigate stationary sheath solutions that are known to be difficult to capture.  
 As suggested by the referee, the abstract and conclusions have been modified. \\
-     {\small A mon avis, le but etait d'arriver a avoir une solution de reference numerique sur un modele original; ce qui est possible grace a un schema SL effectivement assez classique; 
-le schema FD donne tres rapidement des resultats tres differents (a partir de T=0.2). il est interessant de voir que les
-conditions au bord implementees ne donnent pas d'instabilite, contrairement a un travail precedent [BMN18]. Il est  aussi interessant de voir quels choix sont preferables comme conditions aux bords imposees sur Poisson (Figure 12).}
+%     {\small A mon avis, le but etait d'arriver a avoir une solution de reference numerique sur un modele original; ce qui est possible grace a un schema SL effectivement assez classique; le schema FD donne tres rapidement des resultats tres differents (a partir de T=0.2). il est interessant de voir que les conditions au bord implementees ne donnent pas d'instabilite, contrairement a un travail precedent [BMN18]. Il est  aussi interessant de voir quels choix sont preferables comme conditions aux bords imposees sur Poisson (Figure 12).}
 \end{enumerate}
 
 \bigskip 
@@ -167,25 +154,29 @@ was to test them in the two-species Vlasov context. \\
 Regarding the boundary conditions for the Poisson equation, our goal was to compare them and investigate the better one 
 in terms of stability and accuracy (see Figure 3 for FD and Figure 12 for SL). 
         \item \textcolor{blue}{it would be useful to summarize at the end of Section 1 which boundary conditions will actually be used in the numerical scheme: (1.5), (1.8), (1.11)? }\\
-    The different approaches are compared at different stages of the paper. Section 1 and the discussions of the results have been clarified. \textcolor{red}{Quelle methode est utilisee dans les gros tests SL ?  A part dans Figure 12 ou il y a les 3 qui sont comparees, je ne trouve pas l'information. }
-    \textcolor{teal}{État des lieux des conditions au bord~: en tout, il y en a 4 différentes dans le papier. 
-    \begin{enumerate}[label={(\alph*)}]
-    \item\label{cond:Et0} La condition $E(t,0) = 0$ (1.8),
-    \item\label{cond:sym} La condition $E(t,-1) = - E(t,1)$ (évoquée dans la remarque 2.1), 
-    \item\label{cond:int} La condition $\int_{x=-1}^{1} E(t,x) dx = 0$ (évoquée dans la remarque 2.1), 
-    \item\label{cond:elb} La condition plus élaborée du calcul avec $J$ (1.11), qui donne le solveur (2.2).
-    \end{enumerate}
-    L'équation (1.5) évoquée dans la question n'est pas une condition au bord sur $E$, mais la normalisation de $\varphi$ en $0$. Les comparaisons numériques sont faites à deux endroits~: d'abord dans la validation du schéma DF (Section 3.1), où sont comparées \ref{cond:Et0}, \ref{cond:int} et \ref{cond:elb} (Figure 3). La conclusion de la comparaison ici est que \ref{cond:Et0} et \ref{cond:int} sont équivalentes, tandis que \ref{cond:elb} mène à un champ $E$ discontinu en 0. L'autre comparaison est sur les "gros runs"~: Figure 8 apparaissent \ref{cond:Et0} et \ref{cond:int}, qui donnent des résultats équivalents, et Figure 12 apparaissent \ref{cond:Et0}, \ref{cond:sym} et \ref{cond:int}, avec des résultats pratiquement indiscernables. Après avoir constaté ça, on était partis par défaut sur \ref{cond:int} dans les gros calculs. De mémoire, \ref{cond:elb} avait été abandonnée à cause de la discontinuité. 
-    }
+        As suggested by the referee, we clarified the boundary conditions discussion for the Poisson equation. Moreover, Remark 2.1 
+        makes the links between the Poisson equation and the different boundary conditions. Finally, in the numerical part, we now refer more clearly 
+        to the different boundary conditions. 
+%    The different approaches are compared at different stages of the paper. Section 1 and the discussions of the results have been clarified. \textcolor{red}{Quelle methode est utilisee dans les gros tests SL ?  A part dans Figure 12 ou il y a les 3 qui sont comparees, je ne trouve pas l'information. }
+%    \textcolor{teal}{État des lieux des conditions au bord~: en tout, il y en a 4 différentes dans le papier. 
+%    \begin{enumerate}[label={(\alph*)}]
+%    \item\label{cond:Et0} La condition $E(t,0) = 0$ (1.8),
+%    \item\label{cond:sym} La condition $E(t,-1) = - E(t,1)$ (évoquée dans la remarque 2.1), 
+%    \item\label{cond:int} La condition $\int_{x=-1}^{1} E(t,x) dx = 0$ (évoquée dans la remarque 2.1), 
+%    \item\label{cond:elb} La condition plus élaborée du calcul avec $J$ (1.11), qui donne le solveur (2.2).
+%    \end{enumerate}
+%    L'équation (1.5) évoquée dans la question n'est pas une condition au bord sur $E$, mais la normalisation de $\varphi$ en $0$. Les comparaisons numériques sont faites à deux endroits~: d'abord dans la validation du schéma DF (Section 3.1), où sont comparées \ref{cond:Et0}, \ref{cond:int} et \ref{cond:elb} (Figure 3). La conclusion de la comparaison ici est que \ref{cond:Et0} et \ref{cond:int} sont équivalentes, tandis que \ref{cond:elb} mène à un champ $E$ discontinu en 0. L'autre comparaison est sur les "gros runs"~: Figure 8 apparaissent \ref{cond:Et0} et \ref{cond:int}, qui donnent des résultats équivalents, et Figure 12 apparaissent \ref{cond:Et0}, \ref{cond:sym} et \ref{cond:int}, avec des résultats pratiquement indiscernables. Après avoir constaté ça, on était partis par défaut sur \ref{cond:int} dans les gros calculs. De mémoire, \ref{cond:elb} avait été abandonnée à cause de la discontinuité. 
+%    }
     \item \textcolor{blue}{same remark for the formulas for $E$ given in Section 2. In particular,
-since (2.1) modified according to Remark 2.1 and (2.2) are both derived from the symmetry assumption and they both involve a constant that depends on time, are these formulas equivalent ?} Solvers (2.1) and (2.2) both yield symmetric solutions, but differ in that (2.2) may produce discontinuities at 0. This point has been clarified in the discussion of Figure 3. \\ 
-\textcolor{red}{En relisant, ce n'est pas tres clair pour moi entre les solvers de Poisson ((2.1) ou (2.2)) et les conditions au bord 
-((1.11), (1.8) ou $E(t, x=-1)=-E(t, x=1)$. Un des arguments pour favoriser une option plutot qu'une autre est la symetrie par rapport a zero, c'est ca ?   } \textcolor{teal}{(2.1) et (2.2) pas équivalents en ceci que (2.2) n'impose pas de condition de continuité en 0. Le solveur (2.2) n'est utilisé que pour la validation, après quoi il a été abandonné pour cause de non-continuité.}
+since (2.1) modified according to Remark 2.1 and (2.2) are both derived from the symmetry assumption and they both involve a constant that depends on time, are these formulas equivalent ?} \\ 
+Solvers (2.1) and (2.2) both yield symmetric solutions, but differ in that (2.2) may produce discontinuities at 0. This point has been clarified in the discussion of Figure 3. 
+%\textcolor{red}{En relisant, ce n'est pas tres clair pour moi entre les solvers de Poisson ((2.1) ou (2.2)) et les conditions au bord 
+%((1.11), (1.8) ou $E(t, x=-1)=-E(t, x=1)$. Un des arguments pour favoriser une option plutot qu'une autre est la symetrie par rapport a zero, c'est ca ?   } \textcolor{teal}{(2.1) et (2.2) pas équivalents en ceci que (2.2) n'impose pas de condition de continuité en 0. Le solveur (2.2) n'est utilisé que pour la validation, après quoi il a été abandonné pour cause de non-continuité.}
     \item \textcolor{blue}{In the FD and SL schemes the authors should be clearer about which formulas are used.
 In the FD scheme this is not written, and in the SL scheme the authors write that
 the Poisson equation is solved using (2.1), and later that only (1.8) will be used:
-does that mean via (2.1) ? With or without the modification suggested by Remark 2.1 ? } 
-The comparison of the different boundary conditions in Figure 12 showed that the results are very similar, with a slight loss of symmetry for the condition $E(t,0)=0$. This comparison has been relocated at the beginning of the numerical section for clarification, with the following effect on numerotation: 
+does that mean via (2.1) ? With or without the modification suggested by Remark 2.1 ? } \\ 
+The comparison of the different boundary conditions in Figure 6 showed that the results are very similar, with a slight loss of symmetry for the condition $E(t,0)=0$. This comparison has been relocated at the beginning of the numerical section for clarification, with the following effect on numerotation: 
 \begin{center}
 \begin{tabular}{|c|c|c|c|}
 	\hline
@@ -195,22 +186,29 @@ The comparison of the different boundary conditions in Figure 12 showed that the
 	\hline
 \end{tabular}
 \end{center}
-The discussion has been completed to highlight the effective choice  of the condition $\int_{x=-1}^{1} E(t,x) dx = 0$.
-\textcolor{red}{Meme question que 2-3.} \textcolor{teal}{Modifications pour répondre à 2-3-4: 
+The discussion has been completed to highlight the effective choice  of the condition $\int_{x=-1}^{1} E(t,x) dx = 0$. Let us remark that this 
+condition is used in Figures 7-12.  \\
+Let us summarize the answers to the referee comments 2-3-4
+%\textcolor{red}{Meme question que 2-3.} \textcolor{teal}{Modifications pour répondre à 2-3-4: 
 \begin{itemize}
-\item Changement de la partie "Boundary conditions" (fin Section 1) pour clarifier les 4 conditions au bord au même endroit. 
-\item Modification de la remarque 2.1 en conséquence. 
-\item Ajout d'une phrase dans la partie 2.2 pour préciser que le terme $E$ sera calculé avec différents solveurs, justement, et les résultats seront comparés.
-\item Clarification de la discussion de la Figure 3 pour mettre en évidence que le solveur (2.2) ne nous satisfait pas. 
-\item Clarification de la discussion de la Figure 12, qui remonte pour être mise \emph{avant} les comparaisons à deux espèces, avec pour effet le choix de la condition \ref{cond:int}. \textbf{Faut-il préciser dans toutes les légendes suivantes le choix de la condition au bord (qui sera le même)~?}
-\end{itemize}}
+\item modification of the paragraph "Boundary conditions" (p4, end of Section 1) to clarify the different boundary conditions. 
+\item modification of Remark 2.1, following the paragraph "Boundary conditions". 
+\item addition of a sentence in Subsection 2.2 to precise different solvers to compute $E$ will be compared. 
+%Ajout d'une phrase dans la partie 2.2 pour préciser que le terme $E$ sera calculé avec différents solveurs, justement, et les résultats seront comparés.
+\item discussion for Figure 3 (bottom of p7) about the Poisson solver (2.2). 
+\item Figure 12 became Figure 6 to first discuss the effect of the boundary conditions for the Poisson solver. 
+% Clarification de la discussion de la Figure 12, qui remonte pour être mise \emph{avant} les comparaisons à deux espèces, avec pour effet le choix de la condition \ref{cond:int}. \textbf{Faut-il préciser dans toutes les légendes suivantes le choix de la condition au bord (qui sera le même)~?}
+\end{itemize}
 \item \textcolor{blue}{I also have a question about the ionization term: Could the authors comment on how
 it is derived ? For densities which vanish close to the domain boundaries,
 (1.2) does not preserve the total charge $\iint (f_e + f_i) dx dv$, which seems unphysical.
 Could the authors discuss this lack of total charge conservation ?
 On p14 it is further written that the ionization parameter needs to be adjusted to ensure the
 stationarity of the solution: this should probably be explained in Section 1. }\\ 
-\textcolor{red}{Dans [ALPM+20], ils parlent de termes decrivant les 'ionization reactions' mais sans plus de detail... Je me souviens qu'on avait evoque l'influence du parametre $\nu$ }
+\textcolor{black}{In general, the presence of a sheath induces a mass loss at the boundary. To ensure mass preservation, 
+an ionization term is introduced in such a way the neutrality is ensured in the plasma core $\int (f_e(t, x=0, v)dv =  \int (f_i(t, x=0, v)dv$. 
+In practice, this leads to a relation on $\nu$ (see [ALPM+20] for more details). We do not investigate this in the present work 
+but intend to explore this aspect.  }
 \item \textcolor{blue}{Finally the authors should comment on how well their numerical results model a non-neutral sheath. Since here the normalized Debye length is $\lambda/2$, the sheath
 occupies a large portion (probably all) of the computational domain.
 Looking at Figure 8 one sees indeed a larger charge at distance $\lambda/2$ from the boundaries (although the charge is positive everywhere, which is probably
@@ -241,16 +239,17 @@ Thank you. We changed.
         \item \textcolor{blue}{p5: what is "a large enough maximum speed" ? }\\ 
         As usual in Eulerian Vlasov simulations, a grid in velocity has to be considered and a maximum value of $v$ has to be fixed 
         to ensure the unknown is correctly represented in the interval. The sentence has been modified. \\
-        \textcolor{red}{Dans le papier: with a large enough maximum speed $\bar{V} \to$  with $\bar{V}$ large enough so that the unknown are well represented in 
-        $[-\bar{V}, \bar{V}]$. }
+%        \textcolor{red}{Dans le papier: with a large enough maximum speed $\bar{V} \to$  with $\bar{V}$ large enough so that the unknown are well represented in $[-\bar{V}, \bar{V}]$. }
         \item \textcolor{blue}{p5: in eq (2.3), how is $E^n_j$ defined ? also, I guess scalar products are missing. }\\ 
-$E^n_j$ is supposed to be an approximation of $E(t^n, x_j)$ from one of the three strategies proposed in Section 2.  \textcolor{red}{A preciser selon les reponses aux questions 2-3.} \textcolor{teal}{Voir réponse à la question 4.}
+$E^n_j$ is supposed to be an approximation of $E(t^n, x_j)$ from one of the three strategies proposed in Section 2.  A sentence has been added 
+p5 (see also the answer of comment 4). 
+%\textcolor{teal}{Voir réponse à la question 4.}
 \\
 Actually, there is no missing scalar product since the vector notations in (2.3) are chosen in such a way we do not need.  
 \item \textcolor{blue}{p5: "coordwise" $\to$ "element-wise" ?}\\
         Thank you. We changed. 
 \item \textcolor{blue}{p5: "The upwind scheme is known to be ...": please cite a relevant reference. }\\ 
-      Thank you. We changed the sentence: \textcolor{red}{ The upwind scheme is known to be diffusive, and stable under the CFL condition $\to$ The upwind scheme is stable under the CFL condition}. 
+      Thank you. We changed the sentence: \textcolor{black}{ The upwind scheme is known to be diffusive, and stable under the CFL condition $\to$ The upwind scheme is stable under the CFL condition}. 
 \item \textcolor{blue}{p14: "we then make vary" $\to$ "we then vary" / "we remark" $\to$ "we observe". }\\
        Thank you. We changed. 
 \end{enumerate}

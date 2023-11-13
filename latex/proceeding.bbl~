@@ -1,0 +1,73 @@
+\newcommand{\etalchar}[1]{$^{#1}$}
+\begin{thebibliography}{ALPM{\etalchar{+}}20}
+
+\bibitem[ALPM{\etalchar{+}}20]{alvarezlagunaAsymptoticPreservingWellbalanced2020}
+A.~Alvarez~Laguna, T.~Pichard, T.~Magin, P.~Chabert, A.~Bourdon, and M.~Massot.
+\newblock An asymptotic preserving well-balanced scheme for the isothermal
+  fluid equations in low-temperature plasmas at low-pressure.
+\newblock {\em Journal of Computational Physics}, 419:109634, October 2020.
+
+\bibitem[Bad21]{badsiCollisionalSheathSolutions2021}
+Mehdi Badsi.
+\newblock Collisional sheath solutions of a bi-species
+  {{Vlasov-Poisson-Boltzmann}} boundary value problem.
+\newblock {\em Kinetic \& Related Models}, 14(1):149, 2021.
+
+\bibitem[BBC21]{badsiStableFixedPoint2021}
+Mehdi Badsi, Christophe Berthon, and Ana{\"i}s Crestetto.
+\newblock A stable fixed point method for the numerical simulation of a kinetic
+  collisional sheath.
+\newblock {\em Journal of Computational Physics}, 429:109990, March 2021.
+
+\bibitem[BMG{\etalchar{+}}22]{bourneNonUniformSplinesSemiLagrangian2022}
+Emily Bourne, Yann Munschy, Virginie Grandgirard, Michel Mehrenberger, and
+  Philippe Ghendrih.
+\newblock Non-{{Uniform Splines}} for {{Semi-Lagrangian Kinetic Simulations}}
+  of the {{Plasma Sheath}}.
+\newblock August 2022.
+
+\bibitem[BMN18]{badsiNumericalStabilityPlasma2018}
+Mehdi Badsi, Michel Mehrenberger, and Laurent Navoret.
+\newblock Numerical stability of plasma sheath.
+\newblock {\em ESAIM: Proceedings and Surveys, SMAI 2017}, 64:17--36, 2018.
+
+\bibitem[BNS{\etalchar{+}}21]{boutinHighOrderNumerical2021}
+B.~Boutin, T.H.T. Nguyen, A.~Sylla, S.~{Tran-Tien}, and J.-F. Coulombel.
+\newblock High order numerical schemes for transport equations on bounded
+  domains.
+\newblock {\em ESAIM: Proceedings and Surveys}, 70:84--106, 2021.
+
+\bibitem[CL20]{coulombelNeumannNumericalBoundary2020}
+Jean-Fran{\c c}ois Coulombel and Fr{\'e}d{\'e}ric Lagouti{\`e}re.
+\newblock The {{Neumann}} numerical boundary condition for transport equations.
+\newblock {\em Kinetic \& Related Models}, 13(1):1--32, 2020.
+
+\bibitem[CM14]{couletteEulerianVlasovCode2014}
+David Coulette and Giovanni Manfredi.
+\newblock An {{Eulerian Vlasov}} code for plasma-wall interactions.
+\newblock {\em Journal of Physics: Conference Series}, 561(1), November 2014.
+
+\bibitem[DM08]{manfredi_devaux}
+Stephane Devaux and Giovanni Manfredi.
+\newblock Magnetized plasma-wall transition consequences for wall sputtering
+  and erosion.
+\newblock {\em Plasma Physics and Controlled Fusion}, 50:025009, January 2008.
+
+\bibitem[DPB16]{despresMinimizationFormulationBikinetic2016}
+Bruno Despr{\'e}s, Martin~Campos Pinto, and Mehdi Badsi.
+\newblock A minimization formulation of a bi-kinetic sheath.
+\newblock {\em Kinetic and Related Models}, 9(4):621--656, September 2016.
+
+\bibitem[MK20]{malkovNonstationaryAntonovSelfgravitating2020}
+Evgeny~A. Malkov and Alexey~N. Kudryavtsev.
+\newblock Non-stationary {{Antonov}} self-gravitating layer: Analytics and
+  numerics.
+\newblock {\em Monthly Notices of the Royal Astronomical Society},
+  491:3952--3966, January 2020.
+
+\bibitem[Rie91]{riemannBohmCriterionSheath1991}
+K.-U. Riemann.
+\newblock The {{Bohm}} criterion and sheath formation.
+\newblock {\em Journal of Physics D: Applied Physics}, 24(4):493, April 1991.
+
+\end{thebibliography}
